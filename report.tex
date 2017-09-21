@@ -56,7 +56,18 @@
 \end{abstract}
 
 \section{Introduction}
-Introduction Here \cite{Heller}
+In the past few years the Open-Source community and activity have grown enormously. According to GitHub \cite{GHOctoverse}, in 2016, there were over 5.8 million users engaged in activities relating to public repositories. GitHub defines these activities as “there was some activity within the last year, e.g. code committed, a comment created, a repository starred, or an issue opened”. With GitHub providing programmatic access to all open-source repository and user data, it is possible to try and get more insights into the way the open-source community collaborates. However, up until now there haven’t been a lot of tools or platforms which aim to provide visual insight into e.g. collaboration on a specific repository. 
+We aim to provide a platform which stakeholders can leverage to gain insights into open source software projects and collaboration.
+
+By mining software repositories and analyzing data gathered researchers try to improve the development of software. An important way to analyze gathered data is to visualize it. 
+
+To try and answer this research question a total of two sub questions will be answered. The first possible trend could emerge in the amount of development activity per geolocation, because the amount of developers differs per country. By visualizing this activity per country or continent over time, it might be possible to tell in which countries development activity is increasing/decreasing or where activity might increase/decrease in the future. Because of this possible trend the first sub question is: Do trends emerge from comparing development activity per country or continent. Another possible trend could emerge in collaboration links for projects. Collaboration links are defined as links between developers who add contributions consecutively to the same project. By visualizing collaboration links over time, it becomes possible to see the way developer collaboration changes over time. It also becomes possible to see if the distance between developers working on the same project differs over time. This led to the second sub question, which is: Do trends emerge in collaboration links for projects.  
+
+To answer the questions a set of large repositories (i.e. repositories with the most GitHub stars or collaborators) on the open source software platform GitHub will be chosen. A GitHub crawler will be built to crawl data from these GitHub repositories. Data crawled will consist of the owner, contributors and collaborators of the repository. Next to the user information, commits will be gathered for the repositories to compare statistics in different time frames. 
+A web-based service will be created to quickly search and navigate repositories or GitHub users. Data gathered will then be displayed in multiple forms like geolocations for collaborators on an interactive map (Mapbox) and activity for a project in a graph over time. 
+Different ways of linking users and repositories will be experimented with and results will be published.
+
+By creating this web-based service new insights will be created in the collaboration in open source software development. Especially new insights concerning trends in software collaboration activity and collaboration links over time will be revealed. Besides these new insights to these questions a new way is provided for researchers to get visual insights in open source software development collaboration statistics, by visiting our website.
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{bibliography}
