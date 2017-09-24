@@ -52,22 +52,24 @@ type Link struct {
 }
 
 func parseLinkHeader(linkHeader string) LinkHeader {
+	fmt.Println("PARSE: ", linkHeader)
 	var parsedLinkHeader LinkHeader
 	result := strings.Split(linkHeader, ", <")
-	if len(result) != 2 {
-		fmt.Println("Link header parse error")
+	if len(result) < 2 {
+		fmt.Println("Length: ", len(result))
+		panic("No valid link length: ")
 	}
 	firstSplitted := strings.Split(result[0], ">;")
-	if len(firstSplitted) != 2 {
-		fmt.Println("Link header parse error")
+	if len(firstSplitted) < 2 {
+		panic("No valid sublink link first")
 	}
 	firstLinkURL := strings.Replace(firstSplitted[0], "<", "", -1)
 	firstRel := firstSplitted[1]
 	parsedLinkHeader.First = Link{URL: firstLinkURL, Rel: firstRel}
 
 	secondSplitted := strings.Split(result[1], ">;")
-	if len(secondSplitted) != 2 {
-		fmt.Println("Link header parse error")
+	if len(secondSplitted) < 2 {
+		panic("No valid sublink link second")
 	}
 	secondLinkURL := secondSplitted[0]
 	secondRel := secondSplitted[1]

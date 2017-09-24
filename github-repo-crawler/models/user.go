@@ -10,13 +10,14 @@ import (
 
 // User struct for Usersitory in DB
 type User struct {
-	ID        int    `gorm:"primary_key"` // primary key
-	Login     string //user name
-	CreatedAt time.Time
-	DeletedAt *time.Time
-	UpdatedAt time.Time
-	Type      string //type of user
-	Raw       []byte `sql:"type:jsonb"` // This is the RAW JSONB of the metadata of a User
+	ID           int    `gorm:"primary_key"` // primary key
+	Login        string //user name
+	CreatedAt    time.Time
+	DeletedAt    *time.Time
+	UpdatedAt    time.Time
+	GithubUserID int64
+	Type         string //type of user
+	Raw          []byte `sql:"type:jsonb"` // This is the RAW JSONB of the metadata of a User
 }
 
 // TableName overrides the table name settings in Gorm to force a specific table name
@@ -55,6 +56,18 @@ func (m *UserDB) Get(ctx context.Context, id int) (*User, error) {
 
 	var native User
 	err := m.Db.Table(m.TableName()).Where("id = ?", id).Find(&native).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil, err
+	}
+
+	return &native, err
+}
+
+func (m *UserDB) GetByGithubID(ctx context.Context, id int64) (*User, error) {
+	defer goa.MeasureSince([]string{"goa", "db", "User", "get"}, time.Now())
+
+	var native User
+	err := m.Db.Table(m.TableName()).Where("github_user_id = ?", id).Find(&native).Error
 	if err == gorm.ErrRecordNotFound {
 		return nil, err
 	}

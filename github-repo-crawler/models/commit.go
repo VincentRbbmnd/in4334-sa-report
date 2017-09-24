@@ -13,9 +13,11 @@ type Commit struct {
 	CreatedAt    time.Time
 	DeletedAt    *time.Time
 	UpdatedAt    time.Time
+	CommitDate   time.Time
+	Message      string
 	SHA          string
-	AuthorID     int
-	CommitterID  int
+	AuthorID     int64
+	CommitterID  int64
 	RepositoryID int
 	Raw          []byte `sql:"type:jsonb"` // This is the RAW JSONB of the metadata of a Commit
 }
@@ -56,6 +58,18 @@ func (m *CommitDB) Get(ctx context.Context, sha string) (*Commit, error) {
 
 	var native Commit
 	err := m.Db.Table(m.TableName()).Where("sha = ?", sha).Find(&native).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil, err
+	}
+
+	return &native, err
+}
+
+func (m *CommitDB) GetLastCommitByRepoID(ctx context.Context, repoID int) (*Commit, error) {
+	defer goa.MeasureSince([]string{"goa", "db", "Commit", "get"}, time.Now())
+
+	var native Commit
+	err := m.Db.Table(m.TableName()).Where("repository_id = ?", repoID).Order("created_at DESC LIMIT 1").Find(&native).Error
 	if err == gorm.ErrRecordNotFound {
 		return nil, err
 	}

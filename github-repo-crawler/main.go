@@ -19,5 +19,6 @@ func main() {
 	initDatabase(true)
 
 	// startRepoCrawling()
-	getLastCommitOfRepo("microsoft/vscode", 41881900)
+
+	startCommitCrawling()
 }

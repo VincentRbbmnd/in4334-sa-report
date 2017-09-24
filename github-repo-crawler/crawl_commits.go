@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
+	"time"
 
 	"./models"
 )
@@ -12,33 +14,43 @@ import (
 type RawCommitData []interface{}
 
 type ImportantCommitData struct {
-	SHA string `json:"sha"`
-	// Author       User        `json:"author"`
-	AuthorRaw RawUserData `json:"author"`
-	// Committer    User        `json:"committer"`
+	SHA          string      `json:"sha"`
+	AuthorRaw    RawUserData `json:"author"`
 	CommitterRaw RawUserData `json:"committer"`
+	Commit       Commit      `json:"commit"`
 }
 
-func startCommitCrawling(repository string, repoID int) {
-	commits := githubAPICall("https://api.github.com/repos/"+repository+"/commits", "GET", nil)
-	fmt.Println("Commits: ", commits)
+type Commit struct {
+	Message string `json:"message"`
+	Author  Author `json:"author"`
 }
 
-func getLastCommitOfRepo(repository string, repoID int) string {
-	if false {
-		//TODO add if commits stored for this project in repo get last sha
-		return "TODO add if commits stored for this project in repo get last sha"
-	} else {
-		return getFirstCommitOfRepo(repository, repoID)
-	}
+type Author struct {
+	Date string `json:"date"`
 }
 
-func getFirstCommitOfRepo(repository string, repoID int) string {
+func startCommitCrawling() {
+	// sha := getLastCommitOfRepo("microsoft/vscode", 41881900)
+	// fmt.Println("Last stored: ", sha)
+	url := "https://api.github.com/repos/microsoft/vscode/commits?per_page=100"
+	getCommitsOfRepo(41881900, url)
+}
 
-	resp := githubAPICall("https://api.github.com/repos/"+repository+"/commits", "GET", nil)
-	link := resp.Header.Get("link")
-	parsedLinkHeader := parseLinkHeader(link)
-	resp = githubAPICall(parsedLinkHeader.Second.URL, "GET", nil)
+// func getLastCommitOfRepo(repository string, repoID int) string {
+// 	var ctx context.Context
+
+// 	commit, err := commitDB.GetLastCommitByRepoID(ctx, repoID)
+// 	if err != nil {
+// 		return getFirstCommitOfRepo(repository, repoID)
+// 	}
+// 	return commit.SHA
+// }
+
+func getCommitsOfRepo(repoID int, apiUrl string) {
+	fmt.Println("URL: ", apiUrl)
+	resp := githubAPICall(apiUrl, "GET", nil)
+
+	// resp = githubAPICall(parsedLinkHeader.Second.URL, "GET", nil)
 
 	var res RawCommitData
 	err := json.NewDecoder(resp.Body).Decode(&res)
@@ -46,30 +58,44 @@ func getFirstCommitOfRepo(repository string, repoID int) string {
 	if err != nil {
 		fmt.Println("Data could not be decoded into struct", err)
 	}
-	byteData, err := json.Marshal(res[len(res)-1])
-	if err != nil {
-		fmt.Println("Raw data could not be converted to bytes", err)
+	for _, commit := range res {
+		byteData, err := json.Marshal(commit)
+		if err != nil {
+			fmt.Println("Raw data could not be converted to bytes", err)
+		}
+		var commitData ImportantCommitData
+		err = json.Unmarshal(byteData, &commitData)
+		if err != nil {
+			fmt.Println("Raw repo data could not be decoded further into struct", err)
+		}
+		//ADD USERS TO DB
+		author := getImportantUserData(commitData.AuthorRaw)
+		addUserToDB(author, commitData.AuthorRaw)
+		committer := getImportantUserData(commitData.CommitterRaw)
+		if author.ID != committer.ID {
+			addUserToDB(committer, commitData.CommitterRaw)
+		}
+		//ADD COMMIT TO DB
+		addCommitToDB(commitData, byteData, repoID, int64(author.ID), int64(committer.ID))
 	}
-	var commitData ImportantCommitData
-	err = json.Unmarshal(byteData, &commitData)
-	if err != nil {
-		fmt.Println("Raw repo data could not be decoded further into struct", err)
+	link := resp.Header.Get("link")
+	parsedLinkHeader := parseLinkHeader(link)
+	if strings.Contains(parsedLinkHeader.First.Rel, `rel="next"`) {
+		// duration := time.Duration(1) * time.Hour
+		// fmt.Println("Duration: ", duration)
+		time.Sleep(10000)
+		fmt.Println("NEXT:", parsedLinkHeader.First.URL)
+		getCommitsOfRepo(repoID, parsedLinkHeader.First.URL)
+	} else {
+		fmt.Println("NEXT:", parsedLinkHeader.First.URL)
+		fmt.Println("DONNEEE" + parsedLinkHeader.First.Rel + "DONE")
 	}
-	//ADD USERS TO DB
-	author := getImportantUserData(commitData.AuthorRaw)
-	addUserToDB(author, commitData.AuthorRaw)
-	committer := getImportantUserData(commitData.CommitterRaw)
-	addUserToDB(committer, commitData.CommitterRaw)
-
-	//ADD COMMIT TO DB
-	addCommitToDB(commitData, byteData, repoID, author.ID, committer.ID)
-	return commitData.SHA
 }
 
-func addCommitToDB(commitData ImportantCommitData, byteData []byte, repositoryID int, authorID int, committerID int) {
+func addCommitToDB(commitData ImportantCommitData, byteData []byte, repositoryID int, authorID int64, committerID int64) {
 	var ctx context.Context
 	commit, err := commitDB.Get(ctx, commitData.SHA)
-	//if commit already added return
+	// if commit already added return
 	if commit != nil || err == nil {
 		return
 	}
@@ -80,6 +106,13 @@ func addCommitToDB(commitData ImportantCommitData, byteData []byte, repositoryID
 	dbCommit.AuthorID = authorID
 	dbCommit.CommitterID = committerID
 	dbCommit.RepositoryID = repositoryID
+	time, err := time.Parse(time.RFC3339, commitData.Commit.Author.Date)
+	if err != nil {
+		fmt.Println("COULD NOT PARSE DATE COMMIT")
+		panic(err)
+	}
+	dbCommit.CommitDate = time
+	dbCommit.Message = commitData.Commit.Message
 
 	err = commitDB.Add(ctx, &dbCommit)
 	if err != nil {
