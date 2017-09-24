@@ -12,6 +12,7 @@ import (
 
 var db *gorm.DB
 var repoDB *models.RepoDB
+var userDB *models.UserDB
 var rateLimit int
 var githubAPIKey *string
 
