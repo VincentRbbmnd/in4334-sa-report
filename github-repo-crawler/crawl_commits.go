@@ -12,10 +12,10 @@ import (
 type RawCommitData []interface{}
 
 type ImportantCommitData struct {
-	SHA          string      `json:"sha"`
-	Author       User        `json:"author"`
-	AuthorRaw    RawUserData `json:"author"`
-	Committer    User        `json:"committer"`
+	SHA string `json:"sha"`
+	// Author       User        `json:"author"`
+	AuthorRaw RawUserData `json:"author"`
+	// Committer    User        `json:"committer"`
 	CommitterRaw RawUserData `json:"committer"`
 }
 
@@ -38,7 +38,7 @@ func getFirstCommitOfRepo(repository string, repoID int) string {
 	resp := githubAPICall("https://api.github.com/repos/"+repository+"/commits", "GET", nil)
 	link := resp.Header.Get("link")
 	parsedLinkHeader := parseLinkHeader(link)
-	resp = githubAPICall(parsedLinkHeader[1].URL, "GET", nil)
+	resp = githubAPICall(parsedLinkHeader.Second.URL, "GET", nil)
 
 	var res RawCommitData
 	err := json.NewDecoder(resp.Body).Decode(&res)
@@ -55,12 +55,18 @@ func getFirstCommitOfRepo(repository string, repoID int) string {
 	if err != nil {
 		fmt.Println("Raw repo data could not be decoded further into struct", err)
 	}
-	addCommitToDB(commitData, byteData, repoID)
-	//TODO add committer and author to db
+	//ADD USERS TO DB
+	author := getImportantUserData(commitData.AuthorRaw)
+	addUserToDB(author, commitData.AuthorRaw)
+	committer := getImportantUserData(commitData.CommitterRaw)
+	addUserToDB(committer, commitData.CommitterRaw)
+
+	//ADD COMMIT TO DB
+	addCommitToDB(commitData, byteData, repoID, author.ID, committer.ID)
 	return commitData.SHA
 }
 
-func addCommitToDB(commitData ImportantCommitData, byteData []byte, repositoryID int) {
+func addCommitToDB(commitData ImportantCommitData, byteData []byte, repositoryID int, authorID int, committerID int) {
 	var ctx context.Context
 	commit, err := commitDB.Get(ctx, commitData.SHA)
 	//if commit already added return
@@ -71,8 +77,8 @@ func addCommitToDB(commitData ImportantCommitData, byteData []byte, repositoryID
 	var dbCommit models.Commit
 	dbCommit.Raw = byteData
 	dbCommit.SHA = commitData.SHA
-	dbCommit.AuthorID = commitData.Author.Id
-	dbCommit.CommitterID = commitData.Committer.Id
+	dbCommit.AuthorID = authorID
+	dbCommit.CommitterID = committerID
 	dbCommit.RepositoryID = repositoryID
 
 	err = commitDB.Add(ctx, &dbCommit)

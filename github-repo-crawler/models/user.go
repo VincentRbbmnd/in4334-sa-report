@@ -45,7 +45,7 @@ func (m *UserDB) DB() interface{} {
 
 // Tablename returns the table name
 func (m *UserDB) TableName() string {
-	return "Users"
+	return "users"
 }
 
 // Get returns a single User as a Database Model

@@ -42,35 +42,36 @@ func createRemainingType(crawlType string) {
 	remainingDB.Add(ctx, &remaining)
 }
 
+type LinkHeader struct {
+	First  Link
+	Second Link
+}
 type Link struct {
 	Rel string
 	URL string
 }
 
-func parseLinkHeader(linkHeader string) []Link {
-	var links []Link
+func parseLinkHeader(linkHeader string) LinkHeader {
+	var parsedLinkHeader LinkHeader
 	result := strings.Split(linkHeader, ", <")
 	if len(result) != 2 {
 		fmt.Println("Link header parse error")
 	}
-	first := result[0]
-	firstSplitted := strings.Split(first, ">;")
+	firstSplitted := strings.Split(result[0], ">;")
 	if len(firstSplitted) != 2 {
 		fmt.Println("Link header parse error")
 	}
 	firstLinkURL := strings.Replace(firstSplitted[0], "<", "", -1)
 	firstRel := firstSplitted[1]
+	parsedLinkHeader.First = Link{URL: firstLinkURL, Rel: firstRel}
 
-	links = append(links, Link{URL: firstLinkURL, Rel: firstRel})
-	second := result[1]
-	secondSplitted := strings.Split(second, ">;")
+	secondSplitted := strings.Split(result[1], ">;")
 	if len(secondSplitted) != 2 {
 		fmt.Println("Link header parse error")
 	}
-	secondLinkURL :=secondSplitted[0]
-	secondRel :=secondSplitted[1]
+	secondLinkURL := secondSplitted[0]
+	secondRel := secondSplitted[1]
+	parsedLinkHeader.Second = Link{URL: secondLinkURL, Rel: secondRel}
 
-	links = append(links, Link{URL: secondLinkURL, Rel: secondRel})
-	fmt.Println("return: ", links)
-	return links
+	return parsedLinkHeader
 }
