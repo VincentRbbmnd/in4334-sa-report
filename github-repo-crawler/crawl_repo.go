@@ -19,6 +19,7 @@ type RawRepoData []interface{}
 type ImportantRepoData struct {
 	FullName string             `json:"full_name"`
 	Owner    ImportantOwnerData `json:"owner"`
+	ID       int                `json:"id"`
 }
 
 type ImportantOwnerData struct {
@@ -93,6 +94,7 @@ func addRepoToDB(repoData ImportantRepoData, byteData []byte) {
 	dbRepo.Raw = byteData
 	dbRepo.Owner = repoData.Owner.Name
 	dbRepo.UserType = repoData.Owner.Type
+	dbRepo.ProjectID = repoData.ID
 	var ctx context.Context
 	if dbRepo.UserType == "Organization" {
 		dbRepo.Org = true

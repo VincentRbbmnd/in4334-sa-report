@@ -16,6 +16,7 @@ type Repo struct {
 	DeletedAt *time.Time
 	UpdatedAt time.Time
 	Org       bool
+	ProjectID int
 	UserType  string
 	FullName  string // timestamp
 	Raw       []byte `sql:"type:jsonb"` // This is the RAW JSONB of the metadata of a Repo
