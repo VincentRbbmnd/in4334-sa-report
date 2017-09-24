@@ -8,6 +8,7 @@ import (
 
 var db *gorm.DB
 var repoDB *models.RepoDB
+var commitDB *models.CommitDB
 var userDB *models.UserDB
 var remainingDB *models.RemainingDB
 var rateLimit int
@@ -17,5 +18,6 @@ func main() {
 	rateLimit = 10
 	initDatabase(true)
 
-	startRepoCrawling()
+	// startRepoCrawling()
+	getLastCommitOfRepo("microsoft/vscode", 41881900)
 }

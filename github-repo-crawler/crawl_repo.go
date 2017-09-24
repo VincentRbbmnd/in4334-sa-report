@@ -65,10 +65,10 @@ func writeToRemaining(remaining int) {
 }
 
 func processRepoData(remainingPages int) (int, error) {
-	body := githubAPICall(createRepoCrawlingURL(remainingPages), "GET", nil)
+	resp := githubAPICall(createRepoCrawlingURL(remainingPages), "GET", nil)
 	var res RawRepoData
-	err := json.NewDecoder(body).Decode(&res)
-	defer body.Close()
+	err := json.NewDecoder(resp.Body).Decode(&res)
+	defer resp.Body.Close()
 	if err != nil {
 		fmt.Println("Data could not be decoded into struct", err)
 	}
