@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"encoding/gob"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -26,16 +24,6 @@ type ImportantOwnerData struct {
 	Type string `json:"type"`
 }
 
-func GetBytes(key interface{}) ([]byte, error) {
-	var buf bytes.Buffer
-	enc := gob.NewEncoder(&buf)
-	err := enc.Encode(key)
-	if err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
-}
-
 func createRepoCrawlingURL(current int) string {
 	currentString := strconv.Itoa(current)
 	baseURL := "https://api.github.com/repositories?since="
@@ -43,17 +31,27 @@ func createRepoCrawlingURL(current int) string {
 	return baseURL + currentString + perPage
 }
 
-func startRepoCrawling(remainingPages int) {
+func startRepoCrawling() {
+	ProjectIDLastRepoCrawling, err := checkHowFarIWas("repo_crawling")
+	if err != nil {
+		panic(err)
+	}
+	crawlRepos(ProjectIDLastRepoCrawling)
+}
+
+func crawlRepos(remainingPages int) {
 	for rateLimit > 0 {
 		remainingPages++
-		lastID, _ := processRepoData(remainingPages)
-		// Here should be some error checking
+		lastID, err := processRepoData(remainingPages)
+		if err != nil {
+			panic(err)
+		}
 		writeToRemaining(lastID)
 	}
 	duration := time.Duration(1) * time.Hour
 	time.Sleep(duration)
 	rateLimit = 5000
-	startRepoCrawling(remainingPages)
+	crawlRepos(remainingPages)
 }
 
 func writeToRemaining(remaining int) {

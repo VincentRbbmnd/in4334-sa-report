@@ -16,9 +16,6 @@ var githubAPIKey *string
 func main() {
 	rateLimit = 10
 	initDatabase(true)
-	ProjectIDLastRepoCrawling, err := checkHowFarIWas("repo_crawling")
-	if err != nil {
-		panic(err)
-	}
-	startRepoCrawling(ProjectIDLastRepoCrawling)
+
+	startRepoCrawling()
 }
