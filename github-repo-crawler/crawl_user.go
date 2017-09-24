@@ -24,7 +24,6 @@ func getImportantUserData(rawUserData RawUserData) ImportantUserData {
 		fmt.Println("Raw data could not be converted to bytes", err)
 	}
 	var userData ImportantUserData
-	// var dat map[string]interface{}
 	err = json.Unmarshal(byteData, &userData)
 	if err != nil {
 		panic(err)

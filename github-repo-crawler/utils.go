@@ -19,6 +19,9 @@ func githubAPICall(url string, method string, payload *interface{}) *http.Respon
 		fmt.Println("error getting github repos", err)
 	}
 	rate := resp.Header.Get("x-ratelimit-remaining")
+	if rate == "0" {
+		panic("HIT API LIMIT FUUUUUUUUUUUUUU")
+	}
 	fmt.Println("X-ratelimit-remaining: ", rate)
 	rateInt, _ := strconv.Atoi(rate)
 	rateLimit = rateInt
@@ -52,11 +55,9 @@ type Link struct {
 }
 
 func parseLinkHeader(linkHeader string) LinkHeader {
-	fmt.Println("PARSE: ", linkHeader)
 	var parsedLinkHeader LinkHeader
 	result := strings.Split(linkHeader, ", <")
 	if len(result) < 2 {
-		fmt.Println("Length: ", len(result))
 		panic("No valid link length: ")
 	}
 	firstSplitted := strings.Split(result[0], ">;")

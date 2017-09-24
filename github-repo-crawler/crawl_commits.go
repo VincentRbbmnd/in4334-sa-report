@@ -30,27 +30,12 @@ type Author struct {
 }
 
 func startCommitCrawling() {
-	// sha := getLastCommitOfRepo("microsoft/vscode", 41881900)
-	// fmt.Println("Last stored: ", sha)
 	url := "https://api.github.com/repos/microsoft/vscode/commits?per_page=100"
 	getCommitsOfRepo(41881900, url)
 }
 
-// func getLastCommitOfRepo(repository string, repoID int) string {
-// 	var ctx context.Context
-
-// 	commit, err := commitDB.GetLastCommitByRepoID(ctx, repoID)
-// 	if err != nil {
-// 		return getFirstCommitOfRepo(repository, repoID)
-// 	}
-// 	return commit.SHA
-// }
-
 func getCommitsOfRepo(repoID int, apiUrl string) {
-	fmt.Println("URL: ", apiUrl)
 	resp := githubAPICall(apiUrl, "GET", nil)
-
-	// resp = githubAPICall(parsedLinkHeader.Second.URL, "GET", nil)
 
 	var res RawCommitData
 	err := json.NewDecoder(resp.Body).Decode(&res)
@@ -81,14 +66,9 @@ func getCommitsOfRepo(repoID int, apiUrl string) {
 	link := resp.Header.Get("link")
 	parsedLinkHeader := parseLinkHeader(link)
 	if strings.Contains(parsedLinkHeader.First.Rel, `rel="next"`) {
-		// duration := time.Duration(1) * time.Hour
-		// fmt.Println("Duration: ", duration)
-		time.Sleep(10000)
-		fmt.Println("NEXT:", parsedLinkHeader.First.URL)
 		getCommitsOfRepo(repoID, parsedLinkHeader.First.URL)
 	} else {
-		fmt.Println("NEXT:", parsedLinkHeader.First.URL)
-		fmt.Println("DONNEEE" + parsedLinkHeader.First.Rel + "DONE")
+
 	}
 }
 
