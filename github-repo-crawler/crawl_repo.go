@@ -6,7 +6,6 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"fmt"
-	"os"
 	"strconv"
 	"time"
 
@@ -39,7 +38,7 @@ func GetBytes(key interface{}) ([]byte, error) {
 
 func createRepoCrawlingURL(current int) string {
 	currentString := strconv.Itoa(current)
-	baseURL := "https://api.github.com/repositories?page="
+	baseURL := "https://api.github.com/repositories?since="
 	perPage := "&per_page=100"
 	return baseURL + currentString + perPage
 }
@@ -47,8 +46,9 @@ func createRepoCrawlingURL(current int) string {
 func startRepoCrawling(remainingPages int) {
 	for rateLimit > 0 {
 		remainingPages++
-		processRepoData(remainingPages)
-		writeToRemaining(remainingPages)
+		lastID, _ := processRepoData(remainingPages)
+		// Here should be some error checking
+		writeToRemaining(lastID)
 	}
 	duration := time.Duration(1) * time.Hour
 	time.Sleep(duration)
@@ -57,15 +57,16 @@ func startRepoCrawling(remainingPages int) {
 }
 
 func writeToRemaining(remaining int) {
-	data, _ := checkHowFarIWas()
-	data.RemainingRepoPages = remaining
-	f, _ := os.Create("remaining.json")
-	defer f.Close()
-	byteData, _ := json.Marshal(data)
-	f.WriteString(string(byteData))
+	var ctx context.Context
+	res, _ := remainingDB.GetWhereCrawlType(ctx, "repo_crawling")
+	res.LastID = remaining
+	err := remainingDB.Update(ctx, res)
+	if err != nil {
+		fmt.Println("Remaning to DB went wrong", err)
+	}
 }
 
-func processRepoData(remainingPages int) error {
+func processRepoData(remainingPages int) (int, error) {
 	body := githubAPICall(createRepoCrawlingURL(remainingPages), "GET", nil)
 	var res RawRepoData
 	err := json.NewDecoder(body).Decode(&res)
@@ -73,6 +74,7 @@ func processRepoData(remainingPages int) error {
 	if err != nil {
 		fmt.Println("Data could not be decoded into struct", err)
 	}
+	lastID := 0
 	for _, rawData := range res {
 		byteData, err := json.Marshal(rawData)
 		if err != nil {
@@ -84,8 +86,9 @@ func processRepoData(remainingPages int) error {
 			fmt.Println("Raw repo data could not be decoded further into struct", err)
 		}
 		addRepoToDB(repoData, byteData)
+		lastID = repoData.ID
 	}
-	return nil
+	return lastID, nil
 }
 
 func addRepoToDB(repoData ImportantRepoData, byteData []byte) {

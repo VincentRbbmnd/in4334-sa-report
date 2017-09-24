@@ -18,10 +18,11 @@ func initDatabase(logMode bool) {
 	}
 	db.LogMode(logMode)
 	db.Exec("CREATE EXTENSION IF NOT EXISTS \"postgis\";")
-	db.AutoMigrate(&models.Repo{}, &models.User{})
+	db.AutoMigrate(&models.Repo{}, &models.User{}, &models.Remaining{})
 
 	repoDB = models.NewRepoDB(db)
 	userDB = models.NewUserDB(db)
+	remainingDB = models.NewRemainingDB(db)
 
 	db.DB().SetMaxOpenConns(50)
 }
