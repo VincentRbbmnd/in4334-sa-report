@@ -36,10 +36,10 @@ func addUserToDB(userData ImportantUserData, rawUserData RawUserData) {
 		return
 	}
 	var ctx context.Context
-	user, err := userDB.GetByGithubID(ctx, int64(userData.ID))
-	if user != nil || err == nil {
-		return
-	}
+	// user, err := userDB.GetByGithubID(ctx, int64(userData.ID))
+	// if user != nil || err == nil {
+	// 	return
+	// }
 	byteData, err := json.Marshal(rawUserData)
 	if err != nil {
 		fmt.Println("Raw data could not be converted to bytes", err)

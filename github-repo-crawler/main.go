@@ -24,7 +24,7 @@ type Project struct {
 
 func main() {
 	rateLimit = 10
-	initDatabase(true)
+	initDatabase(false)
 
 	repoList := getRepoList()
 	for _, repo := range repoList {

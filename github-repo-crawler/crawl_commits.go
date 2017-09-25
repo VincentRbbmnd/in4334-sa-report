@@ -30,7 +30,8 @@ type Author struct {
 
 func startCommitCrawling(repoID int64, repoName string) {
 	url := "https://api.github.com/repos/" + repoName + "/commits?per_page=100"
-	getCommitsOfRepo(repoID, url, isFirstCommitInDB(getSHAOfFirstCommit(repoName)))
+	//isFirstCommitInDB(getSHAOfFirstCommit(repoName))
+	getCommitsOfRepo(repoID, url, false)
 }
 
 func getSHAOfFirstCommit(repoName string) string {
@@ -72,7 +73,7 @@ func isFirstCommitInDB(sha string) bool {
 
 func getCommitsOfRepo(repoID int64, apiUrl string, firstCommitInDB bool) {
 	resp := githubAPICall(apiUrl, "GET", nil)
-
+	fmt.Println("URL: ", apiUrl)
 	var res RawCommitData
 	err := json.NewDecoder(resp.Body).Decode(&res)
 	defer resp.Body.Close()
@@ -110,12 +111,12 @@ func getCommitsOfRepo(repoID int64, apiUrl string, firstCommitInDB bool) {
 
 func addCommitToDB(commitData ImportantCommitData, byteData []byte, repositoryID int64, authorID int64, committerID int64) bool {
 	var ctx context.Context
-	commit, err := commitDB.Get(ctx, commitData.SHA)
+	// commit, err := commitDB.Get(ctx, commitData.SHA)
 
-	// if commit already added return
-	if commit != nil || err == nil {
-		return true
-	}
+	// // if commit already added return
+	// if commit != nil || err == nil {
+	// 	return true
+	// }
 
 	var dbCommit models.Commit
 	dbCommit.Raw = byteData
