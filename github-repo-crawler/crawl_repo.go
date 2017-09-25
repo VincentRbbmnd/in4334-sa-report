@@ -64,11 +64,11 @@ func processRepoData(currentProject string) (int64, error) {
 func addRepoToDB(repoData ImportantRepoData, byteData []byte) {
 	var ctx context.Context
 
-	repo, err := repoDB.Get(ctx, int64(repoData.ID))
-	// if commit already added return
-	if repo != nil || err == nil {
-		return
-	}
+	// repo, err := repoDB.Get(ctx, int64(repoData.ID))
+	// // if commit already added return
+	// if repo != nil || err == nil {
+	// 	return
+	// }
 	var dbRepo models.Repo
 	dbRepo.FullName = repoData.FullName
 	dbRepo.Raw = byteData
@@ -78,7 +78,7 @@ func addRepoToDB(repoData ImportantRepoData, byteData []byte) {
 	if dbRepo.UserType == "Organization" {
 		dbRepo.Org = true
 	}
-	err = repoDB.Add(ctx, &dbRepo)
+	err := repoDB.Add(ctx, &dbRepo)
 	if err != nil {
 		fmt.Println("repo not added to db", err)
 	}
