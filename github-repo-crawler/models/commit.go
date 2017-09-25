@@ -18,7 +18,7 @@ type Commit struct {
 	SHA          string
 	AuthorID     int64
 	CommitterID  int64
-	RepositoryID int
+	RepositoryID int64
 	Raw          []byte `sql:"type:jsonb"` // This is the RAW JSONB of the metadata of a Commit
 }
 

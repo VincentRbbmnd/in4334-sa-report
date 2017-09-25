@@ -4,19 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strconv"
-	"time"
 
 	"./models"
 )
 
 // RawRepoData contains list of repos in raw form
-type RawRepoData []interface{}
+type RawRepoData interface{}
 
 type ImportantRepoData struct {
 	FullName string             `json:"full_name"`
 	Owner    ImportantOwnerData `json:"owner"`
-	ID       int                `json:"id"`
+	ID       float64            `json:"id"`
 }
 
 type UserDataFromRepoData struct {
@@ -28,93 +26,59 @@ type ImportantOwnerData struct {
 	Type string `json:"type"`
 }
 
-func createRepoCrawlingURL(current int) string {
-	currentString := strconv.Itoa(current)
-	baseURL := "https://api.github.com/repositories?since="
-	perPage := "&per_page=100"
-	return baseURL + currentString + perPage
+func createRepoCrawlingURL(current string) string {
+	return "https://api.github.com/repos/" + current
 }
 
-func startRepoCrawling() {
-	ProjectIDLastRepoCrawling, err := checkHowFarIWas("repo_crawling")
-	if err != nil {
-		panic(err)
-	}
-	crawlRepos(ProjectIDLastRepoCrawling)
-}
-
-func crawlRepos(remainingPages int) {
-	for rateLimit > 0 {
-		remainingPages++
-		lastID, err := processRepoData(remainingPages)
-		if err != nil {
-			panic(err)
-		}
-		writeToRemaining(lastID)
-	}
-	duration := time.Duration(1) * time.Hour
-	time.Sleep(duration)
-	rateLimit = 5000
-	crawlRepos(remainingPages)
-}
-
-func writeToRemaining(remaining int) {
-	var ctx context.Context
-	res, _ := remainingDB.GetWhereCrawlType(ctx, "repo_crawling")
-	res.LastID = remaining
-	err := remainingDB.Update(ctx, res)
-	if err != nil {
-		fmt.Println("Remaning to DB went wrong", err)
-	}
-}
-
-func processRepoData(remainingPages int) (int, error) {
-	resp := githubAPICall(createRepoCrawlingURL(remainingPages), "GET", nil)
+func processRepoData(currentProject string) (int64, error) {
+	resp := githubAPICall(createRepoCrawlingURL(currentProject), "GET", nil)
 	var res RawRepoData
 	err := json.NewDecoder(resp.Body).Decode(&res)
 	defer resp.Body.Close()
 	if err != nil {
 		fmt.Println("Data could not be decoded into struct", err)
 	}
-	lastID := 0
-	for _, rawData := range res {
-		byteData, err := json.Marshal(rawData)
-		if err != nil {
-			fmt.Println("Raw data could not be converted to bytes", err)
-		}
-		var repoData ImportantRepoData
-		err = json.Unmarshal(byteData, &repoData)
-		if err != nil {
-			fmt.Println("Raw repo data could not be decoded further into struct", err)
-		}
-		addRepoToDB(repoData, byteData)
-
-		var userData UserDataFromRepoData
-		err = json.Unmarshal(byteData, &userData)
-		if err != nil {
-			fmt.Println("Raw repo data could not be decoded further into struct", err)
-		}
-		//ADD USERS TO DB
-		author := getImportantUserData(userData.Owner)
-		addUserToDB(author, userData.Owner)
-
-		lastID = repoData.ID
+	byteData, err := json.Marshal(res)
+	if err != nil {
+		fmt.Println("Raw data could not be converted to bytes", err)
 	}
-	return lastID, nil
+	var repoData ImportantRepoData
+	err = json.Unmarshal(byteData, &repoData)
+	if err != nil {
+		panic(err)
+	}
+	addRepoToDB(repoData, byteData)
+
+	var userData UserDataFromRepoData
+	err = json.Unmarshal(byteData, &userData)
+	if err != nil {
+		fmt.Println("Raw repo data could not be decoded further into struct", err)
+	}
+	//ADD USERS TO DB
+	author := getImportantUserData(userData.Owner)
+	addUserToDB(author, userData.Owner)
+
+	return int64(repoData.ID), nil
 }
 
 func addRepoToDB(repoData ImportantRepoData, byteData []byte) {
+	var ctx context.Context
+
+	repo, err := repoDB.Get(ctx, int64(repoData.ID))
+	// if commit already added return
+	if repo != nil || err == nil {
+		return
+	}
 	var dbRepo models.Repo
 	dbRepo.FullName = repoData.FullName
 	dbRepo.Raw = byteData
 	dbRepo.Owner = repoData.Owner.Name
 	dbRepo.UserType = repoData.Owner.Type
-	dbRepo.ProjectID = repoData.ID
-	var ctx context.Context
+	dbRepo.ProjectID = int64(repoData.ID)
 	if dbRepo.UserType == "Organization" {
 		dbRepo.Org = true
 	}
-	err := repoDB.Add(ctx, &dbRepo)
+	err = repoDB.Add(ctx, &dbRepo)
 	if err != nil {
 		fmt.Println("repo not added to db", err)
 	}
