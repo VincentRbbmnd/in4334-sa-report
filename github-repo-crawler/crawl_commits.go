@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
 	"time"
 
 	"./models"
@@ -31,7 +30,7 @@ type Author struct {
 
 func startCommitCrawling() {
 	url := "https://api.github.com/repos/microsoft/vscode/commits?per_page=100"
-	getCommitsOfRepo(41881900, url)
+	getCommitsOfRepo(31, url)
 }
 
 func getCommitsOfRepo(repoID int, apiUrl string) {
@@ -63,10 +62,9 @@ func getCommitsOfRepo(repoID int, apiUrl string) {
 		//ADD COMMIT TO DB
 		addCommitToDB(commitData, byteData, repoID, int64(author.ID), int64(committer.ID))
 	}
-	link := resp.Header.Get("link")
-	parsedLinkHeader := parseLinkHeader(link)
-	if strings.Contains(parsedLinkHeader.First.Rel, `rel="next"`) {
-		getCommitsOfRepo(repoID, parsedLinkHeader.First.URL)
+	parsedLinkHeader := parseLinkHeader(resp.Header.Get("link"))
+	if parsedLinkHeader.Next != (Link{}) {
+		getCommitsOfRepo(repoID, parsedLinkHeader.Next.URL)
 	} else {
 
 	}

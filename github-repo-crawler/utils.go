@@ -46,8 +46,10 @@ func createRemainingType(crawlType string) {
 }
 
 type LinkHeader struct {
-	First  Link
-	Second Link
+	First Link
+	Next  Link
+	Prev  Link
+	Last  Link
 }
 type Link struct {
 	Rel string
@@ -56,25 +58,35 @@ type Link struct {
 
 func parseLinkHeader(linkHeader string) LinkHeader {
 	var parsedLinkHeader LinkHeader
-	result := strings.Split(linkHeader, ", <")
-	if len(result) < 2 {
+	if linkHeader == "" {
+		return parsedLinkHeader
+	}
+	results := strings.Split(linkHeader, ", <")
+	if len(results) < 2 {
 		panic("No valid link length: ")
 	}
-	firstSplitted := strings.Split(result[0], ">;")
-	if len(firstSplitted) < 2 {
-		panic("No valid sublink link first")
+	for _, res := range results {
+		splittedLink := strings.Split(res, ">; ")
+		if len(splittedLink) < 2 {
+			panic("No valid sublink link first")
+		}
+		linkURL := strings.Replace(splittedLink[0], "<", "", -1)
+		rel := splittedLink[1]
+		switch rel {
+		case `rel="prev"`:
+			parsedLinkHeader.Prev = Link{URL: linkURL, Rel: rel}
+			break
+		case `rel="first"`:
+			parsedLinkHeader.First = Link{URL: linkURL, Rel: rel}
+			break
+		case `rel="next"`:
+			parsedLinkHeader.Next = Link{URL: linkURL, Rel: rel}
+			break
+		case `rel="last"`:
+			parsedLinkHeader.Last = Link{URL: linkURL, Rel: rel}
+			break
+		}
 	}
-	firstLinkURL := strings.Replace(firstSplitted[0], "<", "", -1)
-	firstRel := firstSplitted[1]
-	parsedLinkHeader.First = Link{URL: firstLinkURL, Rel: firstRel}
-
-	secondSplitted := strings.Split(result[1], ">;")
-	if len(secondSplitted) < 2 {
-		panic("No valid sublink link second")
-	}
-	secondLinkURL := secondSplitted[0]
-	secondRel := secondSplitted[1]
-	parsedLinkHeader.Second = Link{URL: secondLinkURL, Rel: secondRel}
 
 	return parsedLinkHeader
 }

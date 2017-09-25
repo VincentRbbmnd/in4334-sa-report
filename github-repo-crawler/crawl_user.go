@@ -32,6 +32,9 @@ func getImportantUserData(rawUserData RawUserData) ImportantUserData {
 }
 
 func addUserToDB(userData ImportantUserData, rawUserData RawUserData) {
+	if userData.ID == 0 {
+		return
+	}
 	var ctx context.Context
 	user, err := userDB.GetByGithubID(ctx, int64(userData.ID))
 	if user != nil || err == nil {
