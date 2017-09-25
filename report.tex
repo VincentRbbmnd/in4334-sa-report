@@ -49,34 +49,47 @@
   \country{The Netherlands}}
 \email{wim_spaargaren@live.nl}
 
-\maketitle
-
 \begin{abstract}
-	
+This paper describes the building of an online platform to provide open source software collaboration visualizations on GitHub.
+In addition, the evolution of developer activity for open source software repositories is explored.
+Exploratory research is done by answering questions about the evolution of developer activity in the developer community and the amount of commits made by a developer per country.
 \end{abstract}
+
+\keywords{Data Visualization, GitHub, Open Source Software, Collaboration}
+
+\maketitle
 
 \section{Introduction}
 In the past few years the open-source software(OSS) community and development in OSS have grown enormously.
 According to GitHub \cite{GHOctoverse}, in 2016, there were over 5.8 million users engaged in activities relating to public repositories.
 GitHub defines these activities as "some activity within the last year, e.g. code committed, a comment created, a repository starred, or an issue opened".
 With GitHub providing programmatic access to all OSS repository and user data\cite{GHAPI}, it is possible to manipulate this data to get more insights into the way the OSS community collaborates.
-By mining software repositories and analyzing data gathered, researchers try to improve the development of software.
-An important way to analyze gathered data is to visualize it.
-However, up until now there have not been a lot of tools or platforms which provide visual insight into e.g. collaboration over time on a specific repository.
+By mining software repositories and analyzing data gathered, researchers try to improve the development of software. 
+One way for researchers, to analyze the data gathered, is by visualizing it \cite{Heller}, however, up until now there have not been a lot of tools or platforms which provide visual insight into e.g. collaboration over time on a specific repository.
 Tools which are available are outdated or not sufficient.
-Such a tool or platform would be helpful in the field of software engineering by making this data available to all stakeholders.
 Therefore, the aim of this paper is to provide a platform which stakeholders can leverage to gain insights into OSS projects and collaboration on those projects.
-The research question this paper will try to answer is: Is it possible to find different trends in OSS by visualizing collaboration over time?
+Such a tool or platform could be really helpful in the field of software engineering. 
+Making this data available can show where developers are located, this in turn helps, for example, identifying possible cultural differences between collaborators. 
 
-To try and answer this research question two sub questions will be answered. 
-The first possible trend could emerge by analyzing developer activity and their geolocation, since the amount of developers differs per region.
-By adding a temporal element to activity per country, it might be possible to tell in which countries development activities are in- or decreasing, or where activity might increase or decrease in the future.
-Therefore we first aim to answer the question: Do trends emerge from comparing development activity per country or continent?
+The research question this paper will try to answer is: \textbf{Is it possible to find different patterns in OSS by visualizing collaboration over time?}
+
+Since this is a broad subject, we will explore this subject by answering a number of questions. 
+However, these answer will not provide a conclusive answer to the main question asked but in turn invite others to extend and explore this subject.
+In total, two sub questions will be answered, focusing on more specific patterns.
+The first possible trend could emerge by analyzing the active number of developers in the OSS community per country. 
+This trend is expected because the amount of developers per country differs as stated in \cite{StackOverflow2017}.
+By adding a temporal element to active number of developers per country, it might be possible to tell in which countries the number of active developers in open-source software evolves faster. 
+This is interesting to know, because it shows which OSS projects start to gain popularity for developers. 
+Underlying reasons can then be researched for this rise in popularity.
+
+Therefore we first aim to answer the question: \textbf{Does the number of active developers in the OSS community evolve faster for different countries?}
+
 Another possible trend could emerge in collaboration links for projects.
 Collaboration links are defined as links between developers who add contributions consecutively to the same project.
 By adding a temporal component to visualizing collaboration links, it becomes possible to see the way developer collaboration changes over time.
 At the same time it becomes possible to see if the distance between developers working on the same project has influence on collaboration.
-The second question we aim to answer is: Do trends emerge in collaboration links for projects?
+
+The second question we aim to answer is: \textbf{Does the number of commits made by a developer evolve faster for different countries?}
 
 \section{Implementation}
 To answer these questions a set of large repositories (i.e. repositories with the most GitHub stars and/or collaborators) on the open source software platform GitHub will be chosen.
