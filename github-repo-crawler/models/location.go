@@ -8,9 +8,9 @@ import (
 
 // Location struct for Locationsitory in DB
 type Location struct {
-	ID       int    `gorm:"primary_key"` // primary key
-	Location string `sql:"type:geometry(Point,4326)"`
-	Raw      []byte `sql:"type:jsonb"` // This is the RAW JSONB of the metadata of a Location
+	ID     int    `gorm:"primary_key"` // primary key
+	Point  string `sql:"type:geometry(Point,4326)"`
+	UserID int64
 }
 
 // TableName overrides the table name settings in Gorm to force a specific table name
@@ -68,15 +68,16 @@ func (m *LocationDB) List(ctx context.Context) ([]*Location, error) {
 }
 
 // Add creates a new record.
-func (m *LocationDB) Add(ctx context.Context, model *Location) error {
-
-	err := m.Db.Create(model).Error
+func (m *LocationDB) Add(ctx context.Context, lat float64, lng float64, userID int64) (int, error) {
+	query := `INSERT INTO locations (point,user_id)`
+	query += ` VALUES (ST_SetSRID(ST_MakePoint(?,?),4326),?)`
+	var loc Location
+	err := m.Db.Raw(query, lat, lng, userID).Scan(&loc).Error
 	if err != nil {
-
-		return err
+		return 0, err
 	}
 
-	return nil
+	return loc.ID, nil
 }
 
 // Update modifies a single record.

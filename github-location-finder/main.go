@@ -36,6 +36,15 @@ type LocationGoogle struct {
 	Lng float64 `json:"lng"`
 }
 
+type User struct {
+	ID  int
+	Raw GithubUser
+}
+
+type GithubUser struct {
+	Location string `json:"location"`
+}
+
 func main() {
 	initDatabase(true)
 	var ctx context.Context
@@ -44,7 +53,19 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("USERS: ", users)
+	for _, user := range users {
+		var ghUser GithubUser
+		err := json.Unmarshal(user.Raw, &ghUser)
+		if err != nil {
+			panic(err)
+		}
+		if ghUser.Location == "" {
+			fmt.Println("JE MEODER")
+		} else {
+			fmt.Println("Location: ", ghUser.Location)
+		}
+		// break
+	}
 	// userID := int64(320)
 
 	// address := "Amstelveen+Nederland"
