@@ -21,6 +21,7 @@ func githubAPICall(url string, method string, payload *interface{}) *http.Respon
 	rate := resp.Header.Get("x-ratelimit-remaining")
 	if rate == "0" {
 		panic("HIT API LIMIT FUUUUUUUUUUUUUU")
+		//TODO read reset time stamp and sleep time : reset time - now
 	}
 	fmt.Println("X-ratelimit-remaining: ", rate)
 	rateInt, _ := strconv.Atoi(rate)
