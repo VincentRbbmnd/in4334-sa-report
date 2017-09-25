@@ -23,3 +23,5 @@
 *.synctex.gz
 *.pdf
 *.exe
+debug
+.vscode

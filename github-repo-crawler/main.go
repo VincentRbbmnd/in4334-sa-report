@@ -16,9 +16,9 @@ var githubAPIKey *string
 
 func main() {
 	rateLimit = 10
-	initDatabase(true)
+	initDatabase(false)
 
-	// startRepoCrawling()
+	startRepoCrawling()
 
-	startCommitCrawling()
+	// startCommitCrawling()
 }

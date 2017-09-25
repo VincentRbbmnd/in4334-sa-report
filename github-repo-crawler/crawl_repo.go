@@ -19,6 +19,10 @@ type ImportantRepoData struct {
 	ID       int                `json:"id"`
 }
 
+type UserDataFromRepoData struct {
+	Owner RawUserData `json:"owner"`
+}
+
 type ImportantOwnerData struct {
 	Name string `json:"login"`
 	Type string `json:"type"`
@@ -84,6 +88,16 @@ func processRepoData(remainingPages int) (int, error) {
 			fmt.Println("Raw repo data could not be decoded further into struct", err)
 		}
 		addRepoToDB(repoData, byteData)
+
+		var userData UserDataFromRepoData
+		err = json.Unmarshal(byteData, &userData)
+		if err != nil {
+			fmt.Println("Raw repo data could not be decoded further into struct", err)
+		}
+		//ADD USERS TO DB
+		author := getImportantUserData(userData.Owner)
+		addUserToDB(author, userData.Owner)
+
 		lastID = repoData.ID
 	}
 	return lastID, nil
