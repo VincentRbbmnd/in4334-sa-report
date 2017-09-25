@@ -16,7 +16,7 @@ type Repo struct {
 	DeletedAt *time.Time
 	UpdatedAt time.Time
 	Org       bool
-	ProjectID int
+	ProjectID int64
 	UserType  string
 	FullName  string // timestamp
 	Raw       []byte `sql:"type:jsonb"` // This is the RAW JSONB of the metadata of a Repo
@@ -54,11 +54,11 @@ func (m *RepoDB) TableName() string {
 
 // Get returns a single Repo as a Database Model
 // This is more for use internally, and probably not what you want in  your controllers
-func (m *RepoDB) Get(ctx context.Context, id int) (*Repo, error) {
+func (m *RepoDB) Get(ctx context.Context, id int64) (*Repo, error) {
 	defer goa.MeasureSince([]string{"goa", "db", "Repo", "get"}, time.Now())
 
 	var native Repo
-	err := m.Db.Table(m.TableName()).Where("id = ?", id).Find(&native).Error
+	err := m.Db.Table(m.TableName()).Where("project_id = ?", id).Find(&native).Error
 	if err == gorm.ErrRecordNotFound {
 		return nil, err
 	}
@@ -96,7 +96,7 @@ func (m *RepoDB) Add(ctx context.Context, model *Repo) error {
 func (m *RepoDB) Update(ctx context.Context, model *Repo) error {
 	defer goa.MeasureSince([]string{"goa", "db", "Repo", "update"}, time.Now())
 
-	obj, err := m.Get(ctx, model.ID)
+	obj, err := m.Get(ctx, model.ProjectID)
 	if err != nil {
 		goa.LogError(ctx, "error updating Repo", "error", err.Error())
 		return err

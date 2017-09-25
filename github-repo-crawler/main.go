@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"./models"
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
@@ -16,9 +18,20 @@ var githubAPIKey *string
 
 func main() {
 	rateLimit = 10
-	initDatabase(false)
+	initDatabase(true)
 
-	startRepoCrawling()
+	repoList := [...]string{"microsoft/vscode"}
+	for _, repo := range repoList {
+		fmt.Println(repo)
+		repoID, err := processRepoData(repo)
+		if err != nil {
+			panic(err)
+		}
+		startCommitCrawling(repoID, repo)
 
-	// startCommitCrawling()
+	}
+
+	// startRepoCrawling()
+
+	//
 }

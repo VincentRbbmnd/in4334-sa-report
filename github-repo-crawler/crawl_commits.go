@@ -28,12 +28,12 @@ type Author struct {
 	Date string `json:"date"`
 }
 
-func startCommitCrawling() {
-	url := "https://api.github.com/repos/microsoft/vscode/commits?per_page=100"
-	getCommitsOfRepo(31, url)
+func startCommitCrawling(repoID int64, repoName string) {
+	url := "https://api.github.com/repos/" + repoName + "/commits?per_page=100"
+	getCommitsOfRepo(repoID, url)
 }
 
-func getCommitsOfRepo(repoID int, apiUrl string) {
+func getCommitsOfRepo(repoID int64, apiUrl string) {
 	resp := githubAPICall(apiUrl, "GET", nil)
 
 	var res RawCommitData
@@ -70,9 +70,10 @@ func getCommitsOfRepo(repoID int, apiUrl string) {
 	}
 }
 
-func addCommitToDB(commitData ImportantCommitData, byteData []byte, repositoryID int, authorID int64, committerID int64) {
+func addCommitToDB(commitData ImportantCommitData, byteData []byte, repositoryID int64, authorID int64, committerID int64) {
 	var ctx context.Context
 	commit, err := commitDB.Get(ctx, commitData.SHA)
+
 	// if commit already added return
 	if commit != nil || err == nil {
 		return
