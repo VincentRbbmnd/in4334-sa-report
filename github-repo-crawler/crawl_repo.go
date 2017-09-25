@@ -46,9 +46,7 @@ func processRepoData(currentProject string) (int64, error) {
 	err = json.Unmarshal(byteData, &repoData)
 	if err != nil {
 		panic(err)
-		fmt.Println("Raw repo data could not be decoded further into struct", err)
 	}
-	fmt.Println("REPO: ", repoData)
 	addRepoToDB(repoData, byteData)
 
 	var userData UserDataFromRepoData

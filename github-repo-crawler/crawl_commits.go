@@ -30,7 +30,6 @@ type Author struct {
 
 func startCommitCrawling(repoID int64, repoName string) {
 	url := "https://api.github.com/repos/" + repoName + "/commits?per_page=100"
-	// fmt.Println("SHA OF FIRST COMMIT: ",
 	getCommitsOfRepo(repoID, url, isFirstCommitInDB(getSHAOfFirstCommit(repoName)))
 }
 

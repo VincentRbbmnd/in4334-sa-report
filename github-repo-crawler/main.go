@@ -30,8 +30,4 @@ func main() {
 		startCommitCrawling(repoID, repo)
 
 	}
-
-	// startRepoCrawling()
-
-	//
 }
