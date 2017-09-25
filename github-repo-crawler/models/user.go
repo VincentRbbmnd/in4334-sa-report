@@ -90,7 +90,7 @@ func (m *UserDB) List(ctx context.Context) ([]*User, error) {
 func (m *UserDB) ListNoLocations(ctx context.Context) ([]*User, error) {
 
 	var objs []*User
-	err := m.Db.Table(m.TableName()).Where("location_checked = false").Find(&objs).Error
+	err := m.Db.Table(m.TableName()).Select("github_user_id, raw").Where("location_checked is null limit 1000").Find(&objs).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}

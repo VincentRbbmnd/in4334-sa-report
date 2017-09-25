@@ -38,14 +38,20 @@ type LocationGoogle struct {
 
 func main() {
 	initDatabase(true)
-	userID := int64(320)
-	// userDB.ListNo
-	address := "Amstelveen+Nederland"
-	fmt.Println(getLocationGoogleForAddress(address))
-	googleLocation := getLocationGoogleForAddress(address)
 	var ctx context.Context
-	fmt.Println("LOCATION: ", googleLocation)
-	locationDB.Add(ctx, googleLocation.Lat, googleLocation.Lng, userID)
+
+	users, err := userDB.ListNoLocations(ctx)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("USERS: ", users)
+	// userID := int64(320)
+
+	// address := "Amstelveen+Nederland"
+	// fmt.Println(getLocationGoogleForAddress(address))
+	// googleLocation := getLocationGoogleForAddress(address)
+	// fmt.Println("LOCATION: ", googleLocation)
+	// locationDB.Add(ctx, googleLocation.Lat, googleLocation.Lng, userID)
 
 }
 
