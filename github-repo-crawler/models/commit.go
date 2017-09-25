@@ -94,11 +94,11 @@ func (m *CommitDB) List(ctx context.Context) ([]*Commit, error) {
 func (m *CommitDB) Add(ctx context.Context, model *Commit) error {
 	defer goa.MeasureSince([]string{"goa", "db", "Commit", "add"}, time.Now())
 
-	err := m.Db.Create(model).Error
-	if err != nil {
-		goa.LogError(ctx, "error adding Commit", "error", err.Error())
-		return err
-	}
+	m.Db.Create(model)
+	// if err != nil {
+	// 	goa.LogError(ctx, "error adding Commit", "error", err.Error())
+	// 	return err
+	// }
 
 	return nil
 }

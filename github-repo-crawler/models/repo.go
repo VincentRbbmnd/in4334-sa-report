@@ -83,11 +83,11 @@ func (m *RepoDB) List(ctx context.Context) ([]*Repo, error) {
 func (m *RepoDB) Add(ctx context.Context, model *Repo) error {
 	defer goa.MeasureSince([]string{"goa", "db", "Repo", "add"}, time.Now())
 
-	err := m.Db.Create(model).Error
-	if err != nil {
-		goa.LogError(ctx, "error adding Repo", "error", err.Error())
-		return err
-	}
+	m.Db.Create(model)
+	// if err != nil {
+	// 	goa.LogError(ctx, "error adding Repo", "error", err.Error())
+	// 	return err
+	// }
 
 	return nil
 }
