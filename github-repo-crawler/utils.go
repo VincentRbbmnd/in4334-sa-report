@@ -31,6 +31,7 @@ func githubAPICall(url string, method string, payload *interface{}) *http.Respon
 		duration := tm.Sub(time.Now())
 		fmt.Println("Sleepy time till rate limit reset. Minutes:", duration.Minutes())
 		time.Sleep(duration)
+		return githubAPICall(url, method, payload)
 	}
 	fmt.Println("X-ratelimit-remaining: ", rate)
 	rateInt, _ := strconv.Atoi(rate)
