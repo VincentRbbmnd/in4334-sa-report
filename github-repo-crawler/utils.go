@@ -22,12 +22,14 @@ func githubAPICall(url string, method string, payload *interface{}) *http.Respon
 	rate := resp.Header.Get("x-ratelimit-remaining")
 	if rate == "0" {
 		rateLimitReset := resp.Header.Get("x-ratelimit-reset")
-		resetTime, err := time.Parse(time.RFC3339, rateLimitReset)
+
+		i, err := strconv.ParseInt(rateLimitReset, 10, 64)
 		if err != nil {
 			panic(err)
 		}
-		duration := resetTime.Sub(time.Now())
-		fmt.Println("Sleepy time till rate limit reset")
+		tm := time.Unix(i, 0)
+		duration := tm.Sub(time.Now())
+		fmt.Println("Sleepy time till rate limit reset. Minutes:", duration.Minutes())
 		time.Sleep(duration)
 	}
 	fmt.Println("X-ratelimit-remaining: ", rate)

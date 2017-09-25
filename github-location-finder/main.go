@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -50,41 +51,39 @@ type GithubUser struct {
 }
 
 func main() {
-	initDatabase(true)
+	initDatabase(false)
 	var ctx context.Context
-
-	users, err := userDB.ListNoLocations(ctx)
-	if err != nil {
-		panic(err)
-	}
-	for i, user := range users {
-		fmt.Println("user login: ", user.Login)
-		location := getUserLocation(user.Login)
-		fmt.Println(location)
-		if location == "" {
-			user.LocationChecked = true
-			err = userDB.Update(ctx, user)
-			if err != nil {
-				panic(err)
-			}
-		} else {
-			googleLocation := getLocationGoogleForAddress(location)
-			locationID, err := locationDB.Add(ctx, googleLocation.Lat, googleLocation.Lng, user.GithubUserID)
-			if err != nil {
-				panic(err)
-			}
-			user.LocationID = locationID
-			user.LocationChecked = true
-			err = userDB.Update(ctx, user)
-			if err != nil {
-				panic(err)
+	sum := 1
+	for sum < 1000 {
+		users, err := userDB.ListNoLocations(ctx)
+		if err != nil {
+			panic(err)
+		}
+		for _, user := range users {
+			fmt.Println("user login: ", user.Login)
+			location := getUserLocation(user.Login)
+			fmt.Println(location)
+			if location == "" {
+				user.LocationChecked = true
+				err = userDB.Update(ctx, user)
+				if err != nil {
+					panic(err)
+				}
+			} else {
+				googleLocation := getLocationGoogleForAddress(location)
+				locationID, err := locationDB.Add(ctx, googleLocation.Lat, googleLocation.Lng, user.GithubUserID)
+				if err != nil {
+					panic(err)
+				}
+				user.LocationID = locationID
+				user.LocationChecked = true
+				err = userDB.Update(ctx, user)
+				if err != nil {
+					panic(err)
+				}
 			}
 		}
 
-		//TODO remove
-		if i == 2 {
-			break
-		}
 	}
 
 }
@@ -116,12 +115,14 @@ func githubAPICall(url string, method string, payload *interface{}) *http.Respon
 	rate := resp.Header.Get("x-ratelimit-remaining")
 	if rate == "0" {
 		rateLimitReset := resp.Header.Get("x-ratelimit-reset")
-		resetTime, err := time.Parse(time.RFC3339, rateLimitReset)
+
+		i, err := strconv.ParseInt(rateLimitReset, 10, 64)
 		if err != nil {
 			panic(err)
 		}
-		duration := resetTime.Sub(time.Now())
-		fmt.Println("Sleepy time till rate limit reset")
+		tm := time.Unix(i, 0)
+		duration := tm.Sub(time.Now())
+		fmt.Println("Sleepy time till rate limit reset. Minutes:", duration.Minutes())
 		time.Sleep(duration)
 	}
 	fmt.Println("X-ratelimit-remaining: ", rate)
