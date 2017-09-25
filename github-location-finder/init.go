@@ -49,12 +49,14 @@ func InitDatabase() (*gorm.DB, error) {
 	dbName := flag.String("db", databaseName, "Defaults to hoppa_dev")
 	dbUser := flag.String("user", user, "Defaults to postgres")
 	dbPass := flag.String("pass", pass, "Defaults to empty")
+	githubAPIKey = flag.String("ghkey", "", "Defaults to empty")
 	flag.Parse()
 
 	fmt.Println("Configuration:")
 	fmt.Println("DB HOST: " + *dbHost)
 	fmt.Println("DB Name: " + *dbName)
 	fmt.Println("DB User: " + *dbUser)
+	fmt.Println("GHKey: ", *githubAPIKey)
 
 	url := fmt.Sprintf("dbname=%s user=%s password=%s sslmode=disable port=%d host=%s", *dbName, *dbUser, *dbPass, 5432, *dbHost)
 

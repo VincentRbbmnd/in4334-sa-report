@@ -17,6 +17,8 @@ var db *gorm.DB
 var userDB *ghmodels.UserDB
 var locationDB *ghmodels.LocationDB
 
+var githubAPIKey *string
+
 type GoogleAddresses struct {
 	Results []GoogleAddress `json:"results"`
 	Status  string          `json:"status"`
@@ -53,31 +55,73 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	for _, user := range users {
-		var ghUser GithubUser
-		err := json.Unmarshal(user.Raw, &ghUser)
-		if err != nil {
-			panic(err)
-		}
-		if ghUser.Location == "" {
-			fmt.Println("JE MEODER")
+	for i, user := range users {
+		fmt.Println("user login: ", user.Login)
+		fmt.Println("user github id: ", user.GithubUserID)
+		location := getUserLocation(user.Login)
+		if location == "" {
+			fmt.Println("TODO set checked and no location")
+			user.LocationChecked = true
+			err = userDB.Update(ctx, user)
+			if err != nil {
+				panic(err)
+			}
 		} else {
-			fmt.Println("Location: ", ghUser.Location)
+			googleLocation := getLocationGoogleForAddress(location)
+			locationID, err := locationDB.Add(ctx, googleLocation.Lat, googleLocation.Lng, user.GithubUserID)
+			if err != nil {
+				panic(err)
+			}
+			user.LocationID = locationID
+			user.LocationChecked = true
+			err = userDB.Update(ctx, user)
+			if err != nil {
+				panic(err)
+			}
 		}
-		// break
-	}
-	// userID := int64(320)
 
-	// address := "Amstelveen+Nederland"
-	// fmt.Println(getLocationGoogleForAddress(address))
-	// googleLocation := getLocationGoogleForAddress(address)
-	// fmt.Println("LOCATION: ", googleLocation)
-	// locationDB.Add(ctx, googleLocation.Lat, googleLocation.Lng, userID)
+		//TODO remove
+		if i == 2 {
+			break
+		}
+	}
 
 }
 
-func getLocationGoogleForAddress(address string) LocationGoogle {
+func getUserLocation(login string) string {
+	resp := githubAPICall("https://api.github.com/users/"+login, "GET", nil)
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
 
+	var githubUser GithubUser
+	err = json.Unmarshal(body, &githubUser)
+	if err != nil {
+		panic(err)
+	}
+	return githubUser.Location
+}
+
+func githubAPICall(url string, method string, payload *interface{}) *http.Response {
+	fmt.Println("URL: ", url)
+	req, err := http.NewRequest(method, url, nil)
+	req.Header.Add("Authorization", "token "+*githubAPIKey)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println("error getting github repos", err)
+	}
+	rate := resp.Header.Get("x-ratelimit-remaining")
+	if rate == "0" {
+		panic("HIT API LIMIT FUUUUUUUUUUUUUU")
+	}
+	fmt.Println("X-ratelimit-remaining: ", rate)
+	return resp
+}
+
+func getLocationGoogleForAddress(address string) LocationGoogle {
 	url := "https://maps.googleapis.com/maps/api/geocode/json?address=" + address + "&key=AIzaSyAEn3y2FmCPpqYcc9RfonF8Zw3sbX3PZoM"
 	resp := googleAPICall(url)
 	body, err := ioutil.ReadAll(resp.Body)
