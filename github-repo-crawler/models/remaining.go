@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/goadesign/goa"
 	"github.com/jinzhu/gorm"
 )
 
@@ -51,7 +50,6 @@ func (m *RemainingDB) TableName() string {
 // Get returns a single Remaining as a Database Model
 // This is more for use internally, and probably not what you want in  your controllers
 func (m *RemainingDB) Get(ctx context.Context, id int) (*Remaining, error) {
-	defer goa.MeasureSince([]string{"goa", "db", "Remaining", "get"}, time.Now())
 
 	var native Remaining
 	err := m.Db.Table(m.TableName()).Where("id = ?", id).Find(&native).Error
@@ -65,7 +63,6 @@ func (m *RemainingDB) Get(ctx context.Context, id int) (*Remaining, error) {
 // Get returns a single Remaining as a Database Model
 // This is more for use internally, and probably not what you want in  your controllers
 func (m *RemainingDB) GetWhereCrawlType(ctx context.Context, crawlType string) (*Remaining, error) {
-	defer goa.MeasureSince([]string{"goa", "db", "Remaining", "get"}, time.Now())
 
 	var native Remaining
 	err := m.Db.Table(m.TableName()).Where("crawl_type = ?", crawlType).Find(&native).Error
@@ -78,7 +75,6 @@ func (m *RemainingDB) GetWhereCrawlType(ctx context.Context, crawlType string) (
 
 // List returns an array of Remaining
 func (m *RemainingDB) List(ctx context.Context) ([]*Remaining, error) {
-	defer goa.MeasureSince([]string{"goa", "db", "Remaining", "list"}, time.Now())
 
 	var objs []*Remaining
 	err := m.Db.Table(m.TableName()).Find(&objs).Error
@@ -91,11 +87,10 @@ func (m *RemainingDB) List(ctx context.Context) ([]*Remaining, error) {
 
 // Add creates a new record.
 func (m *RemainingDB) Add(ctx context.Context, model *Remaining) error {
-	defer goa.MeasureSince([]string{"goa", "db", "Remaining", "add"}, time.Now())
 
 	err := m.Db.Create(model).Error
 	if err != nil {
-		goa.LogError(ctx, "error adding Remaining", "error", err.Error())
+
 		return err
 	}
 
@@ -104,11 +99,10 @@ func (m *RemainingDB) Add(ctx context.Context, model *Remaining) error {
 
 // Update modifies a single record.
 func (m *RemainingDB) Update(ctx context.Context, model *Remaining) error {
-	defer goa.MeasureSince([]string{"goa", "db", "Remaining", "update"}, time.Now())
 
 	obj, err := m.Get(ctx, model.ID)
 	if err != nil {
-		goa.LogError(ctx, "error updating Remaining", "error", err.Error())
+
 		return err
 	}
 	err = m.Db.Model(obj).Updates(model).Error
@@ -118,14 +112,13 @@ func (m *RemainingDB) Update(ctx context.Context, model *Remaining) error {
 
 // Delete removes a single record.
 func (m *RemainingDB) Delete(ctx context.Context, id int) error {
-	defer goa.MeasureSince([]string{"goa", "db", "Remaining", "delete"}, time.Now())
 
 	var obj Remaining
 
 	err := m.Db.Delete(&obj, id).Error
 
 	if err != nil {
-		goa.LogError(ctx, "error deleting Remaining", "error", err.Error())
+
 		return err
 	}
 

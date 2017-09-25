@@ -6,14 +6,12 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"lab.weave.nl/hoppa/hoppa-backend/models"
-
 	ghmodels "github.com/VincentRbbmnd/in4334-sa-report/github-repo-crawler/models"
 	"github.com/jinzhu/gorm"
 )
 
 var db *gorm.DB
-var userDB *models.UserDB
+var userDB *ghmodels.UserDB
 
 type GoogleAddresses struct {
 	Results []GoogleAddress `json:"results"`

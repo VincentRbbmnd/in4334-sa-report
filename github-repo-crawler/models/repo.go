@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/goadesign/goa"
 	"github.com/jinzhu/gorm"
 )
 
@@ -55,7 +54,6 @@ func (m *RepoDB) TableName() string {
 // Get returns a single Repo as a Database Model
 // This is more for use internally, and probably not what you want in  your controllers
 func (m *RepoDB) Get(ctx context.Context, id int64) (*Repo, error) {
-	defer goa.MeasureSince([]string{"goa", "db", "Repo", "get"}, time.Now())
 
 	var native Repo
 	err := m.Db.Table(m.TableName()).Where("project_id = ?", id).Find(&native).Error
@@ -68,7 +66,6 @@ func (m *RepoDB) Get(ctx context.Context, id int64) (*Repo, error) {
 
 // List returns an array of Repo
 func (m *RepoDB) List(ctx context.Context) ([]*Repo, error) {
-	defer goa.MeasureSince([]string{"goa", "db", "Repo", "list"}, time.Now())
 
 	var objs []*Repo
 	err := m.Db.Table(m.TableName()).Find(&objs).Error
@@ -81,11 +78,10 @@ func (m *RepoDB) List(ctx context.Context) ([]*Repo, error) {
 
 // Add creates a new record.
 func (m *RepoDB) Add(ctx context.Context, model *Repo) error {
-	defer goa.MeasureSince([]string{"goa", "db", "Repo", "add"}, time.Now())
 
 	m.Db.Create(model)
 	// if err != nil {
-	// 	goa.LogError(ctx, "error adding Repo", "error", err.Error())
+	//
 	// 	return err
 	// }
 
@@ -94,11 +90,10 @@ func (m *RepoDB) Add(ctx context.Context, model *Repo) error {
 
 // Update modifies a single record.
 func (m *RepoDB) Update(ctx context.Context, model *Repo) error {
-	defer goa.MeasureSince([]string{"goa", "db", "Repo", "update"}, time.Now())
 
 	obj, err := m.Get(ctx, model.ProjectID)
 	if err != nil {
-		goa.LogError(ctx, "error updating Repo", "error", err.Error())
+
 		return err
 	}
 	err = m.Db.Model(obj).Updates(model).Error
@@ -108,14 +103,13 @@ func (m *RepoDB) Update(ctx context.Context, model *Repo) error {
 
 // Delete removes a single record.
 func (m *RepoDB) Delete(ctx context.Context, id int) error {
-	defer goa.MeasureSince([]string{"goa", "db", "Repo", "delete"}, time.Now())
 
 	var obj Repo
 
 	err := m.Db.Delete(&obj, id).Error
 
 	if err != nil {
-		goa.LogError(ctx, "error deleting Repo", "error", err.Error())
+
 		return err
 	}
 

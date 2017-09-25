@@ -2,9 +2,7 @@ package models
 
 import (
 	"context"
-	"time"
 
-	"github.com/goadesign/goa"
 	"github.com/jinzhu/gorm"
 )
 
@@ -47,7 +45,6 @@ func (m *LocationDB) TableName() string {
 // Get returns a single Location as a Database Model
 // This is more for use internally, and probably not what you want in  your controllers
 func (m *LocationDB) Get(ctx context.Context, id int) (*Location, error) {
-	defer goa.MeasureSince([]string{"goa", "db", "Location", "get"}, time.Now())
 
 	var native Location
 	err := m.Db.Table(m.TableName()).Where("id = ?", id).Find(&native).Error
@@ -60,7 +57,6 @@ func (m *LocationDB) Get(ctx context.Context, id int) (*Location, error) {
 
 // List returns an array of Location
 func (m *LocationDB) List(ctx context.Context) ([]*Location, error) {
-	defer goa.MeasureSince([]string{"goa", "db", "Location", "list"}, time.Now())
 
 	var objs []*Location
 	err := m.Db.Table(m.TableName()).Find(&objs).Error
@@ -73,11 +69,10 @@ func (m *LocationDB) List(ctx context.Context) ([]*Location, error) {
 
 // Add creates a new record.
 func (m *LocationDB) Add(ctx context.Context, model *Location) error {
-	defer goa.MeasureSince([]string{"goa", "db", "Location", "add"}, time.Now())
 
 	err := m.Db.Create(model).Error
 	if err != nil {
-		goa.LogError(ctx, "error adding Location", "error", err.Error())
+
 		return err
 	}
 
@@ -86,11 +81,10 @@ func (m *LocationDB) Add(ctx context.Context, model *Location) error {
 
 // Update modifies a single record.
 func (m *LocationDB) Update(ctx context.Context, model *Location) error {
-	defer goa.MeasureSince([]string{"goa", "db", "Location", "update"}, time.Now())
 
 	obj, err := m.Get(ctx, model.ID)
 	if err != nil {
-		goa.LogError(ctx, "error updating Location", "error", err.Error())
+
 		return err
 	}
 	err = m.Db.Model(obj).Updates(model).Error
@@ -100,14 +94,13 @@ func (m *LocationDB) Update(ctx context.Context, model *Location) error {
 
 // Delete removes a single record.
 func (m *LocationDB) Delete(ctx context.Context, id int) error {
-	defer goa.MeasureSince([]string{"goa", "db", "Location", "delete"}, time.Now())
 
 	var obj Location
 
 	err := m.Db.Delete(&obj, id).Error
 
 	if err != nil {
-		goa.LogError(ctx, "error deleting Location", "error", err.Error())
+
 		return err
 	}
 

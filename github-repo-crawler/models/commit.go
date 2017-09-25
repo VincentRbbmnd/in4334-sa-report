@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/goadesign/goa"
 	"github.com/jinzhu/gorm"
 )
 
@@ -54,7 +53,6 @@ func (m *CommitDB) TableName() string {
 // Get returns a single Commit as a Database Model
 // This is more for use internally, and probably not what you want in  your controllers
 func (m *CommitDB) Get(ctx context.Context, sha string) (*Commit, error) {
-	defer goa.MeasureSince([]string{"goa", "db", "Commit", "get"}, time.Now())
 
 	var native Commit
 	err := m.Db.Table(m.TableName()).Where("sha = ?", sha).Find(&native).Error
@@ -66,7 +64,6 @@ func (m *CommitDB) Get(ctx context.Context, sha string) (*Commit, error) {
 }
 
 func (m *CommitDB) GetLastCommitByRepoID(ctx context.Context, repoID int) (*Commit, error) {
-	defer goa.MeasureSince([]string{"goa", "db", "Commit", "get"}, time.Now())
 
 	var native Commit
 	err := m.Db.Table(m.TableName()).Where("repository_id = ?", repoID).Order("created_at DESC LIMIT 1").Find(&native).Error
@@ -79,7 +76,6 @@ func (m *CommitDB) GetLastCommitByRepoID(ctx context.Context, repoID int) (*Comm
 
 // List returns an array of Commit
 func (m *CommitDB) List(ctx context.Context) ([]*Commit, error) {
-	defer goa.MeasureSince([]string{"goa", "db", "Commit", "list"}, time.Now())
 
 	var objs []*Commit
 	err := m.Db.Table(m.TableName()).Find(&objs).Error
@@ -92,11 +88,9 @@ func (m *CommitDB) List(ctx context.Context) ([]*Commit, error) {
 
 // Add creates a new record.
 func (m *CommitDB) Add(ctx context.Context, model *Commit) error {
-	defer goa.MeasureSince([]string{"goa", "db", "Commit", "add"}, time.Now())
 
 	m.Db.Create(model)
 	// if err != nil {
-	// 	goa.LogError(ctx, "error adding Commit", "error", err.Error())
 	// 	return err
 	// }
 
@@ -105,11 +99,9 @@ func (m *CommitDB) Add(ctx context.Context, model *Commit) error {
 
 // Update modifies a single record.
 func (m *CommitDB) Update(ctx context.Context, model *Commit) error {
-	defer goa.MeasureSince([]string{"goa", "db", "Commit", "update"}, time.Now())
 
 	obj, err := m.Get(ctx, model.SHA)
 	if err != nil {
-		goa.LogError(ctx, "error updating Commit", "error", err.Error())
 		return err
 	}
 	err = m.Db.Model(obj).Updates(model).Error
@@ -119,14 +111,12 @@ func (m *CommitDB) Update(ctx context.Context, model *Commit) error {
 
 // Delete removes a single record.
 func (m *CommitDB) Delete(ctx context.Context, sha string) error {
-	defer goa.MeasureSince([]string{"goa", "db", "Commit", "delete"}, time.Now())
 
 	var obj Commit
 
 	err := m.Db.Delete(&obj, sha).Error
 
 	if err != nil {
-		goa.LogError(ctx, "error deleting Commit", "error", err.Error())
 		return err
 	}
 
