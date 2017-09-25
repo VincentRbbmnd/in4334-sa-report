@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
+	"time"
 
 	ghmodels "github.com/VincentRbbmnd/in4334-sa-report/github-repo-crawler/models"
 	"github.com/jinzhu/gorm"
@@ -57,10 +59,9 @@ func main() {
 	}
 	for i, user := range users {
 		fmt.Println("user login: ", user.Login)
-		fmt.Println("user github id: ", user.GithubUserID)
 		location := getUserLocation(user.Login)
+		fmt.Println(location)
 		if location == "" {
-			fmt.Println("TODO set checked and no location")
 			user.LocationChecked = true
 			err = userDB.Update(ctx, user)
 			if err != nil {
@@ -105,7 +106,6 @@ func getUserLocation(login string) string {
 }
 
 func githubAPICall(url string, method string, payload *interface{}) *http.Response {
-	fmt.Println("URL: ", url)
 	req, err := http.NewRequest(method, url, nil)
 	req.Header.Add("Authorization", "token "+*githubAPIKey)
 	client := &http.Client{}
@@ -115,14 +115,23 @@ func githubAPICall(url string, method string, payload *interface{}) *http.Respon
 	}
 	rate := resp.Header.Get("x-ratelimit-remaining")
 	if rate == "0" {
-		panic("HIT API LIMIT FUUUUUUUUUUUUUU")
+		rateLimitReset := resp.Header.Get("x-ratelimit-reset")
+		resetTime, err := time.Parse(time.RFC3339, rateLimitReset)
+		if err != nil {
+			panic(err)
+		}
+		duration := resetTime.Sub(time.Now())
+		fmt.Println("Sleepy time till rate limit reset")
+		time.Sleep(duration)
 	}
 	fmt.Println("X-ratelimit-remaining: ", rate)
 	return resp
 }
 
 func getLocationGoogleForAddress(address string) LocationGoogle {
-	url := "https://maps.googleapis.com/maps/api/geocode/json?address=" + address + "&key=AIzaSyAEn3y2FmCPpqYcc9RfonF8Zw3sbX3PZoM"
+	var LocationGoogle LocationGoogle
+
+	url := "https://maps.googleapis.com/maps/api/geocode/json?address=" + strings.Replace(address, " ", "", -1) + "&key=AIzaSyAEn3y2FmCPpqYcc9RfonF8Zw3sbX3PZoM"
 	resp := googleAPICall(url)
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -133,9 +142,9 @@ func getLocationGoogleForAddress(address string) LocationGoogle {
 	var googleAddress GoogleAddresses
 	err = json.Unmarshal(body, &googleAddress)
 	if err != nil {
-		panic(err)
+		fmt.Println("ADDRESS: ", address)
+		return LocationGoogle
 	}
-	var LocationGoogle LocationGoogle
 	if len(googleAddress.Results) == 0 {
 		return LocationGoogle
 	}

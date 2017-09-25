@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"./models"
 )
@@ -20,8 +21,14 @@ func githubAPICall(url string, method string, payload *interface{}) *http.Respon
 	}
 	rate := resp.Header.Get("x-ratelimit-remaining")
 	if rate == "0" {
-		panic("HIT API LIMIT FUUUUUUUUUUUUUU")
-		//TODO read reset time stamp and sleep time : reset time - now
+		rateLimitReset := resp.Header.Get("x-ratelimit-reset")
+		resetTime, err := time.Parse(time.RFC3339, rateLimitReset)
+		if err != nil {
+			panic(err)
+		}
+		duration := resetTime.Sub(time.Now())
+		fmt.Println("Sleepy time till rate limit reset")
+		time.Sleep(duration)
 	}
 	fmt.Println("X-ratelimit-remaining: ", rate)
 	rateInt, _ := strconv.Atoi(rate)
