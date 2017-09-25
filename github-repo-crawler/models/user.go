@@ -9,14 +9,16 @@ import (
 
 // User struct for Usersitory in DB
 type User struct {
-	ID           int    `gorm:"primary_key"` // primary key
-	Login        string //user name
-	CreatedAt    time.Time
-	DeletedAt    *time.Time
-	UpdatedAt    time.Time
-	GithubUserID int64
-	Type         string //type of user
-	Raw          []byte `sql:"type:jsonb"` // This is the RAW JSONB of the metadata of a User
+	ID              int    `gorm:"primary_key"` // primary key
+	Login           string //user name
+	CreatedAt       time.Time
+	DeletedAt       *time.Time
+	UpdatedAt       time.Time
+	GithubUserID    int64
+	Type            string //type of user
+	Raw             []byte `sql:"type:jsonb"` // This is the RAW JSONB of the metadata of a User
+	LocationChecked bool
+	LocationID      int
 }
 
 // TableName overrides the table name settings in Gorm to force a specific table name
@@ -77,6 +79,18 @@ func (m *UserDB) List(ctx context.Context) ([]*User, error) {
 
 	var objs []*User
 	err := m.Db.Table(m.TableName()).Find(&objs).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
+
+	return objs, nil
+}
+
+// List returns an array of User
+func (m *UserDB) ListNoLocations(ctx context.Context) ([]*User, error) {
+
+	var objs []*User
+	err := m.Db.Table(m.TableName()).Where("location_checked = false").Find(&objs).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}

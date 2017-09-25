@@ -5,9 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"lab.weave.nl/hoppa/hoppa-backend/models"
-
-	. "github.com/VincentRbbmnd/in4334-sa-report/github-repo-crawler/models"
+	ghmodels "github.com/VincentRbbmnd/in4334-sa-report/github-repo-crawler/models"
 
 	"github.com/jinzhu/gorm"
 )
@@ -20,9 +18,10 @@ func initDatabase(logMode bool) {
 	}
 	db.LogMode(logMode)
 	db.Exec("CREATE EXTENSION IF NOT EXISTS \"postgis\";")
-	db.AutoMigrate(&models.User{}, &models.Location{})
+	db.AutoMigrate(&ghmodels.User{}, &ghmodels.Location{})
 
-	userDB = models.NewUserDB(db)
+	userDB = ghmodels.NewUserDB(db)
+	locationDB = ghmodels.NewLocationDB(db)
 
 	db.DB().SetMaxOpenConns(50)
 }
@@ -50,14 +49,12 @@ func InitDatabase() (*gorm.DB, error) {
 	dbName := flag.String("db", databaseName, "Defaults to hoppa_dev")
 	dbUser := flag.String("user", user, "Defaults to postgres")
 	dbPass := flag.String("pass", pass, "Defaults to empty")
-	githubAPIKey = flag.String("ghkey", "", "Defaults to empty")
 	flag.Parse()
 
 	fmt.Println("Configuration:")
 	fmt.Println("DB HOST: " + *dbHost)
 	fmt.Println("DB Name: " + *dbName)
 	fmt.Println("DB User: " + *dbUser)
-	fmt.Println("GHKey: ", *githubAPIKey)
 
 	url := fmt.Sprintf("dbname=%s user=%s password=%s sslmode=disable port=%d host=%s", *dbName, *dbUser, *dbPass, 5432, *dbHost)
 

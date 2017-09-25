@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -8,10 +9,13 @@ import (
 
 	ghmodels "github.com/VincentRbbmnd/in4334-sa-report/github-repo-crawler/models"
 	"github.com/jinzhu/gorm"
+
+	_ "github.com/lib/pq"
 )
 
 var db *gorm.DB
 var userDB *ghmodels.UserDB
+var locationDB *ghmodels.LocationDB
 
 type GoogleAddresses struct {
 	Results []GoogleAddress `json:"results"`
@@ -24,7 +28,7 @@ type GoogleAddress struct {
 }
 
 type Geometry struct {
-	LocationGoogle LocationGoogle `json:"LocationGoogle"`
+	LocationGoogle LocationGoogle `json:"location"`
 }
 
 type LocationGoogle struct {
@@ -34,10 +38,14 @@ type LocationGoogle struct {
 
 func main() {
 	initDatabase(true)
+	userID := int64(320)
+	// userDB.ListNo
 	address := "Amstelveen+Nederland"
 	fmt.Println(getLocationGoogleForAddress(address))
-	var location ghmodels.Location
-	fmt.Println("je moeder", location)
+	googleLocation := getLocationGoogleForAddress(address)
+	var ctx context.Context
+	fmt.Println("LOCATION: ", googleLocation)
+	locationDB.Add(ctx, googleLocation.Lat, googleLocation.Lng, userID)
 
 }
 
@@ -60,6 +68,7 @@ func getLocationGoogleForAddress(address string) LocationGoogle {
 	if len(googleAddress.Results) == 0 {
 		return LocationGoogle
 	}
+	fmt.Println("HIii", googleAddress)
 	return googleAddress.Results[0].Geometry.LocationGoogle
 }
 
