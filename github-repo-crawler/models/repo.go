@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -57,6 +58,19 @@ func (m *RepoDB) Get(ctx context.Context, id int64) (*Repo, error) {
 
 	var native Repo
 	err := m.Db.Table(m.TableName()).Where("project_id = ?", id).Find(&native).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil, err
+	}
+
+	return &native, err
+}
+
+// Get returns a single Repo as a Database Model
+// This is more for use internally, and probably not what you want in  your controllers
+func (m *RepoDB) GetByRepoName(ctx context.Context, repoName string) (*Repo, error) {
+
+	var native Repo
+	err := m.Db.Table(m.TableName()).Where("UPPER(full_name) = ?", strings.ToUpper(repoName)).Find(&native).Error
 	if err == gorm.ErrRecordNotFound {
 		return nil, err
 	}
