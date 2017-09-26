@@ -10,15 +10,15 @@ import (
 	"strings"
 	"time"
 
-	ghmodels "github.com/VincentRbbmnd/in4334-sa-report/github-repo-crawler/models"
+	. "github.com/VincentRbbmnd/in4334-sa-report/github-repo-crawler/models"
 	"github.com/jinzhu/gorm"
 
 	_ "github.com/lib/pq"
 )
 
 var db *gorm.DB
-var userDB *ghmodels.UserDB
-var locationDB *ghmodels.LocationDB
+var userDB *UserDB
+var locationDB *LocationDB
 
 var githubAPIKey *string
 
@@ -39,11 +39,6 @@ type Geometry struct {
 type LocationGoogle struct {
 	Lat float64 `json:"lat"`
 	Lng float64 `json:"lng"`
-}
-
-type User struct {
-	ID  int
-	Raw GithubUser
 }
 
 type GithubUser struct {
@@ -121,8 +116,9 @@ func githubAPICall(url string, method string, payload *interface{}) *http.Respon
 			panic(err)
 		}
 		tm := time.Unix(i, 0)
-		duration := tm.Sub(time.Now())
+		duration := tm.Sub(time.Now().Add(-time.Minute * time.Duration(1)))
 		fmt.Println("Sleepy time till rate limit reset. Minutes:", duration.Minutes())
+		fmt.Println("Going back to work at: ", tm.String())
 		time.Sleep(duration)
 		return githubAPICall(url, method, payload)
 	}
@@ -150,7 +146,7 @@ func getLocationGoogleForAddress(address string) LocationGoogle {
 	if len(googleAddress.Results) == 0 {
 		return LocationGoogle
 	}
-	fmt.Println("HIii", googleAddress)
+	fmt.Println("Google address: ", googleAddress)
 	return googleAddress.Results[0].Geometry.LocationGoogle
 }
 
