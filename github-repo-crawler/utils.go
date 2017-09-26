@@ -28,8 +28,9 @@ func githubAPICall(url string, method string, payload *interface{}) *http.Respon
 			panic(err)
 		}
 		tm := time.Unix(i, 0)
-		duration := tm.Sub(time.Now())
+		duration := tm.Sub(time.Now().Add(-time.Minute * time.Duration(1)))
 		fmt.Println("Sleepy time till rate limit reset. Minutes:", duration.Minutes())
+		fmt.Println("Going back to work at: ", tm.String())
 		time.Sleep(duration)
 		return githubAPICall(url, method, payload)
 	}
