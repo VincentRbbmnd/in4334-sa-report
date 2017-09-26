@@ -1,10 +1,11 @@
 [
-    "Masonry/SnapKit",
-    "mattermost/platform",
-    "GraphKit/Material",
-    "nodejs/node",
-    "nodejs/node-v0.x-archive",
-    "nylas/nylas-mail",
-    "pugjs/pug",
-    "torvalds/linux"
+  "twbs/bootstrap",
+  "facebook/react",
+  "tensorflow/tensorflow",
+  "d3/d3",
+  "FortAwesome/Font-Awesome",
+  "apple/swift",
+  "rails/rails",
+  "Microsoft/vscode",
+  "golang/go"
 ]
