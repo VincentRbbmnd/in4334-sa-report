@@ -9,18 +9,14 @@ import (
 
 // Star struct for Star repository in DB
 type Star struct {
-	ID              		int    `gorm:"primary_key"` // primary key
-	UserID					int
-	GithubUserLogin    		string //user name
-	GithubUserID    		int64
-	RepositoryID			int
-	GithubRepositoryName 	string
-	GithubRepositoryID		int64
-	StarredAt 				time.Time
-	CreatedAt       		time.Time
-	DeletedAt       		*time.Time
-	UpdatedAt       		time.Time
-	Raw             		[]byte `sql:"type:jsonb"` // This is the RAW JSONB of the metadata of a Star
+	ID              	int    `gorm:"primary_key"` // primary key
+	UserID				uint
+	RepoID				uint
+	StarredAt 			time.Time
+	CreatedAt      		time.Time
+	DeletedAt      		*time.Time
+	UpdatedAt      		time.Time
+	Raw            		[]byte `sql:"type:jsonb"` // This is the RAW JSONB of the metadata of a Star
 }
 
 // TableName overrides the table name settings in Gorm to force a specific table name
