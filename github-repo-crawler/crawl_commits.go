@@ -116,13 +116,6 @@ func getCommitsOfRepo(repoID int64, apiUrl string, firstCommitInDB bool) {
 
 func addCommitToDB(commitData ImportantCommitData, byteData []byte, repositoryID int64, authorID int64, committerID int64) bool {
 	var ctx context.Context
-	// commit, err := commitDB.Get(ctx, commitData.SHA)
-
-	// // if commit already added return
-	// if commit != nil || err == nil {
-	// 	return true
-	// }
-
 	var dbCommit models.Commit
 	dbCommit.Raw = byteData
 	dbCommit.SHA = commitData.SHA
@@ -139,7 +132,8 @@ func addCommitToDB(commitData ImportantCommitData, byteData []byte, repositoryID
 
 	err = commitDB.Add(ctx, &dbCommit)
 	if err != nil {
-		fmt.Println("commit not added to db", err)
+		// fmt.Println("commit not added to db", err)
+		return true
 	}
 	return false
 }

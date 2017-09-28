@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 
 	"./models"
@@ -33,12 +32,11 @@ func main() {
 	}
 	// repoList := getRepoList()
 	for _, repo := range repos {
-		fmt.Println(repo)
 		//Not necessary anymore, since we have top 1000 projects in db.
 		// repoID, err := processRepoData(repo.FullName)
-		if err != nil {
-			panic(err)
-		}
+		// if err != nil {
+		// 	panic(err)
+		// }
 		startCommitCrawling(repo.ProjectID, repo.FullName)
 	}
 }
