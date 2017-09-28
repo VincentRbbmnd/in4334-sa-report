@@ -100,13 +100,14 @@ func (m *StarDB) ListByGithubRepositoryName(ctx context.Context, id int64) ([]*S
 }
 
 // Add creates a new record.
-func (m *StarDB) Add(ctx context.Context, model *Star) error {
+func (m *StarDB) Add(ctx context.Context, starredAt time.Time, userId int, repoId int) error {
 
-	m.Db.Create(model)
-	// if err != nil {
-	//
-	// 	return err
-	// }
+	query := `INSERT INTO stars (starred_at, user_id, repo_id) VALUES (?, ?, ?)`
+	var star Star
+	err := m.Db.Raw(query, starredAt, userId, repoId).Scan(&star).Error
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
