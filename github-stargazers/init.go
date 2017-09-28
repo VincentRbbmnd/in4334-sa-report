@@ -22,7 +22,7 @@ func initDatabase(logMode bool) {
 
 	starDB = ghmodels.NewStarDB(db)
 	userDB = ghmodels.NewUserDB(db)
-	locationDB = ghmodels.NewLocationDB(db)
+	repoDB = ghmodels.NewRepoDB(db)
 
 	db.DB().SetMaxOpenConns(50)
 }
