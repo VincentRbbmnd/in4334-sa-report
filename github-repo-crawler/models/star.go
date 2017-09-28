@@ -13,10 +13,6 @@ type Star struct {
 	UserID				uint
 	RepoID				uint
 	StarredAt 			time.Time
-	CreatedAt      		time.Time
-	DeletedAt      		*time.Time
-	UpdatedAt      		time.Time
-	Raw            		[]byte `sql:"type:jsonb"` // This is the RAW JSONB of the metadata of a Star
 }
 
 // TableName overrides the table name settings in Gorm to force a specific table name
