@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"./models"
+	ghmodels "github.com/vincentrbbmnd/in4334-sa-report/github-repo-crawler/models"
 
 	"github.com/jinzhu/gorm"
 )
@@ -18,14 +18,11 @@ func initDatabase(logMode bool) {
 	}
 	db.LogMode(logMode)
 	db.Exec("CREATE EXTENSION IF NOT EXISTS \"postgis\";")
-	db.AutoMigrate(&models.Repo{}, &models.User{}, &models.Remaining{}, &models.Commit{}, &models.Star{})
-	db.Model(&models.User{}).AddUniqueIndex("idx_user_login", "login")
+	db.AutoMigrate(&ghmodels.Star{}, &ghmodels.Repo{}, &ghmodels.User{})
 
-	repoDB = models.NewRepoDB(db)
-	userDB = models.NewUserDB(db)
-	commitDB = models.NewCommitDB(db)
-	remainingDB = models.NewRemainingDB(db)
-	starDB = models.NewStarDB(db)
+	starDB = ghmodels.NewStarDB(db)
+	userDB = ghmodels.NewUserDB(db)
+	repoDB = ghmodels.NewRepoDB(db)
 
 	db.DB().SetMaxOpenConns(50)
 }

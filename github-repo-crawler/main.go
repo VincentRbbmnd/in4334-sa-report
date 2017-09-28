@@ -14,6 +14,7 @@ var db *gorm.DB
 var repoDB *models.RepoDB
 var commitDB *models.CommitDB
 var userDB *models.UserDB
+var starDB *models.StarDB
 var remainingDB *models.RemainingDB
 var rateLimit int
 var githubAPIKey *string
@@ -37,7 +38,9 @@ func main() {
 		// if err != nil {
 		// 	panic(err)
 		// }
-		startCommitCrawling(repo.ProjectID, repo.FullName)
+		// startCommitCrawling(repo.ProjectID, repo.FullName)
+		startStarCrawling(repo.ProjectID, repo.FullName)
+		break
 	}
 }
 

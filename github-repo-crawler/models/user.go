@@ -19,6 +19,7 @@ type User struct {
 	Raw             []byte `sql:"type:jsonb"` // This is the RAW JSONB of the metadata of a User
 	LocationChecked bool
 	LocationID      int
+	Stars			[]Star
 }
 
 // TableName overrides the table name settings in Gorm to force a specific table name
