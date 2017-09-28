@@ -34,7 +34,6 @@ func main() {
 	for _, repo := range repos {
 		startCommitCrawling(repo.ProjectID, repo.FullName)
 		startStarCrawling(repo.ProjectID, repo.FullName)
-		break
 	}
 }
 
