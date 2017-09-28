@@ -31,14 +31,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	// repoList := getRepoList()
 	for _, repo := range repos {
-		//Not necessary anymore, since we have top 1000 projects in db.
-		// repoID, err := processRepoData(repo.FullName)
-		// if err != nil {
-		// 	panic(err)
-		// }
-		// startCommitCrawling(repo.ProjectID, repo.FullName)
+		startCommitCrawling(repo.ProjectID, repo.FullName)
 		startStarCrawling(repo.ProjectID, repo.FullName)
 		break
 	}

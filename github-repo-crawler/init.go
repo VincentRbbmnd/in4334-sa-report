@@ -60,9 +60,10 @@ func InitDatabase() (*gorm.DB, error) {
 	fmt.Println("DB HOST: " + *dbHost)
 	fmt.Println("DB Name: " + *dbName)
 	fmt.Println("DB User: " + *dbUser)
+	fmt.Println("DB Pass: " + *dbPass)
 	fmt.Println("GHKey: ", *githubAPIKey)
 
-	url := fmt.Sprintf("dbname=%s user=%s password=%s sslmode=disable port=%d host=%s", *dbName, *dbUser, *dbPass, 5432, *dbHost)
+	url := fmt.Sprintf("dbname=%s user=%s password=%s sslmode=disable port=%d host=%s", *dbName, *dbUser, *dbPass, 8082, *dbHost)
 
 	return gorm.Open("postgres", url)
 }

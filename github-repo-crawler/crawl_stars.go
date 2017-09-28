@@ -24,7 +24,10 @@ func startStarCrawling(repoID int64, repoName string) {
 }
 
 func getStargazersOfRepo(repoID int64, apiUrl string) {
+	fmt.Println(time.Now().String(), " DOING REQUEST")
 	resp := githubAPICallStarMediaType(apiUrl, "GET", nil)
+	fmt.Println(time.Now().String(), " FINISHED REQUEST")
+
 	fmt.Println("URL: ", apiUrl)
 	var res RawStarData
 	err := json.NewDecoder(resp.Body).Decode(&res)
