@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -25,15 +26,20 @@ type Project struct {
 func main() {
 	rateLimit = 10
 	initDatabase(false)
-	//TODO adjust this by getting repo's from our own database.
-	repoList := getRepoList()
-	for _, repo := range repoList {
+	var ctx context.Context
+	repos, err := repoDB.List(ctx)
+	if err != nil {
+		panic(err)
+	}
+	// repoList := getRepoList()
+	for _, repo := range repos {
 		fmt.Println(repo)
-		repoID, err := processRepoData(repo)
+		//Not necessary anymore, since we have top 1000 projects in db.
+		// repoID, err := processRepoData(repo.FullName)
 		if err != nil {
 			panic(err)
 		}
-		startCommitCrawling(repoID, repo)
+		startCommitCrawling(repo.ProjectID, repo.FullName)
 	}
 }
 
