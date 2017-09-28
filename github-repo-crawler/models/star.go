@@ -9,10 +9,10 @@ import (
 
 // Star struct for Star repository in DB
 type Star struct {
-	ID              	int    `gorm:"primary_key"` // primary key
-	UserID				uint
-	RepoID				uint
-	StarredAt 			time.Time
+	ID        int `gorm:"primary_key"` // primary key
+	UserID    int64
+	RepoID    int64
+	StarredAt time.Time
 }
 
 // TableName overrides the table name settings in Gorm to force a specific table name
@@ -30,6 +30,7 @@ type StarDB struct {
 func NewStarDB(db *gorm.DB) *StarDB {
 	return &StarDB{Db: db}
 }
+
 // DB returns the underlying database.
 func (m *StarDB) DB() interface{} {
 	return m.Db
@@ -55,11 +56,11 @@ func (m *StarDB) Get(ctx context.Context, id int) (*Star, error) {
 	return &native, err
 }
 
-func (m *StarDB) ListByGithubUserID(ctx context.Context, id int64) ([]*Star, error) {
+func (m *StarDB) ListStars(ctx context.Context, id int64) ([]*Star, error) {
 
 	var objs []*Star
-	err := m.Db.Table(m.TableName()).Where("github_user_id = ?", id).Find(&objs).Error
-	if err == gorm.ErrRecordNotFound {
+	err := m.Db.Table(m.TableName()).Find(&objs).Error
+	if err != nil {
 		return nil, err
 	}
 
@@ -69,6 +70,8 @@ func (m *StarDB) ListByGithubUserID(ctx context.Context, id int64) ([]*Star, err
 func (m *StarDB) ListByGithubUserLogin(ctx context.Context, login string) ([]*Star, error) {
 
 	var objs []*Star
+	//TODO this doesn't work yet
+	//Join tables user and stars
 	err := m.Db.Table(m.TableName()).Where("github_user_login = ?", login).Find(&objs).Error
 	if err == gorm.ErrRecordNotFound {
 		return nil, err
@@ -80,17 +83,8 @@ func (m *StarDB) ListByGithubUserLogin(ctx context.Context, login string) ([]*St
 func (m *StarDB) ListByGithubRepositoryID(ctx context.Context, id int64) ([]*Star, error) {
 
 	var objs []*Star
-	err := m.Db.Table(m.TableName()).Where("github_repository_id = ?", id).Find(&objs).Error
-	if err == gorm.ErrRecordNotFound {
-		return nil, err
-	}
-
-	return objs, err
-}
-
-func (m *StarDB) ListByGithubRepositoryName(ctx context.Context, id int64) ([]*Star, error) {
-
-	var objs []*Star
+	//TODO this doesn't work yet
+	//Join tables repo and stars
 	err := m.Db.Table(m.TableName()).Where("github_repository_id = ?", id).Find(&objs).Error
 	if err == gorm.ErrRecordNotFound {
 		return nil, err
@@ -100,11 +94,9 @@ func (m *StarDB) ListByGithubRepositoryName(ctx context.Context, id int64) ([]*S
 }
 
 // Add creates a new record.
-func (m *StarDB) Add(ctx context.Context, starredAt time.Time, userId int, repoId int) error {
+func (m *StarDB) Add(ctx context.Context, star *Star) error {
 
-	query := `INSERT INTO stars (starred_at, user_id, repo_id) VALUES (?, ?, ?)`
-	var star Star
-	err := m.Db.Raw(query, starredAt, userId, repoId).Scan(&star).Error
+	err := m.Db.Create(star).Error
 	if err != nil {
 		return err
 	}
