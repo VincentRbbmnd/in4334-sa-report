@@ -25,7 +25,7 @@ type Project struct {
 func main() {
 	rateLimit = 10
 	initDatabase(false)
-
+	//TODO adjust this by getting repo's from our own database.
 	repoList := getRepoList()
 	for _, repo := range repoList {
 		fmt.Println(repo)

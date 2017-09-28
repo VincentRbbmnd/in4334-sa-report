@@ -30,11 +30,12 @@ type Author struct {
 
 func startCommitCrawling(repoID int64, repoName string) {
 	url := "https://api.github.com/repos/" + repoName + "/commits?per_page=100"
-	//isFirstCommitInDB(getSHAOfFirstCommit(repoName))
-	getCommitsOfRepo(repoID, url, false)
+	isFirstCommitInDB := isFirstCommitInDB(getSHAOfFirstCommit(repoName))
+	getCommitsOfRepo(repoID, url, isFirstCommitInDB)
 }
 
 func getSHAOfFirstCommit(repoName string) string {
+
 	resp := githubAPICall("https://api.github.com/repos/"+repoName+"/commits?per_page=100", "GET", nil)
 	link := resp.Header.Get("link")
 	if link != "" {
@@ -79,16 +80,20 @@ func getCommitsOfRepo(repoID int64, apiUrl string, firstCommitInDB bool) {
 	defer resp.Body.Close()
 	if err != nil {
 		fmt.Println("Data could not be decoded into struct", err)
+		getCommitsOfRepo(repoID, apiUrl, firstCommitInDB)
 	}
 	for _, commit := range res {
 		byteData, err := json.Marshal(commit)
 		if err != nil {
 			fmt.Println("Raw data could not be converted to bytes", err)
+			getCommitsOfRepo(repoID, apiUrl, firstCommitInDB)
 		}
 		var commitData ImportantCommitData
 		err = json.Unmarshal(byteData, &commitData)
 		if err != nil {
 			fmt.Println("Raw repo data could not be decoded further into struct", err)
+			getCommitsOfRepo(repoID, apiUrl, firstCommitInDB)
+
 		}
 		//ADD USERS TO DB
 		author := getImportantUserData(commitData.AuthorRaw)
