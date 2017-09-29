@@ -1,8 +1,8 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 
 	"./models"
@@ -14,6 +14,7 @@ var db *gorm.DB
 var repoDB *models.RepoDB
 var commitDB *models.CommitDB
 var userDB *models.UserDB
+var starDB *models.StarDB
 var remainingDB *models.RemainingDB
 var rateLimit int
 var githubAPIKey *string
@@ -25,15 +26,14 @@ type Project struct {
 func main() {
 	rateLimit = 10
 	initDatabase(false)
-
-	repoList := getRepoList()
-	for _, repo := range repoList {
-		fmt.Println(repo)
-		repoID, err := processRepoData(repo)
-		if err != nil {
-			panic(err)
-		}
-		startCommitCrawling(repoID, repo)
+	var ctx context.Context
+	repos, err := repoDB.List(ctx)
+	if err != nil {
+		panic(err)
+	}
+	for _, repo := range repos {
+		startCommitCrawling(repo.ProjectID, repo.FullName)
+		startStarCrawling(repo.ProjectID, repo.FullName)
 	}
 }
 

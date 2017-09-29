@@ -54,6 +54,10 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+		if len(users) == 0 {
+			fmt.Println("No users found sleepy time for half an hour")
+			time.Sleep(time.Minute * 30)
+		}
 		for _, user := range users {
 			fmt.Println("user login: ", user.Login)
 			location := getUserLocation(user.Login)

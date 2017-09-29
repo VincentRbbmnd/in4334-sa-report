@@ -4,4 +4,4 @@
 
 ## Run instructions
 
-- run `./crawler -ghkey %GITHUB_API_KEY%`
+- run `./crawler -ghkey %GITHUB_API_KEY% -host 86.67.235.82 -user %USER% -pass %pass%`

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	ghmodels "github.com/VincentRbbmnd/in4334-sa-report/github-repo-crawler/models"
+	ghmodels "github.com/vincentrbbmnd/in4334-sa-report/github-repo-crawler/models"
 
 	"github.com/jinzhu/gorm"
 )
@@ -18,10 +18,11 @@ func initDatabase(logMode bool) {
 	}
 	db.LogMode(logMode)
 	db.Exec("CREATE EXTENSION IF NOT EXISTS \"postgis\";")
-	db.AutoMigrate(&ghmodels.User{}, &ghmodels.Location{})
+	db.AutoMigrate(&ghmodels.Star{}, &ghmodels.Repo{}, &ghmodels.User{})
 
+	starDB = ghmodels.NewStarDB(db)
 	userDB = ghmodels.NewUserDB(db)
-	locationDB = ghmodels.NewLocationDB(db)
+	repoDB = ghmodels.NewRepoDB(db)
 
 	db.DB().SetMaxOpenConns(50)
 }
@@ -58,7 +59,7 @@ func InitDatabase() (*gorm.DB, error) {
 	fmt.Println("DB User: " + *dbUser)
 	fmt.Println("GHKey: ", *githubAPIKey)
 
-	url := fmt.Sprintf("dbname=%s user=%s password=%s sslmode=disable port=%d host=%s", *dbName, *dbUser, *dbPass, 8082, *dbHost)
+	url := fmt.Sprintf("dbname=%s user=%s password=%s sslmode=disable port=%d host=%s", *dbName, *dbUser, *dbPass, 5432, *dbHost)
 
 	return gorm.Open("postgres", url)
 }
