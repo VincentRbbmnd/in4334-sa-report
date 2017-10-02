@@ -1,0 +1,271 @@
+basePath: /v1
+consumes:
+- application/json
+- application/x-www-form-urlencoded
+definitions:
+  Commit:
+    description: Commit data (default view)
+    example:
+      author:
+        id: 5.4301856e+18
+        location:
+          id: 1.1409709e+18
+          lat: Cum accusantium sit.
+          lng: Esse maiores sit.
+        login: Consequatur eos atque similique.
+        type: Consectetur sunt asperiores dolor necessitatibus quasi suscipit.
+      id: 8.348355e+18
+      message: Soluta natus doloribus.
+      sha: Sint cupiditate ratione.
+      timestamp: 1978-06-20T04:46:16+02:00
+    properties:
+      author:
+        $ref: '#/definitions/Ghuser'
+      id:
+        description: ID of the commit in the database
+        example: 8.348355e+18
+        format: int64
+        type: integer
+      message:
+        description: Message of the commit
+        example: Soluta natus doloribus.
+        type: string
+      sha:
+        description: Unique identifier of the commit
+        example: Sint cupiditate ratione.
+        type: string
+      timestamp:
+        description: Time the commit happened
+        example: 1978-06-20T04:46:16+02:00
+        format: date-time
+        type: string
+    required:
+    - id
+    - sha
+    - author
+    - timestamp
+    title: 'Mediatype identifier: application/vnd.commit+json; view=default'
+    type: object
+  CommitCollection:
+    description: CommitCollection is the media type for an array of Commit (default
+      view)
+    example:
+    - author:
+        id: 5.4301856e+18
+        location:
+          id: 1.1409709e+18
+          lat: Cum accusantium sit.
+          lng: Esse maiores sit.
+        login: Consequatur eos atque similique.
+        type: Consectetur sunt asperiores dolor necessitatibus quasi suscipit.
+      id: 8.348355e+18
+      message: Soluta natus doloribus.
+      sha: Sint cupiditate ratione.
+      timestamp: 1978-06-20T04:46:16+02:00
+    items:
+      $ref: '#/definitions/Commit'
+    title: 'Mediatype identifier: application/vnd.commit+json; type=collection; view=default'
+    type: array
+  Ghuser:
+    description: GH user data (default view)
+    example:
+      id: 5.4301856e+18
+      location:
+        id: 1.1409709e+18
+        lat: Cum accusantium sit.
+        lng: Esse maiores sit.
+      login: Consequatur eos atque similique.
+      type: Consectetur sunt asperiores dolor necessitatibus quasi suscipit.
+    properties:
+      id:
+        description: ID of the user in the database
+        example: 5.4301856e+18
+        format: int64
+        type: integer
+      location:
+        $ref: '#/definitions/Location'
+      login:
+        description: Unique username of the user
+        example: Consequatur eos atque similique.
+        type: string
+      type:
+        description: Type of the user
+        example: Consectetur sunt asperiores dolor necessitatibus quasi suscipit.
+        type: string
+    required:
+    - id
+    - login
+    - type
+    title: 'Mediatype identifier: application/vnd.ghuser+json; view=default'
+    type: object
+  ListPayload:
+    example:
+      from: 2003-04-07T07:12:11+02:00
+      limit: 3.0971241e+18
+      till: 1994-01-29T15:10:24+01:00
+    properties:
+      from:
+        example: 2003-04-07T07:12:11+02:00
+        format: date-time
+        type: string
+      limit:
+        example: 3.0971241e+18
+        format: int64
+        type: integer
+      till:
+        example: 1994-01-29T15:10:24+01:00
+        format: date-time
+        type: string
+    title: ListPayload
+    type: object
+  Location:
+    description: Location as geocoordinates (default view)
+    example:
+      id: 1.1409709e+18
+      lat: Cum accusantium sit.
+      lng: Esse maiores sit.
+    properties:
+      id:
+        description: ID of the location in the database
+        example: 1.1409709e+18
+        format: int64
+        type: integer
+      lat:
+        description: coordinates lat
+        example: Cum accusantium sit.
+        type: string
+      lng:
+        description: coordinates lng
+        example: Esse maiores sit.
+        type: string
+    required:
+    - id
+    - lat
+    - lng
+    title: 'Mediatype identifier: application/vnd.location+json; view=default'
+    type: object
+  error:
+    description: Error response media type (default view)
+    example:
+      code: invalid_value
+      detail: Value of ID must be an integer
+      id: 3F1FKVRR
+      meta:
+        timestamp: 1.458609e+09
+      status: "400"
+    properties:
+      code:
+        description: an application-specific error code, expressed as a string value.
+        example: invalid_value
+        type: string
+      detail:
+        description: a human-readable explanation specific to this occurrence of the
+          problem.
+        example: Value of ID must be an integer
+        type: string
+      id:
+        description: a unique identifier for this particular occurrence of the problem.
+        example: 3F1FKVRR
+        type: string
+      meta:
+        additionalProperties: true
+        description: a meta object containing non-standard meta-information about
+          the error.
+        example:
+          timestamp: 1.458609e+09
+        type: object
+      status:
+        description: the HTTP status code applicable to this problem, expressed as
+          a string value.
+        example: "400"
+        type: string
+    title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+    type: object
+host: 86.87.235.82:8081
+info:
+  contact:
+    email: rpjproost@gmail.com
+    name: Rick Proost, Wim Spaargaren, Vincent Robbemond
+    url: http://127.0.0.1
+  description: API for retrieving specific data from the github crawler
+  title: Visualization API for github crawler
+  version: ""
+paths:
+  /commits/{commitID}:
+    get:
+      description: Retrieve commit from db
+      operationId: commits#show
+      parameters:
+      - description: Commit ID
+        in: path
+        minimum: 1
+        name: commitID
+        required: true
+        type: integer
+      produces:
+      - application/vnd.goa.error
+      - application/vnd.commit+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Commit'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/error'
+        "404":
+          description: Not Found
+      schemes:
+      - http
+      summary: show commits
+      tags:
+      - commits
+  /commits/list:
+    post:
+      description: Retrieve commits between timespan with users
+      operationId: commits#list
+      parameters:
+      - in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/ListPayload'
+      produces:
+      - application/vnd.goa.error
+      - application/vnd.commit+json; type=collection
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/CommitCollection'
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/error'
+        "404":
+          description: Not Found
+      schemes:
+      - http
+      summary: list commits
+      tags:
+      - commits
+produces:
+- application/json
+- application/xml
+- application/gob
+- application/x-gob
+responses:
+  NoContent:
+    description: No Content
+  NotFound:
+    description: Not Found
+  OK:
+    description: OK
+    schema:
+      $ref: '#/definitions/Commit'
+schemes:
+- http
+swagger: "2.0"
