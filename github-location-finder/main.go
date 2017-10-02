@@ -46,6 +46,10 @@ type GithubUser struct {
 	Location string `json:"location"`
 }
 
+//TODO query updates:
+// UPDATE public.users
+//    SET location_checked=false, location_id=null
+
 func main() {
 	initDatabase(false)
 	var ctx context.Context
@@ -65,26 +69,26 @@ func main() {
 			fmt.Println("Location: ", location)
 			if location == "" {
 				user.LocationChecked = true
-				// err = userDB.Update(ctx, user)
+				err = userDB.Update(ctx, user)
 				if err != nil {
 					panic(err)
 				}
 			} else {
-				// var ctx context.Context
-				// location, err := locationDB.GetByLocationString(ctx, location)
-				// if err != nil {
-				// 	googleLocation := getLocationGoogleForAddress(location)
-				// 	fmt.Println("google loc: ", googleLocation)
-				// 	// locationID, err := locationDB.Add(ctx, googleLocation.Lat, googleLocation.Lng, user.GithubUserID)
-				// 	// if err != nil {
-				// 	// 	panic(err)
-				// 	// }
-				// 	user.LocationID = locationID
-				// } else {
-				// 	user.LocationID = location.ID
-				// }
-				// user.LocationChecked = true
-				// err = userDB.Update(ctx, user)
+				var ctx context.Context
+				locationFromDB, err := locationDB.GetByLocationString(ctx, location)
+				if err != nil {
+					googleLocation := getLocationGoogleForAddress(location)
+					fmt.Println("google loc: ", googleLocation)
+					locationID, err := locationDB.Add(ctx, googleLocation.Lat, googleLocation.Lng, user.GithubUserID)
+					if err != nil {
+						panic(err)
+					}
+					user.LocationID = locationID
+				} else {
+					user.LocationID = locationFromDB.ID
+				}
+				user.LocationChecked = true
+				err = userDB.Update(ctx, user)
 				if err != nil {
 					panic(err)
 				}
