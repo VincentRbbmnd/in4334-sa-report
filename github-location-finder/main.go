@@ -72,7 +72,7 @@ func main() {
 		}
 		for i, user := range users {
 			fmt.Println("Length users for repo: ", repo.FullName, len(users))
-			fmt.Println("user login: ", user.Login, "Number: ", i)
+			fmt.Println("user login: ", user.User.Login, "Number: ", i)
 			fmt.Println(user.ID, "test", user.GithubUserID)
 			location := getUserLocation(user.Login)
 			processUserLocation(location, user)
@@ -80,13 +80,13 @@ func main() {
 	}
 }
 
-func processUserLocation(location string, user *User) {
+func processUserLocation(location string, user *UserContainer) {
 	var ctx context.Context
 
 	fmt.Println("Location: ", location)
 	if location == "" {
 		user.LocationChecked = true
-		err := userDB.Update(ctx, user)
+		err := userDB.Update(ctx, &user.User)
 		if err != nil {
 			panic(err)
 		}
@@ -105,7 +105,7 @@ func processUserLocation(location string, user *User) {
 			user.LocationID = locationFromDB.ID
 		}
 		user.LocationChecked = true
-		err = userDB.Update(ctx, user)
+		err = userDB.Update(ctx, &user.User)
 		if err != nil {
 			panic(err)
 		}

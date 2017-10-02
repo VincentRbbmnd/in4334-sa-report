@@ -107,7 +107,7 @@ type UserContainer struct {
 // ListNoLocationsForRepo lists users for certain repo
 func (m *UserDB) ListNoLocationsForRepo(ctx context.Context, PID int64) []*UserContainer {
 	var res []*UserContainer
-	err := m.Db.Table("repositories").Select("users.id, github_user_id, login").
+	err := m.Db.Scopes().Table("repositories").Select("users.*").
 		Joins(`LEFT JOIN "Commits" ON repository_id = project_id`).
 		Joins(`LEFT JOIN users ON github_user_id = author_id`).
 		Where("(location_checked is null OR location_checked = false) AND project_id = ?", PID).Limit(100).
