@@ -19,6 +19,7 @@ type User struct {
 	Raw             []byte `sql:"type:jsonb"` // This is the RAW JSONB of the metadata of a User
 	LocationChecked bool
 	LocationID      int
+	Stars			[]Star
 }
 
 // TableName overrides the table name settings in Gorm to force a specific table name
@@ -90,7 +91,7 @@ func (m *UserDB) List(ctx context.Context) ([]*User, error) {
 func (m *UserDB) ListNoLocations(ctx context.Context) ([]*User, error) {
 
 	var objs []*User
-	err := m.Db.Table(m.TableName()).Select("id,github_user_id,login").Where("location_checked is null").Limit(1000).Find(&objs).Error
+	err := m.Db.Table(m.TableName()).Select("id,github_user_id,login").Where("location_checked is null OR location_checked = false").Limit(1000).Find(&objs).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}

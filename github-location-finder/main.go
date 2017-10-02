@@ -6,18 +6,19 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
-	ghmodels "github.com/VincentRbbmnd/in4334-sa-report/github-repo-crawler/models"
+	. "github.com/VincentRbbmnd/in4334-sa-report/github-repo-crawler/models"
 	"github.com/jinzhu/gorm"
 
 	_ "github.com/lib/pq"
 )
 
 var db *gorm.DB
-var userDB *ghmodels.UserDB
-var locationDB *ghmodels.LocationDB
+var userDB *UserDB
+var locationDB *LocationDB
 
 var githubAPIKey *string
 
@@ -40,51 +41,48 @@ type LocationGoogle struct {
 	Lng float64 `json:"lng"`
 }
 
-type User struct {
-	ID  int
-	Raw GithubUser
-}
-
 type GithubUser struct {
 	Location string `json:"location"`
 }
 
 func main() {
-	initDatabase(true)
+	initDatabase(false)
 	var ctx context.Context
-
-	users, err := userDB.ListNoLocations(ctx)
-	if err != nil {
-		panic(err)
-	}
-	for i, user := range users {
-		fmt.Println("user login: ", user.Login)
-		location := getUserLocation(user.Login)
-		fmt.Println(location)
-		if location == "" {
-			user.LocationChecked = true
-			err = userDB.Update(ctx, user)
-			if err != nil {
-				panic(err)
-			}
-		} else {
-			googleLocation := getLocationGoogleForAddress(location)
-			locationID, err := locationDB.Add(ctx, googleLocation.Lat, googleLocation.Lng, user.GithubUserID)
-			if err != nil {
-				panic(err)
-			}
-			user.LocationID = locationID
-			user.LocationChecked = true
-			err = userDB.Update(ctx, user)
-			if err != nil {
-				panic(err)
+	sum := 1
+	for sum < 1000 {
+		users, err := userDB.ListNoLocations(ctx)
+		if err != nil {
+			panic(err)
+		}
+		if len(users) == 0 {
+			fmt.Println("No users found sleepy time for half an hour")
+			time.Sleep(time.Minute * 30)
+		}
+		for _, user := range users {
+			fmt.Println("user login: ", user.Login)
+			location := getUserLocation(user.Login)
+			fmt.Println(location)
+			if location == "" {
+				user.LocationChecked = true
+				err = userDB.Update(ctx, user)
+				if err != nil {
+					panic(err)
+				}
+			} else {
+				googleLocation := getLocationGoogleForAddress(location)
+				locationID, err := locationDB.Add(ctx, googleLocation.Lat, googleLocation.Lng, user.GithubUserID)
+				if err != nil {
+					panic(err)
+				}
+				user.LocationID = locationID
+				user.LocationChecked = true
+				err = userDB.Update(ctx, user)
+				if err != nil {
+					panic(err)
+				}
 			}
 		}
 
-		//TODO remove
-		if i == 2 {
-			break
-		}
 	}
 
 }
@@ -116,13 +114,17 @@ func githubAPICall(url string, method string, payload *interface{}) *http.Respon
 	rate := resp.Header.Get("x-ratelimit-remaining")
 	if rate == "0" {
 		rateLimitReset := resp.Header.Get("x-ratelimit-reset")
-		resetTime, err := time.Parse(time.RFC3339, rateLimitReset)
+
+		i, err := strconv.ParseInt(rateLimitReset, 10, 64)
 		if err != nil {
 			panic(err)
 		}
-		duration := resetTime.Sub(time.Now())
-		fmt.Println("Sleepy time till rate limit reset")
+		tm := time.Unix(i, 0)
+		duration := tm.Sub(time.Now().Add(-time.Minute * time.Duration(1)))
+		fmt.Println("Sleepy time till rate limit reset. Minutes:", duration.Minutes())
+		fmt.Println("Going back to work at: ", tm.String())
 		time.Sleep(duration)
+		return githubAPICall(url, method, payload)
 	}
 	fmt.Println("X-ratelimit-remaining: ", rate)
 	return resp
@@ -148,7 +150,7 @@ func getLocationGoogleForAddress(address string) LocationGoogle {
 	if len(googleAddress.Results) == 0 {
 		return LocationGoogle
 	}
-	fmt.Println("HIii", googleAddress)
+	fmt.Println("Google address: ", googleAddress)
 	return googleAddress.Results[0].Geometry.LocationGoogle
 }
 

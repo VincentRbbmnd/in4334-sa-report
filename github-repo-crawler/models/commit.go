@@ -89,10 +89,10 @@ func (m *CommitDB) List(ctx context.Context) ([]*Commit, error) {
 // Add creates a new record.
 func (m *CommitDB) Add(ctx context.Context, model *Commit) error {
 
-	m.Db.Create(model)
-	// if err != nil {
-	// 	return err
-	// }
+	err := m.Db.Create(model).Error
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

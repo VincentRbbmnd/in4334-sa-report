@@ -11,6 +11,25 @@ import (
 	"./models"
 )
 
+func githubAPICallStarMediaType(url string, method string, payload *interface{}) *http.Response {
+	req, err := http.NewRequest(method, url, nil)
+	req.Header.Add("Authorization", "token "+*githubAPIKey)
+	req.Header.Add("Accept", "application/vnd.github.v3.star+json")
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println("error getting github repos", err)
+	}
+	rate := resp.Header.Get("x-ratelimit-remaining")
+	if rate == "0" {
+		return handleRateLimitExceeded(resp, url, method, payload)
+	}
+	fmt.Println("X-ratelimit-remaining: ", rate)
+	rateInt, _ := strconv.Atoi(rate)
+	rateLimit = rateInt
+	return resp
+}
+
 func githubAPICall(url string, method string, payload *interface{}) *http.Response {
 	req, err := http.NewRequest(method, url, nil)
 	req.Header.Add("Authorization", "token "+*githubAPIKey)
@@ -21,19 +40,27 @@ func githubAPICall(url string, method string, payload *interface{}) *http.Respon
 	}
 	rate := resp.Header.Get("x-ratelimit-remaining")
 	if rate == "0" {
-		rateLimitReset := resp.Header.Get("x-ratelimit-reset")
-		resetTime, err := time.Parse(time.RFC3339, rateLimitReset)
-		if err != nil {
-			panic(err)
-		}
-		duration := resetTime.Sub(time.Now())
-		fmt.Println("Sleepy time till rate limit reset")
-		time.Sleep(duration)
+		return handleRateLimitExceeded(resp, url, method, payload)
 	}
 	fmt.Println("X-ratelimit-remaining: ", rate)
 	rateInt, _ := strconv.Atoi(rate)
 	rateLimit = rateInt
 	return resp
+}
+
+func handleRateLimitExceeded(resp *http.Response, url string, method string, payload *interface{}) *http.Response {
+	rateLimitReset := resp.Header.Get("x-ratelimit-reset")
+
+	i, err := strconv.ParseInt(rateLimitReset, 10, 64)
+	if err != nil {
+		panic(err)
+	}
+	tm := time.Unix(i, 0)
+	duration := tm.Sub(time.Now().Add(-time.Minute * time.Duration(1)))
+	fmt.Println("Sleepy time till rate limit reset. Minutes:", duration.Minutes())
+	fmt.Println("Going back to work at: ", tm.String())
+	time.Sleep(duration)
+	return githubAPICall(url, method, payload)
 }
 
 func checkHowFarIWas(crawlType string) (int, error) {

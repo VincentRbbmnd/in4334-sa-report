@@ -18,12 +18,14 @@ func initDatabase(logMode bool) {
 	}
 	db.LogMode(logMode)
 	db.Exec("CREATE EXTENSION IF NOT EXISTS \"postgis\";")
-	db.AutoMigrate(&models.Repo{}, &models.User{}, &models.Remaining{}, &models.Commit{})
+	db.AutoMigrate(&models.Repo{}, &models.User{}, &models.Remaining{}, &models.Commit{}, &models.Star{})
+	db.Model(&models.User{}).AddUniqueIndex("idx_user_login", "login")
 
 	repoDB = models.NewRepoDB(db)
 	userDB = models.NewUserDB(db)
 	commitDB = models.NewCommitDB(db)
 	remainingDB = models.NewRemainingDB(db)
+	starDB = models.NewStarDB(db)
 
 	db.DB().SetMaxOpenConns(50)
 }
@@ -58,9 +60,10 @@ func InitDatabase() (*gorm.DB, error) {
 	fmt.Println("DB HOST: " + *dbHost)
 	fmt.Println("DB Name: " + *dbName)
 	fmt.Println("DB User: " + *dbUser)
+	fmt.Println("DB Pass: " + *dbPass)
 	fmt.Println("GHKey: ", *githubAPIKey)
 
-	url := fmt.Sprintf("dbname=%s user=%s password=%s sslmode=disable port=%d host=%s", *dbName, *dbUser, *dbPass, 5432, *dbHost)
+	url := fmt.Sprintf("dbname=%s user=%s password=%s sslmode=disable port=%d host=%s", *dbName, *dbUser, *dbPass, 8082, *dbHost)
 
 	return gorm.Open("postgres", url)
 }
