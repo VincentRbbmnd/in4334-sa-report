@@ -23,8 +23,9 @@ var locationDB *LocationDB
 var githubAPIKey *string
 
 type GoogleAddresses struct {
-	Results []GoogleAddress `json:"results"`
-	Status  string          `json:"status"`
+	Results      []GoogleAddress `json:"results"`
+	Status       string          `json:"status"`
+	ErrorMessage string          `json:"error_message"`
 }
 
 type GoogleAddress struct {
@@ -61,22 +62,29 @@ func main() {
 		for _, user := range users {
 			fmt.Println("user login: ", user.Login)
 			location := getUserLocation(user.Login)
-			fmt.Println(location)
+			fmt.Println("Location: ", location)
 			if location == "" {
 				user.LocationChecked = true
-				err = userDB.Update(ctx, user)
+				// err = userDB.Update(ctx, user)
 				if err != nil {
 					panic(err)
 				}
 			} else {
-				googleLocation := getLocationGoogleForAddress(location)
-				locationID, err := locationDB.Add(ctx, googleLocation.Lat, googleLocation.Lng, user.GithubUserID)
-				if err != nil {
-					panic(err)
-				}
-				user.LocationID = locationID
-				user.LocationChecked = true
-				err = userDB.Update(ctx, user)
+				// var ctx context.Context
+				// location, err := locationDB.GetByLocationString(ctx, location)
+				// if err != nil {
+				// 	googleLocation := getLocationGoogleForAddress(location)
+				// 	fmt.Println("google loc: ", googleLocation)
+				// 	// locationID, err := locationDB.Add(ctx, googleLocation.Lat, googleLocation.Lng, user.GithubUserID)
+				// 	// if err != nil {
+				// 	// 	panic(err)
+				// 	// }
+				// 	user.LocationID = locationID
+				// } else {
+				// 	user.LocationID = location.ID
+				// }
+				// user.LocationChecked = true
+				// err = userDB.Update(ctx, user)
 				if err != nil {
 					panic(err)
 				}
@@ -131,9 +139,10 @@ func githubAPICall(url string, method string, payload *interface{}) *http.Respon
 }
 
 func getLocationGoogleForAddress(address string) LocationGoogle {
-	var LocationGoogle LocationGoogle
+	// var LocationGoogle LocationGoogle
 
-	url := "https://maps.googleapis.com/maps/api/geocode/json?address=" + strings.Replace(address, " ", "", -1) + "&key=AIzaSyAEn3y2FmCPpqYcc9RfonF8Zw3sbX3PZoM"
+	url := "https://maps.googleapis.com/maps/api/geocode/json?address=" + strings.Replace(address, " ", "", -1) + "&key=AIzaSyDpy6APeHM3X1JVqdOyuNkZqOS242e8ij8"
+	fmt.Println("API CALL : ", url)
 	resp := googleAPICall(url)
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -144,11 +153,13 @@ func getLocationGoogleForAddress(address string) LocationGoogle {
 	var googleAddress GoogleAddresses
 	err = json.Unmarshal(body, &googleAddress)
 	if err != nil {
-		fmt.Println("ADDRESS: ", address)
-		return LocationGoogle
+		panic(err)
+	}
+	if googleAddress.ErrorMessage != "" {
+		panic(googleAddress.ErrorMessage)
 	}
 	if len(googleAddress.Results) == 0 {
-		return LocationGoogle
+		panic("AAAH")
 	}
 	fmt.Println("Google address: ", googleAddress)
 	return googleAddress.Results[0].Geometry.LocationGoogle

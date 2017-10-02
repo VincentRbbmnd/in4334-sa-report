@@ -29,10 +29,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         top: 0;
         left: 0;
         right: 0;
+        bottom: 0;
       }
     </style>
 
-    <google-map id="map" map="{{map}}" latitude="52.000692" longitude="4.365242" api-key="AIzaSyBFRdnjO9WVvl3Voqj84bLvVMVIjDfBjlk">
+    <google-map disable-default-ui id="map" map="{{map}}" latitude="0" longitude="0" zoom="2" api-key="AIzaSyBFRdnjO9WVvl3Voqj84bLvVMVIjDfBjlk">
       <dom-repeat id="userMarkers" items="{{users}}" as="user">
         <template>
           <google-map-marker latitude="{{user.lat}}" longitude="{{user.lon}}"></google-map-marker>
@@ -50,11 +51,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         return {
           users: {
             type: Object,
-            value: [{ lat: 52.0, lon: 4.36 }, { lat: 52.1, lon: 4.37 }]
+            value: [{ lat: 52.0, lon: 4.36 }, { lat: 52.1, lon: 4.37 }],
+            observer: 'addLines'
           },
           map: {
             type: Object,
             notify: true
+          },
+          apiLoaded: {
+            type: Boolean,
+            notify: true,
+            value: false
           }
 
         };
@@ -64,6 +71,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         super.ready();
 
         document.addEventListener('api-load', (e) => {
+          this.apiLoaded = true;
           this.addLines();
         }, {
             once: true
@@ -71,6 +79,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       addLines() {
+        console.log("api loaded: ", this.apiLoaded);
+        if(!this.apiLoaded){
+          return;
+        }
         for (var i = 0; i < this.users.length; i++) {
 
         }
@@ -81,11 +93,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var flightPath = new google.maps.Polyline({
           path: flightPlanCoordinates,
           geodesic: true,
-          strokeColor: '#FF0000',
+          strokeColor: '#3423A6',
           strokeOpacity: 1.0,
           strokeWeight: 2
         });
-        console.log("flgithPath", flightPath);
         flightPath.setMap(this.map);
       }
     }

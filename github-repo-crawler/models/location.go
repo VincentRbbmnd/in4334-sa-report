@@ -8,9 +8,10 @@ import (
 
 // Location struct for Locationsitory in DB
 type Location struct {
-	ID     int    `gorm:"primary_key"` // primary key
-	Point  string `sql:"type:geometry(Point,4326)"`
-	UserID int64
+	ID             int `gorm:"primary_key"` // primary key
+	LocationString string
+	Point          string `sql:"type:geometry(Point,4326)"`
+	UserID         int64
 }
 
 // TableName overrides the table name settings in Gorm to force a specific table name
@@ -48,6 +49,17 @@ func (m *LocationDB) Get(ctx context.Context, id int) (*Location, error) {
 
 	var native Location
 	err := m.Db.Table(m.TableName()).Where("id = ?", id).Find(&native).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil, err
+	}
+
+	return &native, err
+}
+
+func (m *LocationDB) GetByLocationString(ctx context.Context, locationString string) (*Location, error) {
+
+	var native Location
+	err := m.Db.Table(m.TableName()).Where("location_string = ?", locationString).Find(&native).Error
 	if err == gorm.ErrRecordNotFound {
 		return nil, err
 	}
