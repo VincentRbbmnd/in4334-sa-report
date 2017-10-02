@@ -19,7 +19,7 @@ func NewCommitsController(service *goa.Service) *CommitsController {
 // List runs the list action.
 func (c *CommitsController) List(ctx *app.ListCommitsContext) error {
 	// CommitsController_List: start_implement
-	commitDB.ListCommitWithUsersWithLocationForRepo(ctx, 13491895, ctx.Payload.From, ctx.Payload.Till, *ctx.Payload.Limit)
+	commitDB.ListCommitWithUsersWithLocationForRepo(ctx, 2325298, ctx.Payload.From, ctx.Payload.Till, *ctx.Payload.Limit)
 	// CommitsController_List: end_implement
 	res := app.CommitCollection{}
 	return ctx.OK(res)
