@@ -22,6 +22,8 @@ func initDatabase(logMode bool) {
 
 	userDB = ghmodels.NewUserDB(db)
 	locationDB = ghmodels.NewLocationDB(db)
+	repoDB = ghmodels.NewRepoDB(db)
+	commitDB = ghmodels.NewCommitDB(db)
 
 	db.DB().SetMaxOpenConns(50)
 }

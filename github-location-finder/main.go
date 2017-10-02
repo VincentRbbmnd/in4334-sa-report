@@ -19,6 +19,8 @@ import (
 var db *gorm.DB
 var userDB *UserDB
 var locationDB *LocationDB
+var repoDB *RepoDB
+var commitDB *CommitDB
 
 var githubAPIKey *string
 
@@ -53,8 +55,15 @@ type GithubUser struct {
 func main() {
 	initDatabase(false)
 	var ctx context.Context
-	sum := 1
-	for sum < 1000 {
+	repos, err := repoDB.List(ctx)
+	if err != nil {
+		panic(err)
+	}
+	for _, repo := range repos {
+		fmt.Println("repo: ", repo)
+		//TODO use repo to get users
+		//commitDB get commits where repo = current repo
+		//Join with users op author id where locationchecked = false
 		users, err := userDB.ListNoLocations(ctx)
 		if err != nil {
 			panic(err)
@@ -66,37 +75,41 @@ func main() {
 		for _, user := range users {
 			fmt.Println("user login: ", user.Login)
 			location := getUserLocation(user.Login)
-			fmt.Println("Location: ", location)
-			if location == "" {
-				user.LocationChecked = true
-				err = userDB.Update(ctx, user)
-				if err != nil {
-					panic(err)
-				}
-			} else {
-				var ctx context.Context
-				locationFromDB, err := locationDB.GetByLocationString(ctx, location)
-				if err != nil {
-					googleLocation := getLocationGoogleForAddress(location)
-					fmt.Println("google loc: ", googleLocation)
-					locationID, err := locationDB.Add(ctx, googleLocation.Lat, googleLocation.Lng, user.GithubUserID)
-					if err != nil {
-						panic(err)
-					}
-					user.LocationID = locationID
-				} else {
-					user.LocationID = locationFromDB.ID
-				}
-				user.LocationChecked = true
-				err = userDB.Update(ctx, user)
-				if err != nil {
-					panic(err)
-				}
-			}
+			processUserLocation(location, user)
 		}
-
 	}
+}
 
+func processUserLocation(location string, user *User) {
+	var ctx context.Context
+
+	fmt.Println("Location: ", location)
+	if location == "" {
+		user.LocationChecked = true
+		err := userDB.Update(ctx, user)
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		var ctx context.Context
+		locationFromDB, err := locationDB.GetByLocationString(ctx, location)
+		if err != nil {
+			googleLocation := getLocationGoogleForAddress(location)
+			fmt.Println("google loc: ", googleLocation)
+			locationID, err := locationDB.Add(ctx, googleLocation.Lat, googleLocation.Lng, user.GithubUserID)
+			if err != nil {
+				panic(err)
+			}
+			user.LocationID = locationID
+		} else {
+			user.LocationID = locationFromDB.ID
+		}
+		user.LocationChecked = true
+		err = userDB.Update(ctx, user)
+		if err != nil {
+			panic(err)
+		}
+	}
 }
 
 func getUserLocation(login string) string {
