@@ -100,9 +100,13 @@ func (m *UserDB) ListNoLocations(ctx context.Context) ([]*User, error) {
 	return objs, nil
 }
 
+type UserContainer struct {
+	User
+}
+
 // ListNoLocationsForRepo lists users for certain repo
-func (m *UserDB) ListNoLocationsForRepo(ctx context.Context, PID int64) []*User {
-	var res []*User
+func (m *UserDB) ListNoLocationsForRepo(ctx context.Context, PID int64) []*UserContainer {
+	var res []*UserContainer
 	err := m.Db.Table("repositories").Select("users.id, github_user_id, login").
 		Joins(`LEFT JOIN "Commits" ON repository_id = project_id`).
 		Joins(`LEFT JOIN users ON github_user_id = author_id`).

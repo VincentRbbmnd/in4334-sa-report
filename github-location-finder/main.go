@@ -60,7 +60,7 @@ func main() {
 		panic(err)
 	}
 	for _, repo := range repos {
-		fmt.Println("repo: ", repo)
+		fmt.Println("repo: ", repo.FullName)
 		users := userDB.ListNoLocationsForRepo(ctx, repo.ProjectID)
 		// users, err := userDB.ListNoLocations(ctx)
 		// if err != nil {
@@ -70,8 +70,10 @@ func main() {
 			fmt.Println("No users found sleepy time for half an hour")
 			time.Sleep(time.Minute * 30)
 		}
-		for _, user := range users {
-			fmt.Println("user login: ", user.Login)
+		for i, user := range users {
+			fmt.Println("Length users for repo: ", repo.FullName, len(users))
+			fmt.Println("user login: ", user.Login, "Number: ", i)
+			fmt.Println(user.ID, "test", user.GithubUserID)
 			location := getUserLocation(user.Login)
 			processUserLocation(location, user)
 		}
