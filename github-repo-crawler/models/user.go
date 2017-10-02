@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -19,7 +20,7 @@ type User struct {
 	Raw             []byte `sql:"type:jsonb"` // This is the RAW JSONB of the metadata of a User
 	LocationChecked bool
 	LocationID      int
-	Stars			[]Star
+	Stars           []Star
 }
 
 // TableName overrides the table name settings in Gorm to force a specific table name
@@ -97,6 +98,24 @@ func (m *UserDB) ListNoLocations(ctx context.Context) ([]*User, error) {
 	}
 
 	return objs, nil
+}
+
+// ListNoLocationsForRepo lists users for certain repo
+func (m *UserDB) ListNoLocationsForRepo(ctx context.Context, PID int) []*User {
+	var res []*User
+	err := m.Db.Table("repositories").Select("id, github_user_id, login").
+		Joins(`LEFT JOIN "Commits" ON repository_id = project_id`).
+		Joins(`LEFT JOIN users ON github_user_id = author_id`).
+		Where("(location_checked is null OR location_checked = false) AND project_id = ?", PID).Limit(100).
+		Find(&res).Error
+	if err != nil {
+		fmt.Println("Wat is aan die handje", err)
+		return res
+	}
+	return res
+	//TODO use repo to get users
+	//commitDB get commits where repo = current repo
+	//Join with users op author id where locationchecked = false
 }
 
 // Add creates a new record.

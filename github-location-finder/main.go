@@ -61,13 +61,11 @@ func main() {
 	}
 	for _, repo := range repos {
 		fmt.Println("repo: ", repo)
-		//TODO use repo to get users
-		//commitDB get commits where repo = current repo
-		//Join with users op author id where locationchecked = false
-		users, err := userDB.ListNoLocations(ctx)
-		if err != nil {
-			panic(err)
-		}
+		users := userDB.ListNoLocationsForRepo(ctx, repo.ProjectID)
+		// users, err := userDB.ListNoLocations(ctx)
+		// if err != nil {
+		// 	panic(err)
+		// }
 		if len(users) == 0 {
 			fmt.Println("No users found sleepy time for half an hour")
 			time.Sleep(time.Minute * 30)
