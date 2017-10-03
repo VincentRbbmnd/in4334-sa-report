@@ -64,9 +64,11 @@ func main() {
 	for 1 < 2 {
 		fmt.Println("repo: ", repos[counter].FullName)
 		users := userDB.ListNoLocationsForRepo(ctx, repos[counter].ProjectID)
-		if len(users) == 0 {
+		if len(users) == 1 {
 			counter++
+			break
 		}
+		fmt.Println("Users this time: ", len(users))
 		for _, user := range users {
 			location := getUserLocation(user.Login)
 			processUserLocation(location, user)
