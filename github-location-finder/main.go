@@ -24,6 +24,7 @@ var repoDB *RepoDB
 var commitDB *CommitDB
 
 var githubAPIKey *string
+var GKEY *string
 
 type GoogleAddresses struct {
 	Results      []GoogleAddress `json:"results"`
@@ -66,10 +67,10 @@ func main() {
 		users := userDB.ListNoLocationsForRepo(ctx, repos[counter].ProjectID)
 		if len(users) == 1 {
 			counter++
-			break
 		}
 		fmt.Println("Users this time: ", len(users))
 		for _, user := range users {
+			fmt.Println(user.ID, user.Login)
 			location := getUserLocation(user.Login)
 			processUserLocation(location, user)
 		}
@@ -159,7 +160,7 @@ func githubAPICall(url string, method string, payload *interface{}) *http.Respon
 func getLocationGoogleForAddress(address string) (LocationGoogle, error) {
 	var locationGoogle LocationGoogle
 
-	url := "https://maps.googleapis.com/maps/api/geocode/json?address=" + strings.Replace(address, " ", "", -1) + "&key=AIzaSyDpy6APeHM3X1JVqdOyuNkZqOS242e8ij8"
+	url := "https://maps.googleapis.com/maps/api/geocode/json?address=" + strings.Replace(address, " ", "", -1) + "&key=" + *GKEY
 	fmt.Println("GOOGLE PLACES API CALL : ", url)
 	resp := googleAPICall(url)
 	body, err := ioutil.ReadAll(resp.Body)

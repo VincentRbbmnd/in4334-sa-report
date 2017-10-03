@@ -110,7 +110,7 @@ func (m *UserDB) ListNoLocationsForRepo(ctx context.Context, PID int64) []*UserC
 	err := m.Db.Scopes().Table("repositories").Select("users.*").
 		Joins(`LEFT JOIN "Commits" ON repository_id = project_id`).
 		Joins(`LEFT JOIN users ON github_user_id = author_id`).
-		Where("(location_checked is null OR location_checked = false) AND project_id = ?", PID).Group("users.id").Limit(100).
+		Where("(location_checked is null OR location_checked = false) AND project_id = ? AND users.id IS NOT NULL", PID).Group("users.id").Limit(100).
 		Find(&res).Error
 	if err != nil {
 		fmt.Println("Wat is aan die handje", err)
