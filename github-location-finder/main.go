@@ -59,19 +59,16 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	for _, repo := range repos {
-		fmt.Println("repo: ", repo.FullName)
-		users := userDB.ListNoLocationsForRepo(ctx, repo.ProjectID)
-		// users, err := userDB.ListNoLocations(ctx)
-		// if err != nil {
-		// 	panic(err)
-		// }
+	counter := 0
+	for 1 < 2 {
+		fmt.Println("repo: ", repos[counter].FullName)
+		users := userDB.ListNoLocationsForRepo(ctx, repos[counter].ProjectID)
+
 		if len(users) == 0 {
-			fmt.Println("No users found sleepy time for half an hour")
-			time.Sleep(time.Minute * 30)
+
 		}
 		for i, user := range users {
-			fmt.Println("Length users for repo: ", repo.FullName, len(users))
+			fmt.Println("Length users for repo: ", repos[counter].FullName, len(users))
 			fmt.Println("user login: ", user.User.Login, "Number: ", i)
 			fmt.Println(user.ID, "test", user.GithubUserID)
 			location := getUserLocation(user.Login)
@@ -96,7 +93,7 @@ func processUserLocation(location string, user *UserContainer) {
 		if err != nil {
 			googleLocation := getLocationGoogleForAddress(location)
 			fmt.Println("google loc: ", googleLocation)
-			locationID, err := locationDB.Add(ctx, googleLocation.Lat, googleLocation.Lng, user.GithubUserID)
+			locationID, err := locationDB.Add(ctx, googleLocation.Lat, googleLocation.Lng, user.GithubUserID, location)
 			if err != nil {
 				panic(err)
 			}

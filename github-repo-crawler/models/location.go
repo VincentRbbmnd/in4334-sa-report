@@ -80,11 +80,11 @@ func (m *LocationDB) List(ctx context.Context) ([]*Location, error) {
 }
 
 // Add creates a new record.
-func (m *LocationDB) Add(ctx context.Context, lat float64, lng float64, userID int64) (int, error) {
-	query := `INSERT INTO locations (point,user_id)`
-	query += ` VALUES (ST_SetSRID(ST_MakePoint(?,?),4326),?) RETURNING id`
+func (m *LocationDB) Add(ctx context.Context, lat float64, lng float64, userID int64, locationString string) (int, error) {
+	query := `INSERT INTO locations (point,user_id,location_string)`
+	query += ` VALUES (ST_SetSRID(ST_MakePoint(?,?),4326),?,?) RETURNING id`
 	var loc Location
-	err := m.Db.Raw(query, lat, lng, userID).Scan(&loc).Error
+	err := m.Db.Raw(query, lat, lng, userID, locationString).Scan(&loc).Error
 	if err != nil {
 		return 0, err
 	}
