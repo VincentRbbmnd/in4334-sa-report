@@ -5,9 +5,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github-crawler-api/app"
-	"github-crawler-api/models"
 	"os"
+
+	"github.com/VincentRbbmnd/in4334-sa-report/github-crawler-api/app"
+	"github.com/VincentRbbmnd/in4334-sa-report/github-crawler-api/models"
 
 	"github.com/goadesign/goa"
 	"github.com/goadesign/goa/middleware"
@@ -87,7 +88,7 @@ func InitDatabase() (*gorm.DB, error) {
 	fmt.Println("DB User: " + *dbUser)
 	fmt.Println("GHKey: ", *githubAPIKey)
 
-	url := fmt.Sprintf("dbname=%s user=%s password=%s sslmode=disable port=%d host=%s", *dbName, *dbUser, *dbPass, 8082, *dbHost)
+	url := fmt.Sprintf("dbname=%s user=%s password=%s sslmode=disable port=%d host=%s", *dbName, *dbUser, *dbPass, 5432, *dbHost)
 
 	return gorm.Open("postgres", url)
 }

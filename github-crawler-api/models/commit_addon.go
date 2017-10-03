@@ -2,9 +2,9 @@ package models
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-	"github-crawler-api/app"
+
+	"github.com/VincentRbbmnd/in4334-sa-report/github-crawler-api/app"
+
 	"time"
 
 	"github.com/goadesign/goa"
@@ -18,7 +18,7 @@ type CommitWithEverything struct {
 	Sha        string
 	ParentSha  string
 	Lat        float64
-	Lon        float64
+	Lng        float64
 	LocationID int
 }
 
@@ -29,7 +29,7 @@ type ParentCommit struct {
 }
 
 // ListCommitWithUsersWithLocationForRepo returns an array of view: default.
-func (m *CommitDB) ListCommitWithUsersWithLocationForRepo(ctx context.Context, repoID int, from *time.Time, till *time.Time, limit int) []*app.Commit {
+func (m *CommitDB) ListCommitWithUsersWithLocationForRepo(ctx context.Context, repoID int, from *time.Time, till *time.Time, limit int) app.CommitCollection {
 	defer goa.MeasureSince([]string{"goa", "db", "commit", "listcommit"}, time.Now())
 	var objs []*app.Commit
 
@@ -40,7 +40,7 @@ func (m *CommitDB) ListCommitWithUsersWithLocationForRepo(ctx context.Context, r
 
 	var native []*CommitWithEverything
 	err := m.Db.Scopes().Table("repositories").
-		Select(`users.*, location_id, commit_date, sha, "Commits".raw#>'{parents}' as parent, ST_Y(point) as lat, ST_X(point) as lon`).
+		Select(`users.login,users.type, location_id, commit_date, sha, ST_X(point) as lat, ST_Y(point) as lng`).
 		Joins(`LEFT JOIN "Commits" on repository_id = repositories.project_id`).
 		Joins(`LEFT JOIN users on github_user_id = author_id`).
 		Joins(`LEFT JOIN locations on locations.id = location_id`).
@@ -53,21 +53,16 @@ func (m *CommitDB) ListCommitWithUsersWithLocationForRepo(ctx context.Context, r
 		goa.LogError(ctx, "error listing Commit", "error", err.Error())
 		return objs
 	}
+
+	var list app.CommitCollection
 	for _, t := range native {
-		var pList ParentCommitList
-		err := json.Unmarshal(t.Parent, &pList)
-		if err != nil {
-			fmt.Println("Unmarshall went wrong for parentcommit list", err)
-		}
-		if len(pList) > 0 {
-			t.ParentSha = pList[0].Sha
-		}
-		fmt.Println("Current sha: ", t.Sha)
-		fmt.Println("Parent sha: ", t.ParentSha)
-		fmt.Println("loc", t.Lat)
-		fmt.Println("location id", t.LocationID)
-		// objs = append(objs, t.CommitToCommit())
+		commit := app.Commit{}
+		commit.Sha = t.Sha
+		loc := &app.Location{Lat: t.Lat, Lng: t.Lng}
+		commit.Author = &app.Ghuser{ID: t.User.ID, Location: loc, Login: t.User.Login, Type: t.User.Type}
+		commit.Timestamp = t.CommitDate
+		list = append(list, &commit)
 	}
 
-	return objs
+	return list
 }
