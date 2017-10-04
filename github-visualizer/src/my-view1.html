@@ -12,7 +12,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="../bower_components/google-map/google-map.html">
 <link rel="import" href="../bower_components/google-apis/google-maps-api.html">
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/OverlappingMarkerSpiderfier/1.0.3/oms.min.js"></script>
+<script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
 
 <dom-module id="my-view1">
   <template>
@@ -34,13 +35,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
 
     <google-map disable-default-ui id="map" map="{{map}}" latitude="0" longitude="0" zoom="2" api-key="AIzaSyBFRdnjO9WVvl3Voqj84bLvVMVIjDfBjlk">
-      <dom-repeat id="userMarkers" items="{{users}}" as="user">
-        <template>
-          <google-map-marker latitude="{{user.author.location.lat}}" longitude="{{user.author.location.lng}}">
-            {{user.author.login}}
-          </google-map-marker>
-        </template>
-      </dom-repeat>
     </google-map>
   </template>
 
@@ -50,10 +44,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       static get properties() {
         return {
-          users: {
+          commits: {
             type: Object,
             value: [],
-            observer: 'addLines'
+            observer: 'commitsChanged'
           },
           map: {
             type: Object,
@@ -63,8 +57,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Boolean,
             notify: true,
             value: false
+          },
+          from: {
+            type: String,
+            notify: true
+          },
+          till:{
+            type: String,
+            notify: true
           }
-
         };
       }
 
@@ -73,13 +74,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.getCommits();
         document.addEventListener('api-load', (e) => {
           this.apiLoaded = true;
-          this.addLines();
+          this.commitsChanged();
         }, {
             once: true
           });
       }
 
       getCommits() {
+        console.log("this: ', thi", new Date(this.from));
+        console.log("this: ', till",new Date(this.till));
         fetch('http://localhost:8081/v1/commits/list', {
           method: 'post',
           headers: {
@@ -87,31 +90,68 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            "from": "2012-04-23T18:25:43.511Z",
-            "till": "2017-10-03T18:25:43.511Z",
+            "from": new Date(this.from),
+            "till": new Date(this.till),
             "limit": 10000
           })
         }).then(res => res.json())
           .then(res => {
             console.log(res);
-            this.users = res;
+            this.commits = res;
           });
       }
 
-      addLines() {
-        console.log("api loaded: ", this.apiLoaded);
+      commitsChanged() {
         if (!this.apiLoaded) {
           return;
         }
-        console.log("User length: ", this.users.length);
-        var flightPlanCoordinates = [
+        this.addMarkers();
+        this.addLines();
+      }
+
+      addMarkers() {
+        var oms = new OverlappingMarkerSpiderfier(this.map, {
+          markersWontMove: true,
+          markersWontHide: true,
+          basicFormatEvents: true
+        });
+
+        let markers = [];
+        for (var i = 0; i < this.commits.length; i++) {
+          let myLatlng = new google.maps.LatLng(this.commits[i].author.location.lat, this.commits[i].author.location.lng);
+          let marker = new google.maps.Marker({
+            position: myLatlng,
+            pixel: this.commits[i],
+            title: this.commits[i].author.login
+          });
+          markers.push(marker);
+          let markerContent = this.commits[i];
+          google.maps.event.addListener(marker, 'spider_click', function test(e) {  // 'spider_click', not plain 'click'
+            let iw = new google.maps.InfoWindow();
+            let content = "Author: " + markerContent.author.login + "<br/>";
+            content += "Sha: " + markerContent.sha + "<br/>";
+            content += "Message: " + markerContent.message;
+            iw.setContent(content);
+            iw.open(this.map, marker);
+          });
+
+          oms.addMarker(marker)
+        }
+        var markerCluster = new MarkerClusterer(this.map, markers,
+          { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' });
+        markerCluster.setMaxZoom(10);
+      }
+
+      addLines() {
+
+        var collaborationCoordinates = [
         ];
-        for (var i = 0; i < this.users.length; i++) {
-          flightPlanCoordinates.push({ lat: this.users[i].author.location.lat, lng: this.users[i].author.location.lng })
+        for (var i = 0; i < this.commits.length; i++) {
+          collaborationCoordinates.push({ lat: this.commits[i].author.location.lat, lng: this.commits[i].author.location.lng })
         }
 
         var flightPath = new google.maps.Polyline({
-          path: flightPlanCoordinates,
+          path: collaborationCoordinates,
           geodesic: true,
           strokeColor: '#3423A6',
           strokeOpacity: 1.0,
