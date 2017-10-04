@@ -64,6 +64,10 @@ func main() {
 	counter := 0
 	for 1 < 2 {
 		fmt.Println("repo: ", repos[counter].FullName)
+		if repos[counter].FullName == "torvalds/linux" {
+			counter++
+			continue
+		}
 		users := userDB.ListNoLocationsForRepo(ctx, repos[counter].ProjectID)
 		if len(users) == 0 {
 			counter++
@@ -159,22 +163,22 @@ func githubAPICall(url string, method string, payload *interface{}) *http.Respon
 
 func getLocationGoogleForAddress(address string) (LocationGoogle, error) {
 	var locationGoogle LocationGoogle
-
-	url := "https://maps.googleapis.com/maps/api/geocode/json?address=" + strings.Replace(address, " ", "", -1) + "&key=" + *GKEY
+	a := strings.Replace(address, "#", "", -1)
+	url := "https://maps.googleapis.com/maps/api/geocode/json?address=" + strings.Replace(a, " ", "", -1) + "&key=" + *GKEY
 	fmt.Println("GOOGLE PLACES API CALL : ", url)
 	resp := googleAPICall(url)
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return locationGoogle, err
 	}
-
 	defer resp.Body.Close()
 	var googleAddress GoogleAddresses
 	err = json.Unmarshal(body, &googleAddress)
 	if err != nil {
 		return locationGoogle, err
 	}
-	if googleAddress.ErrorMessage != "" {
+
+	if googleAddress.ErrorMessage == "OVER_QUERY_LIMIT" || googleAddress.ErrorMessage == "REQUEST_DENIED" {
 		panic("PLACES API RATE LIMIT THIS SHOULD NOT HAPPEN" + googleAddress.ErrorMessage)
 	}
 	if len(googleAddress.Results) == 0 {
