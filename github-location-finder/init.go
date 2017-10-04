@@ -52,6 +52,7 @@ func InitDatabase() (*gorm.DB, error) {
 	dbUser := flag.String("user", user, "Defaults to postgres")
 	dbPass := flag.String("pass", pass, "Defaults to empty")
 	githubAPIKey = flag.String("ghkey", "", "Defaults to empty")
+	GKEY = flag.String("google", "", "Defaults to empty")
 	flag.Parse()
 
 	fmt.Println("Configuration:")

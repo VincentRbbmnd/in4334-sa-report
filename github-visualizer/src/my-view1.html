@@ -36,10 +36,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <google-map disable-default-ui id="map" map="{{map}}" latitude="0" longitude="0" zoom="2" api-key="AIzaSyBFRdnjO9WVvl3Voqj84bLvVMVIjDfBjlk">
       <dom-repeat id="userMarkers" items="{{users}}" as="user">
         <template>
-          <google-map-marker latitude="{{user.lat}}" longitude="{{user.lon}}"></google-map-marker>
+          <google-map-marker latitude="{{user.author.location.lat}}" longitude="{{user.author.location.lng}}">
+            {{user.author.login}}
+          </google-map-marker>
         </template>
       </dom-repeat>
-
     </google-map>
   </template>
 
@@ -51,7 +52,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         return {
           users: {
             type: Object,
-            value: [{ lat: 52.0, lon: 4.36 }, { lat: 52.1, lon: 4.37 }],
+            value: [],
             observer: 'addLines'
           },
           map: {
@@ -69,7 +70,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       ready() {
         super.ready();
-
+        this.getCommits();
         document.addEventListener('api-load', (e) => {
           this.apiLoaded = true;
           this.addLines();
@@ -78,18 +79,37 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           });
       }
 
+      getCommits() {
+        fetch('http://localhost:8081/v1/commits/list', {
+          method: 'post',
+          headers: {
+            'Accept': 'application/json, text/plain, */*',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            "from": "2012-04-23T18:25:43.511Z",
+            "till": "2017-10-03T18:25:43.511Z",
+            "limit": 10000
+          })
+        }).then(res => res.json())
+          .then(res => {
+            console.log(res);
+            this.users = res;
+          });
+      }
+
       addLines() {
         console.log("api loaded: ", this.apiLoaded);
-        if(!this.apiLoaded){
+        if (!this.apiLoaded) {
           return;
         }
-        for (var i = 0; i < this.users.length; i++) {
-
-        }
+        console.log("User length: ", this.users.length);
         var flightPlanCoordinates = [
-          { lat: 52.0, lng: 4.36 },
-          { lat: 52.1, lng: 4.37 }
         ];
+        for (var i = 0; i < this.users.length; i++) {
+          flightPlanCoordinates.push({ lat: this.users[i].author.location.lat, lng: this.users[i].author.location.lng })
+        }
+
         var flightPath = new google.maps.Polyline({
           path: flightPlanCoordinates,
           geodesic: true,
