@@ -11,8 +11,9 @@
 package app
 
 import (
-	"github.com/goadesign/goa"
 	"time"
+
+	"github.com/goadesign/goa"
 )
 
 // Commit data (default view)
@@ -104,19 +105,19 @@ type Location struct {
 	// ID of the location in the database
 	ID int `form:"id" json:"id" xml:"id"`
 	// coordinates lat
-	Lat string `form:"lat" json:"lat" xml:"lat"`
+	Lat float64 `form:"lat" json:"lat" xml:"lat"`
 	// coordinates lng
-	Lng string `form:"lng" json:"lng" xml:"lng"`
+	Lng float64 `form:"lng" json:"lng" xml:"lng"`
 }
 
 // Validate validates the Location media type instance.
 func (mt *Location) Validate() (err error) {
 
-	if mt.Lat == "" {
-		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "lat"))
-	}
-	if mt.Lng == "" {
-		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "lng"))
-	}
+	// if mt.Lat == "" {
+	// 	err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "lat"))
+	// }
+	// if mt.Lng == "" {
+	// 	err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "lng"))
+	// }
 	return
 }

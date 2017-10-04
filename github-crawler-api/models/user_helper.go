@@ -12,7 +12,7 @@ package models
 
 import (
 	"context"
-	"github-crawler-api/app"
+	"github.com/VincentRbbmnd/in4334-sa-report/github-crawler-api/app"
 	"time"
 
 	"github.com/goadesign/goa"

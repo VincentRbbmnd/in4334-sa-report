@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github-crawler-api/app"
+	"github.com/VincentRbbmnd/in4334-sa-report/github-crawler-api/app"
 
 	"github.com/goadesign/goa"
 )
@@ -19,9 +19,9 @@ func NewCommitsController(service *goa.Service) *CommitsController {
 // List runs the list action.
 func (c *CommitsController) List(ctx *app.ListCommitsContext) error {
 	// CommitsController_List: start_implement
-	commitDB.ListCommitWithUsersWithLocationForRepo(ctx, 2325298, ctx.Payload.From, ctx.Payload.Till, *ctx.Payload.Limit)
+	res := commitDB.ListCommitWithUsersWithLocationForRepo(ctx, 41881900, ctx.Payload.From, ctx.Payload.Till, *ctx.Payload.Limit)
 	// CommitsController_List: end_implement
-	res := app.CommitCollection{}
+	// res := app.CommitCollection{}
 	return ctx.OK(res)
 }
 
