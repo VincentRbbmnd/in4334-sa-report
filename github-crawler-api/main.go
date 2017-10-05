@@ -79,7 +79,7 @@ func InitDatabase() (*gorm.DB, error) {
 	dbName := flag.String("db", databaseName, "Defaults to hoppa_dev")
 	dbUser := flag.String("user", user, "Defaults to postgres")
 	dbPass := flag.String("pass", pass, "Defaults to empty")
-	dbPort := flag.String("port", 5432, "defaults to 5432")
+	dbPort := flag.Int("port", 5432, "defaults to 5432")
 	githubAPIKey = flag.String("ghkey", "", "Defaults to empty")
 	flag.Parse()
 
