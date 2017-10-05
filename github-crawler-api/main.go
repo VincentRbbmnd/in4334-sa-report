@@ -79,6 +79,7 @@ func InitDatabase() (*gorm.DB, error) {
 	dbName := flag.String("db", databaseName, "Defaults to hoppa_dev")
 	dbUser := flag.String("user", user, "Defaults to postgres")
 	dbPass := flag.String("pass", pass, "Defaults to empty")
+	dbPort := flag.String("port", 5432, "defaults to 5432")
 	githubAPIKey = flag.String("ghkey", "", "Defaults to empty")
 	flag.Parse()
 
@@ -86,9 +87,9 @@ func InitDatabase() (*gorm.DB, error) {
 	fmt.Println("DB HOST: " + *dbHost)
 	fmt.Println("DB Name: " + *dbName)
 	fmt.Println("DB User: " + *dbUser)
-	fmt.Println("GHKey: ", *githubAPIKey)
+	fmt.Println("DB port: ", *dbPort)
 
-	url := fmt.Sprintf("dbname=%s user=%s password=%s sslmode=disable port=%d host=%s", *dbName, *dbUser, *dbPass, 5432, *dbHost)
+	url := fmt.Sprintf("dbname=%s user=%s password=%s sslmode=disable port=%d host=%s", *dbName, *dbUser, *dbPass, *dbPort, *dbHost)
 
 	return gorm.Open("postgres", url)
 }
