@@ -6,7 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -163,7 +165,11 @@ func githubAPICall(url string, method string, payload *interface{}) *http.Respon
 
 func getLocationGoogleForAddress(address string) (LocationGoogle, error) {
 	var locationGoogle LocationGoogle
-	a := strings.Replace(address, "#", "", -1)
+	reg, err := regexp.Compile("[^a-zA-Z,/]+")
+	if err != nil {
+		log.Fatal(err)
+	}
+	a := reg.ReplaceAllString(address, "")
 	url := "https://maps.googleapis.com/maps/api/geocode/json?address=" + strings.Replace(a, " ", "", -1) + "&key=" + *GKEY
 	fmt.Println("GOOGLE PLACES API CALL : ", url)
 	resp := googleAPICall(url)
