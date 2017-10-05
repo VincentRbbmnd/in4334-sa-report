@@ -160,10 +160,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         for (var i = 0; i < this.commits.length; i++) {
           let myLatlng = new google.maps.LatLng(this.commits[i].author.location.lat, this.commits[i].author.location.lng);
+          var image = {
+            url: '../images/icons/git-commit.png',
+            // This marker is 20 pixels wide by 32 pixels high.
+            scaledSize: new google.maps.Size(20, 20),
+            // // The origin for this image is (0, 0).
+            origin: new google.maps.Point(0, 0),
+            // // The anchor for this image is the base of the flagpole at (0, 32).
+            anchor: new google.maps.Point(10, 10)
+          };
           let marker = new google.maps.Marker({
             position: myLatlng,
             pixel: this.commits[i],
-            title: this.commits[i].author.login
+            title: this.commits[i].author.login,
+            icon: image
           });
           this.markers.push(marker);
           let markerContent = this.commits[i];
