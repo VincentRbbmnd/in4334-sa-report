@@ -62,17 +62,67 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: String,
             notify: true
           },
-          till:{
+          till: {
             type: String,
             notify: true
+          },
+          markers: {
+            type: Object,
+            notify: true,
+            value: []
+          },
+          oms: {
+            type: Object,
+            notify: true,
+            value: {}
+          },
+          markerCluster: {
+            type: Object,
+            notify: true,
+            value: {}
+          },
+          commitPath: {
+            type: Object,
+            notify: true,
+            value: {}
+          },
+          collaborationCoordinates: {
+            type: Object,
+            notify: true,
+            value: []
+          },
+          markerClusterDone: {
+            type: Boolean,
+            notify: true,
+            value: false
           }
         };
+      }
+
+      constructor() {
+        super();
       }
 
       ready() {
         super.ready();
         this.getCommits();
         document.addEventListener('api-load', (e) => {
+          this.oms = new OverlappingMarkerSpiderfier(this.map, {
+            markersWontMove: true,
+            markersWontHide: true,
+            basicFormatEvents: true
+          });
+
+          this.commitPath = new google.maps.Polyline({
+            path: this.collaborationCoordinates,
+            geodesic: true,
+            strokeColor: '#3423A6',
+            strokeOpacity: 1.0,
+            strokeWeight: 2
+          });
+
+          this.markerCluster = new MarkerClusterer(this.map, [], { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' });
+          this.markerCluster.setMaxZoom(14);
           this.apiLoaded = true;
           this.commitsChanged();
         }, {
@@ -81,14 +131,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       getCommits() {
-        console.log("this: ', thi", new Date(this.from));
-        console.log("this: ', till",new Date(this.till));
         fetch('http://localhost:8081/v1/commits/list', {
           method: 'post',
-          headers: {
-            'Accept': 'application/json, text/plain, */*',
-            'Content-Type': 'application/json'
-          },
           body: JSON.stringify({
             "from": new Date(this.from),
             "till": new Date(this.till),
@@ -96,7 +140,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           })
         }).then(res => res.json())
           .then(res => {
-            console.log(res);
             this.commits = res;
           });
       }
@@ -110,13 +153,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       addMarkers() {
-        var oms = new OverlappingMarkerSpiderfier(this.map, {
-          markersWontMove: true,
-          markersWontHide: true,
-          basicFormatEvents: true
-        });
+        for (var i = 0; i < this.markers.length; i++) {
+          this.oms.removeMarker(this.markers[i]);
+        }
+        this.markers = [];
 
-        let markers = [];
         for (var i = 0; i < this.commits.length; i++) {
           let myLatlng = new google.maps.LatLng(this.commits[i].author.location.lat, this.commits[i].author.location.lng);
           let marker = new google.maps.Marker({
@@ -124,7 +165,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             pixel: this.commits[i],
             title: this.commits[i].author.login
           });
-          markers.push(marker);
+          this.markers.push(marker);
           let markerContent = this.commits[i];
           google.maps.event.addListener(marker, 'spider_click', function test(e) {  // 'spider_click', not plain 'click'
             let iw = new google.maps.InfoWindow();
@@ -135,29 +176,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             iw.open(this.map, marker);
           });
 
-          oms.addMarker(marker)
+          this.oms.addMarker(marker)
         }
-        var markerCluster = new MarkerClusterer(this.map, markers,
-          { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' });
-        markerCluster.setMaxZoom(10);
+        this.markerCluster.clearMarkers();
+        this.markerCluster.addMarkers(this.markers);
       }
 
       addLines() {
-
-        var collaborationCoordinates = [
-        ];
+        this.commitPath.setMap(null);
+        this.collaborationCoordinates = [];
         for (var i = 0; i < this.commits.length; i++) {
-          collaborationCoordinates.push({ lat: this.commits[i].author.location.lat, lng: this.commits[i].author.location.lng })
+          this.collaborationCoordinates.push({ lat: this.commits[i].author.location.lat, lng: this.commits[i].author.location.lng })
         }
-
-        var flightPath = new google.maps.Polyline({
-          path: collaborationCoordinates,
+        this.commitPath = new google.maps.Polyline({
+          path: this.collaborationCoordinates,
           geodesic: true,
           strokeColor: '#3423A6',
           strokeOpacity: 1.0,
           strokeWeight: 2
         });
-        flightPath.setMap(this.map);
+
+        this.commitPath.setMap(this.map);
       }
     }
 
