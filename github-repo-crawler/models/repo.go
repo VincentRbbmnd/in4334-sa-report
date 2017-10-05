@@ -82,7 +82,7 @@ func (m *RepoDB) GetByRepoName(ctx context.Context, repoName string) (*Repo, err
 func (m *RepoDB) List(ctx context.Context) ([]*Repo, error) {
 
 	var objs []*Repo
-	err := m.Db.Table(m.TableName()).Find(&objs).Error
+	err := m.Db.Table(m.TableName()).Order("id asc").Find(&objs).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}

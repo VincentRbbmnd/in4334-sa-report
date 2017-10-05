@@ -32,6 +32,9 @@ func main() {
 		panic(err)
 	}
 	for _, repo := range repos {
+		if repo.ID < 400 {
+			continue
+		}
 		startCommitCrawling(repo.ProjectID, repo.FullName)
 		startStarCrawling(repo.ProjectID, repo.FullName)
 	}

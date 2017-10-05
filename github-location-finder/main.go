@@ -165,7 +165,7 @@ func githubAPICall(url string, method string, payload *interface{}) *http.Respon
 
 func getLocationGoogleForAddress(address string) (LocationGoogle, error) {
 	var locationGoogle LocationGoogle
-	reg, err := regexp.Compile("[^a-zA-Z,/]+")
+	reg, err := regexp.Compile("[^a-zA-Z,/ ]+")
 	if err != nil {
 		log.Fatal(err)
 	}
