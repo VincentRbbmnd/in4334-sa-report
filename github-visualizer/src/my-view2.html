@@ -11,33 +11,41 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<script src="..\node_modules\d3\build\d3.min.js"></script>
+<script src="..\node_modules\d3-queue\build\d3-queue.min.js"></script>
+<script src="..\node_modules\d3-request\build\d3-request.min.js"></script>
+<script src="..\node_modules\topojson\dist\topojson.min.js"></script>
 
 <dom-module id="my-view2">
   <template>
     <style include="shared-styles iron-flex iron-flex-alignment">
        :host {
-        display: block;
+          display: block;
 
-        padding: 10px;
-      }
+          padding: 10px;
+        }
+
+        #sliderContainer {
+          text-align: center;
+          position: relative;
+          top: 800px;
+        }
+
+        #svg {
+          z-index: 1;
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+        }
     </style>
 
-    <div class="layout vertical">
-      <div>
-        sdfs
-      </div>
-      <div class="layout horizontal">
-        <div>
-          asdfasdf
-        </div>
-        <div class="flex">
+    <svg id="svg" width="1200" height="850"></svg>
 
-        </div>
-        <div on-click="hoiIkbeneenfunctie">
-          asdfasldfkj
-        </div>
-      </div>
-
+    <div id="sliderContainer">
+      <input id="timeslide" type="range" min="0" max="11" value="0" step="1"/><br>
+      <span id="range">January</span>
     </div>
   </template>
 
@@ -45,15 +53,145 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     class MyView2 extends Polymer.Element {
       static get is() { return 'my-view2'; }
 
+      static get properties() {
+        return {
+          commits: {
+            type: Object,
+            value: [],
+            observer: 'commitsChanged'
+          },
+          apiLoaded: {
+            type: Boolean,
+            notify: true,
+            value: false
+          },
+          from: {
+            type: String,
+            notify: true
+          },
+          till: {
+            type: String,
+            notify: true
+          },
+        };
+      }
+
       ready() {
         super.ready();
-        this.hoiIkbeneenfunctie();
+        this.drawMap();
       }
 
 
-      hoiIkbeneenfunctie() {
-          console.log("hiiii");
+      drawMap() {
+        console.log("Starting to make requests...")
+
+        const margin = {top: 20, right: 20, bottom: 30, left: 40}
+        const padding = 30
+        const width = 1500 - margin.left - margin.right
+        const height = 750 - margin.top - margin.bottom
+
+        var svg = d3.select(this.$.svg)
+                    .attr( 'width', 1500 )
+                    .attr( 'height', 750 )
+
+        var projection = d3.geoMercator()
+                            .scale(150)
+                            .translate( [width / 2, height / 1.5]);
+
+        var path = d3.geoPath().projection(projection);
+
+        let that = this;
+
+        d3.queue()
+          .defer( d3.json, "https://d3js.org/world-50m.v1.json" )
+          .defer( d3.json , 'http://localhost:3000/api/v1/repositories/7/commits?from_date=2017-01-01&to_date=2017-09-30' )
+          .await( d3Ready )
+
+        function d3Ready (error, world, commitsResponse) {
+            if (error) throw error;
+    
+            const commits = commitsResponse.data
+    
+            console.log("commits: ", commits)
+    
+            var inputValue = null;
+            var month = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    
+            // when the input range changes update the value
+            d3.select(that.$.timeslide).on("input", function() {
+                update(+this.value);
+            });
+    
+            // update the fill of each SVG of class "commit" with value
+            function update(value) {
+              that.$.range.innerHTML=month[value];
+              inputValue = month[value];
+              d3.selectAll(that.shadowRoot.querySelectorAll('.commit'))
+                  .attr("fill", dateMatch);
+            }
+    
+            function dateMatch(data, value) {
+              var d = new Date(data.attributes.author_date);
+              var m = month[d.getMonth()];
+              if (inputValue == m) {
+                  this.parentElement.appendChild(this);
+                  return "red";
+              } else {
+                  return "#999";
+              };
+            }
+    
+            svg.append("g")
+                .attr("class", "countries")
+                .selectAll("path")
+                .data(topojson.feature(world, world.objects.countries).features)
+                .enter().append("path")
+                .attr("d", path)
+                .style("fill", "white")
+                .style("stroke", "black")
+    
+            svg.selectAll("circle")
+                .data(commits).enter()
+                .append("circle")
+                .attr( "class", "commit")
+                .attr("cx", function (d) {
+                    let lat = d.attributes.location_coordinates[0]
+                    let lon = d.attributes.location_coordinates[1]
+                    return projection([lon, lat])[0];
+                })
+                .attr("cy", function (d) {
+                    let lat = d.attributes.location_coordinates[0]
+                    let lon = d.attributes.location_coordinates[1]
+                    return projection([lon, lat])[1];
+                })
+                .attr("r", "2px")
+                .attr("fill", initialDate)
+    
+            function initialDate(d,i){
+                var d = new Date(d.attributes.author_date);
+                var m = month[d.getMonth()];
+                if (m == "January") {
+                    this.parentElement.appendChild(this);
+                    return "red";
+                } else {
+                    return "#999";
+                };
+            }
+    
         }
+
+      }
+
+      getCommits(url, callback) {
+        const params = JSON.stringify({"from":"2017-09-21T00:00:00.000Z","till":"2017-10-06T00:00:00.000Z","limit":10000})
+        d3.request(url)
+          .mimeType("application/json")
+          .post( params, function( xhr ){ 
+            const json = JSON.parse(xhr.responseText)
+            console.log( "commits json: ", json); 
+            callback( null, json ); 
+          } );
+      }
     }
 
     window.customElements.define(MyView2.is, MyView2);
