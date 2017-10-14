@@ -3,7 +3,7 @@ package models
 import (
 	"context"
 
-	"github.com/VincentRbbmnd/in4334-sa-report/github-crawler-api/app"
+	"github-crawler-api/app"
 
 	"time"
 
@@ -30,13 +30,17 @@ type ParentCommit struct {
 }
 
 // ListCommitWithUsersWithLocationForRepo returns an array of view: default.
-func (m *CommitDB) ListCommitWithUsersWithLocationForRepo(ctx context.Context, repoID int, from *time.Time, till *time.Time, limit int) app.CommitCollection {
+func (m *CommitDB) ListCommitWithUsersWithLocationForRepo(ctx context.Context, repoID int, from *time.Time, till *time.Time, limit *int) app.CommitCollection {
 	defer goa.MeasureSince([]string{"goa", "db", "commit", "listcommit"}, time.Now())
 	var objs []*app.Commit
+	l := 2000
 
 	// We want to filter on time to not crash the system
 	if from == nil || till == nil {
 		return objs
+	}
+	if limit == nil {
+		limit = &l
 	}
 
 	var native []*CommitWithEverything
@@ -45,7 +49,7 @@ func (m *CommitDB) ListCommitWithUsersWithLocationForRepo(ctx context.Context, r
 		Joins(`LEFT JOIN "Commits" on repository_id = repositories.project_id`).
 		Joins(`LEFT JOIN users on github_user_id = author_id`).
 		Joins(`LEFT JOIN locations on locations.id = location_id`).
-		Where("project_id = ? AND commit_date > ? AND commit_date < ? AND ST_Y(point) != 0 ", repoID, from, till).
+		Where("repositories.id = ? AND commit_date > ? AND commit_date < ? AND ST_Y(point) != 0 ", repoID, from, till).
 		Order("commit_date desc").
 		Limit(limit).
 		Find(&native).Error

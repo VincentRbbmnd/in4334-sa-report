@@ -15,6 +15,7 @@ import (
 	"github.com/goadesign/goa"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 // ListCommitsContext provides the commits list action context.
@@ -22,7 +23,10 @@ type ListCommitsContext struct {
 	context.Context
 	*goa.ResponseData
 	*goa.RequestData
-	Payload *ListPayload
+	From   *time.Time
+	Limit  *int
+	RepoID int
+	Until  *time.Time
 }
 
 // NewListCommitsContext parses the incoming request URL and body, performs validations and creates the
@@ -34,6 +38,49 @@ func NewListCommitsContext(ctx context.Context, r *http.Request, service *goa.Se
 	req := goa.ContextRequest(ctx)
 	req.Request = r
 	rctx := ListCommitsContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramFrom := req.Params["from"]
+	if len(paramFrom) > 0 {
+		rawFrom := paramFrom[0]
+		if from, err2 := time.Parse(time.RFC3339, rawFrom); err2 == nil {
+			tmp1 := &from
+			rctx.From = tmp1
+		} else {
+			err = goa.MergeErrors(err, goa.InvalidParamTypeError("from", rawFrom, "datetime"))
+		}
+	}
+	paramLimit := req.Params["limit"]
+	if len(paramLimit) > 0 {
+		rawLimit := paramLimit[0]
+		if limit, err2 := strconv.Atoi(rawLimit); err2 == nil {
+			tmp3 := limit
+			tmp2 := &tmp3
+			rctx.Limit = tmp2
+		} else {
+			err = goa.MergeErrors(err, goa.InvalidParamTypeError("limit", rawLimit, "integer"))
+		}
+	}
+	paramRepoID := req.Params["repoID"]
+	if len(paramRepoID) > 0 {
+		rawRepoID := paramRepoID[0]
+		if repoID, err2 := strconv.Atoi(rawRepoID); err2 == nil {
+			rctx.RepoID = repoID
+		} else {
+			err = goa.MergeErrors(err, goa.InvalidParamTypeError("repoID", rawRepoID, "integer"))
+		}
+		if rctx.RepoID < 1 {
+			err = goa.MergeErrors(err, goa.InvalidRangeError(`repoID`, rctx.RepoID, 1, true))
+		}
+	}
+	paramUntil := req.Params["until"]
+	if len(paramUntil) > 0 {
+		rawUntil := paramUntil[0]
+		if until, err2 := time.Parse(time.RFC3339, rawUntil); err2 == nil {
+			tmp5 := &until
+			rctx.Until = tmp5
+		} else {
+			err = goa.MergeErrors(err, goa.InvalidParamTypeError("until", rawUntil, "datetime"))
+		}
+	}
 	return &rctx, err
 }
 
@@ -64,52 +111,87 @@ func (ctx *ListCommitsContext) NotFound() error {
 	return nil
 }
 
-// ShowCommitsContext provides the commits show action context.
-type ShowCommitsContext struct {
+// ListRepositoriesContext provides the repositories list action context.
+type ListRepositoriesContext struct {
 	context.Context
 	*goa.ResponseData
 	*goa.RequestData
-	CommitID int
+	Payload *ListPayload
 }
 
-// NewShowCommitsContext parses the incoming request URL and body, performs validations and creates the
-// context used by the commits controller show action.
-func NewShowCommitsContext(ctx context.Context, r *http.Request, service *goa.Service) (*ShowCommitsContext, error) {
+// NewListRepositoriesContext parses the incoming request URL and body, performs validations and creates the
+// context used by the repositories controller list action.
+func NewListRepositoriesContext(ctx context.Context, r *http.Request, service *goa.Service) (*ListRepositoriesContext, error) {
 	var err error
 	resp := goa.ContextResponse(ctx)
 	resp.Service = service
 	req := goa.ContextRequest(ctx)
 	req.Request = r
-	rctx := ShowCommitsContext{Context: ctx, ResponseData: resp, RequestData: req}
-	paramCommitID := req.Params["commitID"]
-	if len(paramCommitID) > 0 {
-		rawCommitID := paramCommitID[0]
-		if commitID, err2 := strconv.Atoi(rawCommitID); err2 == nil {
-			rctx.CommitID = commitID
+	rctx := ListRepositoriesContext{Context: ctx, ResponseData: resp, RequestData: req}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *ListRepositoriesContext) OK(r CommitCollection) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.commit+json; type=collection")
+	if r == nil {
+		r = CommitCollection{}
+	}
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *ListRepositoriesContext) BadRequest(r error) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.goa.error")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// ShowRepositoriesContext provides the repositories show action context.
+type ShowRepositoriesContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	RepoID int
+}
+
+// NewShowRepositoriesContext parses the incoming request URL and body, performs validations and creates the
+// context used by the repositories controller show action.
+func NewShowRepositoriesContext(ctx context.Context, r *http.Request, service *goa.Service) (*ShowRepositoriesContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := ShowRepositoriesContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramRepoID := req.Params["repoID"]
+	if len(paramRepoID) > 0 {
+		rawRepoID := paramRepoID[0]
+		if repoID, err2 := strconv.Atoi(rawRepoID); err2 == nil {
+			rctx.RepoID = repoID
 		} else {
-			err = goa.MergeErrors(err, goa.InvalidParamTypeError("commitID", rawCommitID, "integer"))
+			err = goa.MergeErrors(err, goa.InvalidParamTypeError("repoID", rawRepoID, "integer"))
 		}
-		if rctx.CommitID < 1 {
-			err = goa.MergeErrors(err, goa.InvalidRangeError(`commitID`, rctx.CommitID, 1, true))
+		if rctx.RepoID < 1 {
+			err = goa.MergeErrors(err, goa.InvalidRangeError(`repoID`, rctx.RepoID, 1, true))
 		}
 	}
 	return &rctx, err
 }
 
 // OK sends a HTTP response with status code 200.
-func (ctx *ShowCommitsContext) OK(r *Commit) error {
-	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.commit+json")
+func (ctx *ShowRepositoriesContext) OK(r *Repository) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.repository+json")
 	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
 }
 
 // BadRequest sends a HTTP response with status code 400.
-func (ctx *ShowCommitsContext) BadRequest(r error) error {
+func (ctx *ShowRepositoriesContext) BadRequest(r error) error {
 	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.goa.error")
 	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
 }
 
 // NotFound sends a HTTP response with status code 404.
-func (ctx *ShowCommitsContext) NotFound() error {
+func (ctx *ShowRepositoriesContext) NotFound() error {
 	ctx.ResponseData.WriteHeader(404)
 	return nil
 }

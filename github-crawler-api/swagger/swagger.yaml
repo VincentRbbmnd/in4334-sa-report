@@ -6,43 +6,43 @@ definitions:
   Commit:
     description: Commit data (default view)
     example:
-      author:
+      authorOfCommit:
         id: 5.4301856e+18
-        location:
+        locationForUser:
           id: 1.1409709e+18
-          lat: Cum accusantium sit.
-          lng: Esse maiores sit.
-        login: Consequatur eos atque similique.
-        type: Consectetur sunt asperiores dolor necessitatibus quasi suscipit.
-      id: 8.348355e+18
-      message: Soluta natus doloribus.
-      sha: Sint cupiditate ratione.
-      timestamp: 1978-06-20T04:46:16+02:00
+          lat: 0.5667709
+          lng: 0.45074025
+        login: Sit et esse maiores sit.
+        type: Consequatur eos atque similique.
+      id: 9.0379845e+18
+      message: Sunt asperiores dolor necessitatibus.
+      sha: Suscipit consectetur sed soluta natus doloribus velit.
+      timestamp: 2006-05-20T18:06:34+02:00
     properties:
-      author:
+      authorOfCommit:
         $ref: '#/definitions/Ghuser'
       id:
         description: ID of the commit in the database
-        example: 8.348355e+18
+        example: 9.0379845e+18
         format: int64
         type: integer
       message:
         description: Message of the commit
-        example: Soluta natus doloribus.
+        example: Sunt asperiores dolor necessitatibus.
         type: string
       sha:
         description: Unique identifier of the commit
-        example: Sint cupiditate ratione.
+        example: Suscipit consectetur sed soluta natus doloribus velit.
         type: string
       timestamp:
         description: Time the commit happened
-        example: 1978-06-20T04:46:16+02:00
+        example: 2006-05-20T18:06:34+02:00
         format: date-time
         type: string
     required:
     - id
     - sha
-    - author
+    - authorOfCommit
     - timestamp
     title: 'Mediatype identifier: application/vnd.commit+json; view=default'
     type: object
@@ -50,18 +50,18 @@ definitions:
     description: CommitCollection is the media type for an array of Commit (default
       view)
     example:
-    - author:
+    - authorOfCommit:
         id: 5.4301856e+18
-        location:
+        locationForUser:
           id: 1.1409709e+18
-          lat: Cum accusantium sit.
-          lng: Esse maiores sit.
-        login: Consequatur eos atque similique.
-        type: Consectetur sunt asperiores dolor necessitatibus quasi suscipit.
-      id: 8.348355e+18
-      message: Soluta natus doloribus.
-      sha: Sint cupiditate ratione.
-      timestamp: 1978-06-20T04:46:16+02:00
+          lat: 0.5667709
+          lng: 0.45074025
+        login: Sit et esse maiores sit.
+        type: Consequatur eos atque similique.
+      id: 9.0379845e+18
+      message: Sunt asperiores dolor necessitatibus.
+      sha: Suscipit consectetur sed soluta natus doloribus velit.
+      timestamp: 2006-05-20T18:06:34+02:00
     items:
       $ref: '#/definitions/Commit'
     title: 'Mediatype identifier: application/vnd.commit+json; type=collection; view=default'
@@ -70,27 +70,27 @@ definitions:
     description: GH user data (default view)
     example:
       id: 5.4301856e+18
-      location:
+      locationForUser:
         id: 1.1409709e+18
-        lat: Cum accusantium sit.
-        lng: Esse maiores sit.
-      login: Consequatur eos atque similique.
-      type: Consectetur sunt asperiores dolor necessitatibus quasi suscipit.
+        lat: 0.5667709
+        lng: 0.45074025
+      login: Sit et esse maiores sit.
+      type: Consequatur eos atque similique.
     properties:
       id:
         description: ID of the user in the database
         example: 5.4301856e+18
         format: int64
         type: integer
-      location:
+      locationForUser:
         $ref: '#/definitions/Location'
       login:
         description: Unique username of the user
-        example: Consequatur eos atque similique.
+        example: Sit et esse maiores sit.
         type: string
       type:
         description: Type of the user
-        example: Consectetur sunt asperiores dolor necessitatibus quasi suscipit.
+        example: Consequatur eos atque similique.
         type: string
     required:
     - id
@@ -122,8 +122,8 @@ definitions:
     description: Location as geocoordinates (default view)
     example:
       id: 1.1409709e+18
-      lat: Cum accusantium sit.
-      lng: Esse maiores sit.
+      lat: 0.5667709
+      lng: 0.45074025
     properties:
       id:
         description: ID of the location in the database
@@ -132,17 +132,57 @@ definitions:
         type: integer
       lat:
         description: coordinates lat
-        example: Cum accusantium sit.
-        type: string
+        example: 0.5667709
+        format: double
+        type: number
       lng:
         description: coordinates lng
-        example: Esse maiores sit.
-        type: string
+        example: 0.45074025
+        format: double
+        type: number
     required:
     - id
     - lat
     - lng
     title: 'Mediatype identifier: application/vnd.location+json; view=default'
+    type: object
+  Repository:
+    description: Commit data (default view)
+    example:
+      full_name: Dolor ut.
+      id: 6.858816e+18
+      org: true
+      owner: Non magnam.
+      project_id: 0.11750344
+    properties:
+      full_name:
+        description: Full name of the repo
+        example: Dolor ut.
+        type: string
+      id:
+        description: ID of the commit in the database
+        example: 6.858816e+18
+        format: int64
+        type: integer
+      org:
+        description: If owner is an organization
+        example: true
+        type: boolean
+      owner:
+        description: Name of the owner of the repository
+        example: Non magnam.
+        type: string
+      project_id:
+        description: Time the commit happened
+        example: 0.11750344
+        format: double
+        type: number
+    required:
+    - id
+    - owner
+    - full_name
+    - project_id
+    title: 'Mediatype identifier: application/vnd.repository+json; view=default'
     type: object
   error:
     description: Error response media type (default view)
@@ -191,25 +231,25 @@ info:
   title: Visualization API for github crawler
   version: ""
 paths:
-  /commits/{commitID}:
+  /repositories/{repoID}:
     get:
-      description: Retrieve commit from db
-      operationId: commits#show
+      description: Retrieve repository from db
+      operationId: repositories#show
       parameters:
-      - description: Commit ID
+      - description: Repository ID
         in: path
         minimum: 1
-        name: commitID
+        name: repoID
         required: true
         type: integer
       produces:
       - application/vnd.goa.error
-      - application/vnd.commit+json
+      - application/vnd.repository+json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/Commit'
+            $ref: '#/definitions/Repository'
         "400":
           description: Bad Request
           schema:
@@ -218,19 +258,35 @@ paths:
           description: Not Found
       schemes:
       - http
-      summary: show commits
+      summary: show repositories
       tags:
-      - commits
-  /commits/list:
-    post:
+      - repositories
+  /repositories/{repoID}/commits/list:
+    get:
       description: Retrieve commits between timespan with users
       operationId: commits#list
       parameters:
-      - in: body
-        name: payload
+      - description: From date
+        in: query
+        name: from
+        required: false
+        type: string
+      - description: Limit the results
+        in: query
+        name: limit
+        required: false
+        type: integer
+      - description: Repository ID
+        in: path
+        minimum: 1
+        name: repoID
         required: true
-        schema:
-          $ref: '#/definitions/ListPayload'
+        type: integer
+      - description: Till ID
+        in: query
+        name: until
+        required: false
+        type: string
       produces:
       - application/vnd.goa.error
       - application/vnd.commit+json; type=collection
@@ -252,6 +308,33 @@ paths:
       summary: list commits
       tags:
       - commits
+  /repositories/list:
+    get:
+      description: Retrieve all repositories in DB
+      operationId: repositories#list
+      parameters:
+      - in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/ListPayload'
+      produces:
+      - application/vnd.goa.error
+      - application/vnd.commit+json; type=collection
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/CommitCollection'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/error'
+      schemes:
+      - http
+      summary: list repositories
+      tags:
+      - repositories
 produces:
 - application/json
 - application/xml
@@ -265,7 +348,7 @@ responses:
   OK:
     description: OK
     schema:
-      $ref: '#/definitions/Commit'
+      $ref: '#/definitions/Repository'
 schemes:
 - http
 swagger: "2.0"

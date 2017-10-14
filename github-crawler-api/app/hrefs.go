@@ -15,8 +15,8 @@ import (
 	"strings"
 )
 
-// CommitsHref returns the resource href.
-func CommitsHref(commitID interface{}) string {
-	paramcommitID := strings.TrimLeftFunc(fmt.Sprintf("%v", commitID), func(r rune) bool { return r == '/' })
-	return fmt.Sprintf("/v1/commits/%v", paramcommitID)
+// RepositoriesHref returns the resource href.
+func RepositoriesHref(repoID interface{}) string {
+	paramrepoID := strings.TrimLeftFunc(fmt.Sprintf("%v", repoID), func(r rune) bool { return r == '/' })
+	return fmt.Sprintf("/v1/repositories/%v", paramrepoID)
 }

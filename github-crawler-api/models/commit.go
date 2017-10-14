@@ -12,25 +12,22 @@ package models
 
 import (
 	"context"
-
-	"github.com/VincentRbbmnd/in4334-sa-report/github-crawler-api/app"
-
-	"time"
-
+	"github-crawler-api/app"
 	"github.com/goadesign/goa"
 	"github.com/jinzhu/gorm"
+	"time"
 )
 
 // Github commit model in DB
 type Commit struct {
 	ID           int `gorm:"primary_key"` // primary key
-	AuthorID     int64
-	CommitterID  int64
+	AuthorID     float64
+	CommitterID  float64
 	CreatedAt    time.Time
 	DeletedAt    *time.Time
 	Message      string
 	Raw          string `sql:"type:jsonb"`
-	RepositoryID int64
+	RepositoryID float64
 	Sha          string
 	UpdatedAt    time.Time
 }
