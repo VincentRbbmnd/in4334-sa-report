@@ -11,23 +11,24 @@
 package client
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"net/http"
 	"net/url"
 	"strconv"
+	"time"
 )
 
 // ListCommitsPath computes a request path to the list action of commits.
-func ListCommitsPath() string {
+func ListCommitsPath(repoID int) string {
+	param0 := strconv.Itoa(repoID)
 
-	return fmt.Sprintf("/v1/commits/list")
+	return fmt.Sprintf("/v1/repositories/%s/commits/list", param0)
 }
 
 // Retrieve commits between timespan with users
-func (c *Client) ListCommits(ctx context.Context, path string, payload *ListPayload, contentType string) (*http.Response, error) {
-	req, err := c.NewListCommitsRequest(ctx, path, payload, contentType)
+func (c *Client) ListCommits(ctx context.Context, path string, from *time.Time, limit *int, until *time.Time) (*http.Response, error) {
+	req, err := c.NewListCommitsRequest(ctx, path, from, limit, until)
 	if err != nil {
 		return nil, err
 	}
@@ -35,56 +36,26 @@ func (c *Client) ListCommits(ctx context.Context, path string, payload *ListPayl
 }
 
 // NewListCommitsRequest create the request corresponding to the list action endpoint of the commits resource.
-func (c *Client) NewListCommitsRequest(ctx context.Context, path string, payload *ListPayload, contentType string) (*http.Request, error) {
-	var body bytes.Buffer
-	if contentType == "" {
-		contentType = "*/*" // Use default encoder
-	}
-	err := c.Encoder.Encode(payload, &body, contentType)
-	if err != nil {
-		return nil, fmt.Errorf("failed to encode body: %s", err)
-	}
+func (c *Client) NewListCommitsRequest(ctx context.Context, path string, from *time.Time, limit *int, until *time.Time) (*http.Request, error) {
 	scheme := c.Scheme
 	if scheme == "" {
 		scheme = "http"
 	}
 	u := url.URL{Host: c.Host, Scheme: scheme, Path: path}
-	req, err := http.NewRequest("POST", u.String(), &body)
-	if err != nil {
-		return nil, err
+	values := u.Query()
+	if from != nil {
+		tmp6 := from.Format(time.RFC3339)
+		values.Set("from", tmp6)
 	}
-	header := req.Header
-	if contentType == "*/*" {
-		header.Set("Content-Type", "application/json")
-	} else {
-		header.Set("Content-Type", contentType)
+	if limit != nil {
+		tmp7 := strconv.Itoa(*limit)
+		values.Set("limit", tmp7)
 	}
-	return req, nil
-}
-
-// ShowCommitsPath computes a request path to the show action of commits.
-func ShowCommitsPath(commitID int) string {
-	param0 := strconv.Itoa(commitID)
-
-	return fmt.Sprintf("/v1/commits/%s", param0)
-}
-
-// Retrieve commit from db
-func (c *Client) ShowCommits(ctx context.Context, path string) (*http.Response, error) {
-	req, err := c.NewShowCommitsRequest(ctx, path)
-	if err != nil {
-		return nil, err
+	if until != nil {
+		tmp8 := until.Format(time.RFC3339)
+		values.Set("until", tmp8)
 	}
-	return c.Client.Do(ctx, req)
-}
-
-// NewShowCommitsRequest create the request corresponding to the show action endpoint of the commits resource.
-func (c *Client) NewShowCommitsRequest(ctx context.Context, path string) (*http.Request, error) {
-	scheme := c.Scheme
-	if scheme == "" {
-		scheme = "http"
-	}
-	u := url.URL{Host: c.Host, Scheme: scheme, Path: path}
+	u.RawQuery = values.Encode()
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
 		return nil, err

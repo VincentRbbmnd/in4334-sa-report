@@ -24,7 +24,7 @@ type Location struct {
 	DeletedAt *time.Time
 	Point     string `sql:"type:geometry(Point,4326)"`
 	UpdatedAt time.Time
-	UserID    int64
+	UserID    float64
 }
 
 // TableName overrides the table name settings in Gorm to force a specific table name

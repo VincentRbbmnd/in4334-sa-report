@@ -21,7 +21,7 @@ import (
 // Identifier: application/vnd.commit+json; view=default
 type Commit struct {
 	// Owner of the commit
-	Author *Ghuser `form:"author" json:"author" xml:"author"`
+	Author *Ghuser `json:"author"`
 	// ID of the commit in the database
 	ID int `form:"id" json:"id" xml:"id"`
 	// Message of the commit
@@ -39,7 +39,7 @@ func (mt *Commit) Validate() (err error) {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "sha"))
 	}
 	if mt.Author == nil {
-		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "author"))
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "authorOfCommit"))
 	}
 
 	if mt.Author != nil {
@@ -88,7 +88,7 @@ type Ghuser struct {
 	// ID of the user in the database
 	ID int `form:"id" json:"id" xml:"id"`
 	// Location of the user
-	Location *Location `form:"location,omitempty" json:"location,omitempty" xml:"location,omitempty"`
+	Location *Location `json:"location"`
 	// Unique username of the user
 	Login string `form:"login" json:"login" xml:"login"`
 	// Type of the user
@@ -103,11 +103,6 @@ func (mt *Ghuser) Validate() (err error) {
 	}
 	if mt.Type == "" {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "type"))
-	}
-	if mt.Location != nil {
-		if err2 := mt.Location.Validate(); err2 != nil {
-			err = goa.MergeErrors(err, err2)
-		}
 	}
 	return
 }
@@ -133,26 +128,56 @@ type Location struct {
 	// ID of the location in the database
 	ID int `form:"id" json:"id" xml:"id"`
 	// coordinates lat
-	Lat string `form:"lat" json:"lat" xml:"lat"`
+	Lat float64 `form:"lat" json:"lat" xml:"lat"`
 	// coordinates lng
-	Lng string `form:"lng" json:"lng" xml:"lng"`
+	Lng float64 `form:"lng" json:"lng" xml:"lng"`
 }
 
 // Validate validates the Location media type instance.
 func (mt *Location) Validate() (err error) {
 
-	if mt.Lat == "" {
-		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "lat"))
-	}
-	if mt.Lng == "" {
-		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "lng"))
-	}
 	return
 }
 
 // DecodeLocation decodes the Location instance encoded in resp body.
 func (c *Client) DecodeLocation(resp *http.Response) (*Location, error) {
 	var decoded Location
+	err := c.Decoder.Decode(&decoded, resp.Body, resp.Header.Get("Content-Type"))
+	return &decoded, err
+}
+
+// Commit data (default view)
+//
+// Identifier: application/vnd.repository+json; view=default
+type Repository struct {
+	// Full name of the repo
+	FullName string `form:"full_name" json:"full_name" xml:"full_name"`
+	// ID of the commit in the database
+	ID int `form:"id" json:"id" xml:"id"`
+	// If owner is an organization
+	Org *bool `form:"org,omitempty" json:"org,omitempty" xml:"org,omitempty"`
+	// Name of the owner of the repository
+	Owner string `form:"owner" json:"owner" xml:"owner"`
+	// Time the commit happened
+	ProjectID float64 `form:"project_id" json:"project_id" xml:"project_id"`
+}
+
+// Validate validates the Repository media type instance.
+func (mt *Repository) Validate() (err error) {
+
+	if mt.Owner == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "owner"))
+	}
+	if mt.FullName == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "full_name"))
+	}
+
+	return
+}
+
+// DecodeRepository decodes the Repository instance encoded in resp body.
+func (c *Client) DecodeRepository(resp *http.Response) (*Repository, error) {
+	var decoded Repository
 	err := c.Decoder.Decode(&decoded, resp.Body, resp.Header.Get("Content-Type"))
 	return &decoded, err
 }

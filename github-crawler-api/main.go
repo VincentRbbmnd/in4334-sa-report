@@ -7,8 +7,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/VincentRbbmnd/in4334-sa-report/github-crawler-api/app"
-	"github.com/VincentRbbmnd/in4334-sa-report/github-crawler-api/models"
+	"github-crawler-api/models"
+
+	"github-crawler-api/app"
 
 	"github.com/goadesign/goa"
 	"github.com/goadesign/goa/middleware"
@@ -36,6 +37,8 @@ func main() {
 	c := NewCommitsController(service)
 	app.MountCommitsController(service, c)
 
+	c1 := NewRepositoriesController(service)
+	app.MountRepositoriesController(service, c1)
 	// Start service
 	if err := service.ListenAndServe(":8081"); err != nil {
 		service.LogError("startup", "err", err)

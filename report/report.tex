@@ -51,9 +51,13 @@
 \email{wim_spaargaren@live.nl}
 
 \begin{abstract}
+Since the open-source software community has seen such enormous growth in past years and remains to grow still, a wealth of data has become available.
+Collaboration platforms like GitHub provide easy access to all open-source project data by providing an API.
+While this data has been available for some time, there has not been done a lot of research into how this data can be applied to bring insights in the way developers collaborate.
+Developer collaboration has become a bigger point of discussion since the rise of Globally Distributed Software Engineering and can benefit from insights derived from this readily available data.
 This paper describes the building of an online platform to provide open source software collaboration visualizations on GitHub.
-In addition, the evolution of developer activity for open source software repositories is explored.
-Exploratory research is done by answering questions about the evolution of developer activity in the developer community and the amount of commits made by a developer per country.
+In addition, the evolution of developer activity for open source software projects  is explored.
+This exploratory research is done by answering questions about the evolution of developer activity in the developer community and the amount of commits made by a developer per country.
 \end{abstract}
 
 \keywords{Data Visualization, GitHub, Open Source Software, Collaboration}
@@ -64,12 +68,15 @@ Exploratory research is done by answering questions about the evolution of devel
 In the past few years the open-source software(OSS) community and development in OSS have grown enormously.
 According to GitHub \cite{GHOctoverse}, in 2016, there were over 5.8 million users engaged in activities relating to public repositories.
 GitHub defines these activities as "some activity within the last year, e.g. code committed, a comment created, a repository starred, or an issue opened".
+
 With GitHub providing programmatic access to all OSS repository and user data\cite{GHAPI}, it is possible to collect and manipulate this data to get more insights into the way the OSS community collaborates (on GitHub).
 These new insights can then be applied to to e.g. develop new software development methods, improve existing (collaboration) platforms (like GitHub) or coding standards, which improve developer collaboration \cite{Jermakovics2013}.
 Outside of the OSS community, a better understanding of how the OSS community functions helps commercial IT projects adopt typical OSS practices, e.g. promoting open collaboration \cite{Kalliamvakou:2015:OSC:2818754.2818825}, and may help IT planners make more informed decisions and develop more effective strategies for using OSS software \cite{madey2002}. 
+
 One way for researchers to analyze the gathered data, is by visualizing it \cite{Heller}, however, up until now there have not been a lot of tools or platforms which provide visual insight into e.g. collaboration over time on a specific repository.
 Tools which are available are outdated \cite{Heller} or not sufficient, for example a visualization of GitHub's newest and most popular repositories \cite{donnemartin2016}, a GitHub repository history visualizer \cite{artzub2013}, and a repository stats visualizer \cite{bajaj2013}.
 Although these examples are visualization tools for GitHub, they provide insufficient information on developer collaboration in OSS projects.
+
 Therefore, the aim of this paper is to provide a tool/platform which stakeholders can leverage to gain insights into OSS projects and developer collaboration.
 For example, making this data available can show where developers are located, this in turn helps identifying possible cultural differences between collaborators which is important to prevent co-ordination and collaboration problems \cite{Mishra2014}.
 Such a tool or platform could be really helpful in the field of software engineering.
@@ -98,7 +105,7 @@ The second question we aim to answer is: \textbf{Does the number of commits made
 The answers could be derived from visualizing the data in such a way researchers can make well substantiated and testable hypotheses. 
 Therefore, the main outcome is that a service was developed that visualizes evolution on collaboration over time for development.
 
-\section{Implementation}
+\section{Methodology}
 To answer these questions a set of large repositories (i.e. repositories with the most GitHub stars and/or collaborators) on the open source software platform GitHub have been chosen.
 A crawler is built to retrieve data from the above mentioned repositories.
 The crawled data includes (but is not limited to) the owner, contributors and collaborators of the repository.
@@ -112,31 +119,44 @@ By creating this web-based service, new insights will emerge for collaboration i
 Trends in software collaboration, activity and collaboration links over time will be revealed.
 Besides the answers to these questions a new way is provided for researchers to get visual insights in open source software development collaboration statistics and form new hypotheses.
 
-\section{Methodology}
+\section{Implementation}
 The first step in finding answers to the research questions, is to gather data from the software development platform GitHub. 
-This data is gathered by using the GitHub REST API (\url{https://developer.github.com/v3/}). 
+This data is gathered by using the GitHub REST API\cite{GHAPI}. 
 The gathered repositories limits to the top 1000 starred repositories on GitHub, for two reasons:
 First, according to Octoverse \cite{GHOctoverse} in 2016 there were nearly 20 million software repositories, storage of this amount of data goes beyond the scope of this research paper.
-The second reason to choose the most starred repositories, is that users of GitHub star a repository when they think the repository is interesting and/or are a collaborator for that repository (\url{https://help.github.com/articles/about-stars/}). 
+The second reason to choose the most starred repositories, is that users of GitHub star a repository when they think the repository is interesting and/or are a collaborator for that repository).
+ 
 Because of this it was decided to use only the top 1000 most starred GitHub projects specified at \url{https://gitstar-ranking.com/} at september 2017. 
-Data for these projects was gathered by building a custom crawler in Golang, which stores the data in a Postgres database \url{https://www.postgresql.org/} and can be run as cron job which keeps on scanning the GitHub API for project changes.
-First project data is gathered using the projects resource (\url{https://developer.github.com/v3/projects/}).
-After the project data was gathered, the commits resource (\url{https://developer.github.com/v3/repos/commits/}) was used to gather all commits for the collected projects. 
+Data for these projects was gathered by building a custom crawler in Golang, which stores the data in a Postgres database and can be run as cron job which be continuously scanning the GitHub API for project changes.
+First project data is gathered using the projects resource\cite{GHAPI}.
+After the project data was gathered, the commits resource\cite{GHAPI} was used to gather all commits for the collected projects. 
 This was done by crawling all paginated requests for commits per Project. 
 Commit data contains a message which is mostly used to describe the change and a timestamp denoting commit time.
 Commit author and committer data is also available, so it is possible to make this distinction.
 This user data was also stored in a separate table.
-Finally, star data was gathered from the repository stargazer resource(\url{https://developer.github.com/v3/activity/starring/}).
+Finally, star data was gathered from the repository stargazer resource\cite{GHAPI}.
+A stargazer is a user who starred a certain repository, so Developer A stars Repository B, therefore A is now in the list of stargazers of B.
 By adding a custom header to this API request it was possible to retrieve the timestamp for when the user starred the repository.
 This way it was possible to find which user starred a project at what time.
 A second cron job was written to find locations for users. 
-The GitHub platform allows a user to specify a location on their profile, which is stored as plain text. 
+The GitHub platform allows a user to specify a location on their profile, which is stored as plain text.
+
 However to use these locations, coordinates are needed. 
-To transform these locations to coordinates the Google Places API (\url{https://developers.google.com/places/}) was used. 
+To transform these locations to coordinates the Google Places API was used. 
 This way coordinates were found for all specified locations on which the Google Places API returns coordinates.
 
 \section{Results}
 The self developed crawler can be found at \url{https://github.com/VincentRbbmnd/in4334-sa-report} and will keep gathering data to make sure our database stays up to date with the current state of the GitHub platform.
+\begin{figure}
+\includegraphics[scale=0.3]{visualizer-example.PNG} 
+\caption{Example visualization of developer collaboration (early stage version)}
+\label{fig:collaboration}
+\end{figure}
+
+Figure ~\ref{fig:collaboration} shows an example of an early stage visualization in the process of building the visualizer.
+Here, nodes depict developers and lines depict collaboration between developers.
+When at a lower zoom level, nodes get un-grouped and lines between individual developers will be shown.
+
 Preliminary results contain 1000 repositories with over 5 million commits belonging to 160.000 users. 
 Not all of the user gave information on their whereabouts, but about 84.000 did.
 This means that it was possible to retrieve locations for just over 50\% of the gathered users.

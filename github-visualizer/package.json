@@ -10,6 +10,11 @@
     "lint": "npm run lint:javascript && polymer lint",
     "lint:javascript": "eslint . --ext js,html --ignore-path .gitignore",
     "test": "polymer test",
-    "test:integration": "polymer build # test that psk builds without error with the CLI"
+    "test:integration": "polymer build # test that psk builds without error with the CLI",
+    "postinstall": "bower install"
+  },
+  "dependencies": {
+    "d3": "^4.11.0",
+    "topojson": "^3.0.2"
   }
 }

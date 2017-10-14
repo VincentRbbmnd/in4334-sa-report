@@ -12,11 +12,10 @@ package models
 
 import (
 	"context"
-	"github.com/VincentRbbmnd/in4334-sa-report/github-crawler-api/app"
-	"time"
-
+	"github-crawler-api/app"
 	"github.com/goadesign/goa"
 	"github.com/jinzhu/gorm"
+	"time"
 )
 
 // MediaType Retrieval Functions

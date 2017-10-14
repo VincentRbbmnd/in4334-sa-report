@@ -12,7 +12,7 @@ package models
 
 import (
 	"context"
-	"github.com/VincentRbbmnd/in4334-sa-report/github-crawler-api/app"
+	"github-crawler-api/app"
 	"github.com/goadesign/goa"
 	"github.com/jinzhu/gorm"
 	"time"
@@ -23,7 +23,7 @@ type User struct {
 	ID              int `gorm:"primary_key"` // primary key
 	CreatedAt       time.Time
 	DeletedAt       *time.Time
-	GithubUserID    int64
+	GithubUserID    float64
 	LocationChecked bool
 	LocationID      int
 	Login           string

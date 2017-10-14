@@ -7,14 +7,37 @@ import (
 
 var _ = Resource("commits", func() {
 	DefaultMedia(CommitMedia)
+	Parent("repositories")
 	BasePath("/commits")
+	Action("list", func() {
+		Routing(
+			GET("/list"),
+		)
+		Params(func() {
+			Param("from", DateTime, "From date", func() {
+			})
+			Param("until", DateTime, "Till ID", func() {
+			})
+			Param("limit", Integer, "Limit the results")
+		})
+		Description("Retrieve commits between timespan with users")
+		Response(OK, CollectionOf(CommitMedia))
+		Response(NoContent)
+		Response(NotFound)
+		Response(BadRequest, ErrorMedia)
+	})
+})
+
+var _ = Resource("repositories", func() {
+	DefaultMedia(RepositoryMedia)
+	BasePath("/repositories")
 	Action("show", func() {
 		Routing(
-			GET("/:commitID"),
+			GET("/:repoID"),
 		)
-		Description("Retrieve commit from db")
+		Description("Retrieve repository from db")
 		Params(func() {
-			Param("commitID", Integer, "Commit ID", func() {
+			Param("repoID", Integer, "Repository ID", func() {
 				Minimum(1)
 			})
 		})
@@ -24,13 +47,11 @@ var _ = Resource("commits", func() {
 	})
 	Action("list", func() {
 		Routing(
-			POST("/list"),
+			GET("/list"),
 		)
 		Payload(ListPayload)
-		Description("Retrieve commits between timespan with users")
+		Description("Retrieve all repositories in DB")
 		Response(OK, CollectionOf(CommitMedia))
-		Response(NoContent)
-		Response(NotFound)
 		Response(BadRequest, ErrorMedia)
 	})
 })

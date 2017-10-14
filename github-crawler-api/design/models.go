@@ -20,7 +20,7 @@ var _ = StorageGroup("GHAPI", func() {
 				PrimaryKey()
 			})
 			Field("login", gorma.String)
-			Field("github_user_id", gorma.BigInteger)
+			Field("github_user_id", gorma.BigDecimal)
 			Field("type", gorma.String)
 			Field("raw", gorma.String, func() {
 				SQLTag("type:jsonb")
@@ -38,9 +38,26 @@ var _ = StorageGroup("GHAPI", func() {
 			})
 			Field("message", gorma.String)
 			Field("sha", gorma.String)
-			Field("author_id", gorma.BigInteger)
-			Field("committer_id", gorma.BigInteger)
-			Field("repository_id", gorma.BigInteger)
+			Field("author_id", gorma.BigDecimal)
+			Field("committer_id", gorma.BigDecimal)
+			Field("repository_id", gorma.BigDecimal)
+			Field("raw", gorma.String, func() {
+				SQLTag("type:jsonb")
+			})
+		})
+
+		// Commit model
+		Model("Repository", func() {
+			RendersTo(RepositoryMedia)
+			Description("Github repository model in DB")
+			Field("id", gorma.Integer, func() {
+				PrimaryKey()
+			})
+			Field("owner", gorma.String)
+			Field("org", gorma.Boolean)
+			Field("full_name", gorma.String)
+			Field("user_type", gorma.String)
+			Field("project_id", gorma.BigDecimal)
 			Field("raw", gorma.String, func() {
 				SQLTag("type:jsonb")
 			})
@@ -72,7 +89,7 @@ var _ = StorageGroup("GHAPI", func() {
 			Field("point", gorma.String, func() {
 				SQLTag("type:geometry(Point,4326)")
 			})
-			Field("user_id", gorma.BigInteger)
+			Field("user_id", gorma.BigDecimal)
 		})
 	})
 })
