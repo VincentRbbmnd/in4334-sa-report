@@ -46,6 +46,23 @@ var _ = StorageGroup("GHAPI", func() {
 			})
 		})
 
+		// Repo model
+		Model("Repository", func() {
+			RendersTo(RepositoryMedia)
+			Description("Github repository model in DB")
+			Field("id", gorma.Integer, func() {
+				PrimaryKey()
+			})
+			Field("owner", gorma.String)
+			Field("org", gorma.Boolean)
+			Field("project_id", gorma.Integer)
+			Field("user_type", gorma.String)
+			Field("full_name", gorma.String)
+			Field("raw", gorma.String, func() {
+				SQLTag("type:jsonb")
+			})
+		})
+
 		// Location model
 		Model("Location", func() {
 			Description("Location model")

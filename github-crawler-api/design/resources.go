@@ -34,3 +34,18 @@ var _ = Resource("commits", func() {
 		Response(BadRequest, ErrorMedia)
 	})
 })
+
+var _ = Resource("repositories", func() {
+	DefaultMedia(RepositoryMedia)
+	BasePath("/projects")
+	Action("list", func() {
+		Routing(
+			GET("/list"),
+		)
+		Description("Retrieve all projects")
+		Response(OK, CollectionOf(RepositoryMedia))
+		Response(NoContent)
+		Response(NotFound)
+		Response(BadRequest, ErrorMedia)
+	})
+})

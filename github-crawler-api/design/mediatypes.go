@@ -55,3 +55,23 @@ var LocationMedia = MediaType("application/vnd.location+json", func() {
 		Attribute("lng")
 	})
 })
+
+var RepositoryMedia = MediaType("application/vnd.repository+json", func() {
+	Description("Repository data")
+	Attributes(func() {
+		Attribute("id", Integer, "ID of the commit in the database")
+		Attribute("owner", String, "Owner of repo")
+		Attribute("org", Boolean, "Is repo of organisation")
+		Attribute("project_id", Integer, "Repository id")
+		Attribute("user_type", String, "Type of owner of repo")
+		Attribute("full_name", String, "Repository full name")
+	})
+	View("default", func() {
+		Attribute("id")
+		Attribute("owner")
+		Attribute("org")
+		Attribute("project_id")
+		Attribute("user_type")
+		Attribute("full_name")
+	})
+})
