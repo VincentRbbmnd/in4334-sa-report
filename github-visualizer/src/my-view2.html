@@ -100,38 +100,31 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         var path = d3.geoPath().projection(projection);
 
-        let that = this;
-
-        d3.queue()
-          .defer( d3.json, "https://d3js.org/world-50m.v1.json" )
-          .defer( d3.json , 'http://localhost:3000/api/v1/repositories/7/commits?from_date=2017-01-01&to_date=2017-09-30' )
-          .await( d3Ready )
-
-        function d3Ready (error, world, commitsResponse) {
+        let d3Ready = (error, world, commitsResponse) => {
             if (error) throw error;
     
-            const commits = commitsResponse.data
-    
-            console.log("commits: ", commits)
+            const commits = commitsResponse
+            // console.log(commitsResponse);
+            // console.log("commits: ", commits)
     
             var inputValue = null;
             var month = ["January","February","March","April","May","June","July","August","September","October","November","December"];
     
             // when the input range changes update the value
-            d3.select(that.$.timeslide).on("input", function() {
+            d3.select(this.$.timeslide).on("input", function() {
                 update(+this.value);
             });
     
             // update the fill of each SVG of class "commit" with value
-            function update(value) {
-              that.$.range.innerHTML=month[value];
+            let update = (value) => {
+              this.$.range.innerHTML=month[value];
               inputValue = month[value];
-              d3.selectAll(that.shadowRoot.querySelectorAll('.commit'))
+              d3.selectAll(this.shadowRoot.querySelectorAll('.commit'))
                   .attr("fill", dateMatch);
             }
     
             function dateMatch(data, value) {
-              var d = new Date(data.attributes.author_date);
+              var d = new Date(data.timestamp);
               var m = month[d.getMonth()];
               if (inputValue == m) {
                   this.parentElement.appendChild(this);
@@ -155,20 +148,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 .append("circle")
                 .attr( "class", "commit")
                 .attr("cx", function (d) {
-                    let lat = d.attributes.location_coordinates[0]
-                    let lon = d.attributes.location_coordinates[1]
+                    let lat = d.author.location.lat;
+                    let lon = d.author.location.lng
                     return projection([lon, lat])[0];
                 })
                 .attr("cy", function (d) {
-                    let lat = d.attributes.location_coordinates[0]
-                    let lon = d.attributes.location_coordinates[1]
+                  let lat = d.author.location.lat;
+                  let lon = d.author.location.lng
                     return projection([lon, lat])[1];
                 })
                 .attr("r", "2px")
                 .attr("fill", initialDate)
     
             function initialDate(d,i){
-                var d = new Date(d.attributes.author_date);
+                var d = new Date(d.timestamp);
                 var m = month[d.getMonth()];
                 if (m == "January") {
                     this.parentElement.appendChild(this);
@@ -177,8 +170,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     return "#999";
                 };
             }
-    
         }
+
+        d3.queue()
+          .defer( d3.json, "https://d3js.org/world-50m.v1.json" )
+          .defer( d3.json , 'http://localhost:8081/v1/repositories/43/commits/list?from=' + new Date('2017-01-01').toISOString() + '&until=' + new Date().toISOString())
+          .await( d3Ready )
 
       }
 

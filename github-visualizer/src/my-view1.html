@@ -40,7 +40,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <script>
     class MyView1 extends Polymer.Element {
-      static get is() { return 'my-view1'; }
+      static get is() {
+        return 'my-view1';
+      }
 
       static get properties() {
         return {
@@ -121,28 +123,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             strokeWeight: 2
           });
 
-          this.markerCluster = new MarkerClusterer(this.map, [], { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' });
+          this.markerCluster = new MarkerClusterer(this.map, [], {
+            imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'
+          });
           this.markerCluster.setMaxZoom(14);
           this.apiLoaded = true;
           this.commitsChanged();
         }, {
-            once: true
-          });
+          once: true
+        });
       }
 
       getCommits() {
-        fetch('http://localhost:8081/v1/commits/list', {
-          method: 'post',
-          body: JSON.stringify({
-            "from": new Date(this.from),
-            "till": new Date(this.till),
-            "limit": 10000
-          })
-        }).then(res => res.json())
-          .then(res => {
-            console.log("result: ", res);
-            this.commits = res;
-          });
+          '&until=' +
+          new Date(this.till).toISOString());
+        fetch('http://localhost:8081/v1/repositories/42/commits/list?from=' + new Date(this.from).toISOString() +
+          '&until=' +
+          new Date(this.till).toISOString()).then((response) => {
+           return response.json();
+        }).then((resp) => {
+            this.commits = resp;
+        });
       }
 
       commitsChanged() {
@@ -158,9 +159,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.oms.removeMarker(this.markers[i]);
         }
         this.markers = [];
-
+        if (!this.commits) {
+          return;
+        }
         for (var i = 0; i < this.commits.length; i++) {
-          let myLatlng = new google.maps.LatLng(this.commits[i].author.location.lat, this.commits[i].author.location.lng);
+          let myLatlng = new google.maps.LatLng(this.commits[i].author.location.lat, this.commits[i].author.location
+            .lng);
           var image = {
             url: '../images/icons/git-commit.png',
             // This marker is 20 pixels wide by 32 pixels high.
@@ -178,7 +182,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           });
           this.markers.push(marker);
           let markerContent = this.commits[i];
-          google.maps.event.addListener(marker, 'spider_click', function test(e) {  // 'spider_click', not plain 'click'
+          google.maps.event.addListener(marker, 'spider_click', function test(e) { // 'spider_click', not plain 'click'
             let iw = new google.maps.InfoWindow();
             let content = "Author: " + markerContent.author.login + "<br/>";
             content += "Sha: " + markerContent.sha + "<br/>";
@@ -196,8 +200,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       addLines() {
         this.commitPath.setMap(null);
         this.collaborationCoordinates = [];
+        if (!this.commits) {
+          return;
+        }
         for (var i = 0; i < this.commits.length; i++) {
-          this.collaborationCoordinates.push({ lat: this.commits[i].author.location.lat, lng: this.commits[i].author.location.lng })
+          this.collaborationCoordinates.push({
+            lat: this.commits[i].author.location.lat,
+            lng: this.commits[i].author.location.lng
+          })
         }
         this.commitPath = new google.maps.Polyline({
           path: this.collaborationCoordinates,
