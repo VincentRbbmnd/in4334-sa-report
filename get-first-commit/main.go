@@ -37,5 +37,6 @@ func main() {
 		fmt.Println("first commit date: ", commit.CommitDate)
 
 		repo.FirstCommitDate = commit.CommitDate
+		err = repoDB.Update(ctx, repo)
 	}
 }
