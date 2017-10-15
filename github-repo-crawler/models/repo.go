@@ -10,16 +10,17 @@ import (
 
 // Repo struct for repository in DB
 type Repo struct {
-	ID        int    `gorm:"primary_key"` // primary key
-	Owner     string // has many Repo
-	CreatedAt time.Time
-	DeletedAt *time.Time
-	UpdatedAt time.Time
-	Org       bool
-	ProjectID int64
-	UserType  string
-	FullName  string // timestamp
-	Raw       []byte `sql:"type:jsonb"` // This is the RAW JSONB of the metadata of a Repo
+	ID              int    `gorm:"primary_key"` // primary key
+	Owner           string // has many Repo
+	CreatedAt       time.Time
+	DeletedAt       *time.Time
+	UpdatedAt       time.Time
+	Org             bool
+	ProjectID       int64
+	UserType        string
+	FullName        string // timestamp
+	FirstCommitDate time.Time
+	Raw             []byte `sql:"type:jsonb"` // This is the RAW JSONB of the metadata of a Repo
 }
 
 // TableName overrides the table name settings in Gorm to force a specific table name
