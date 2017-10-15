@@ -67,19 +67,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           },
           from: {
             type: String,
-            notify: true,
-            observer: "_timeChanged"
+            notify: true
           },
           till: {
             type: String,
-            notify: true,
-            observer: "_timeChanged"
+            notify: true
           },
           name: {
             type: String
           },
           page: {
             type: String
+          },
+          svg: {
+            type: Object
+          },
+          projection: {
+            type: Function
+          },
+          path: {
+            type: Object
           }
         };
       }
@@ -89,11 +96,46 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.drawMap();
       }
 
-      _timeChanged(time) {
-        console.log(time, this.name, this.page);
-        if(time && this.name == this.page) {
-          this.drawMap();
+      initialDate(d,i){
+        const month = ["January","February","March","April","May","June","July","August","September","October","November","December"]
+        var d = new Date(d.timestamp);
+        var m = month[d.getMonth()];
+        if (m == "January") {
+            this.parentElement.appendChild(this);
+            return "red";
+        } else {
+            return "#999";
+        };
+      }
+
+      commitsChanged() {
+        console.log( "commits changed" )
+        if( this.svg ){
+          let commitNodes = this.svg.selectAll("circle")
+                                    .data(this.commits)
+
+          var that = this
+
+          commitNodes.enter()
+              .append("circle")
+              .attr( "class", "commit")
+              .attr("cx", function (d) {
+                  let lat = d.author.location.lat;
+                  let lon = d.author.location.lng
+                  return that.projection([lon, lat])[0];
+              })
+              .attr("cy", function (d) {
+                let lat = d.author.location.lat;
+                let lon = d.author.location.lng
+                  return that.projection([lon, lat])[1];
+              })
+              .attr("r", "2px")
+              .attr("fill", this.initialDate)
+
+          commitNodes.exit()
+                      .remove()
         }
+
       }
 
       drawMap() {
@@ -104,25 +146,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         const width = 1500 - margin.left - margin.right
         const height = 750 - margin.top - margin.bottom
 
-        var svg = d3.select(this.$.svg)
+        this.svg = d3.select(this.$.svg)
                     .attr( 'width', 1500 )
                     .attr( 'height', 750 )
 
-        var projection = d3.geoMercator()
+        this.projection = d3.geoMercator()
                             .scale(150)
                             .translate( [width / 2, height / 1.5]);
 
-        var path = d3.geoPath().projection(projection);
+        this.path = d3.geoPath().projection(this.projection);
 
-        let d3Ready = (error, world, commitsResponse) => {
+        let d3Ready = (error, world) => {
             if (error) throw error;
     
-            const commits = commitsResponse
+            // const commits = commitsResponse
             // console.log(commitsResponse);
             // console.log("commits: ", commits)
     
             var inputValue = null;
-            var month = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+            const month = ["January","February","March","April","May","June","July","August","September","October","November","December"]
     
             // when the input range changes update the value
             d3.select(this.$.timeslide).on("input", function() {
@@ -148,60 +190,58 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               };
             }
     
-            svg.append("g")
+            this.svg.append("g")
                 .attr("class", "countries")
                 .selectAll("path")
                 .data(topojson.feature(world, world.objects.countries).features)
                 .enter().append("path")
-                .attr("d", path)
+                .attr("d", this.path)
                 .style("fill", "white")
                 .style("stroke", "black")
+
+            console.log("this.commits: ", this.commits)
+
+            let commitNodes = this.svg.selectAll("circle")
+                                  .data(this.commits)
     
-            svg.selectAll("circle")
-                .data(commits).enter()
+            var that = this
+
+            commitNodes.enter()
                 .append("circle")
                 .attr( "class", "commit")
                 .attr("cx", function (d) {
-                    let lat = d.author.location.lat;
+                    let lat = d.author.location.lat
                     let lon = d.author.location.lng
-                    return projection([lon, lat])[0];
+                    return that.projection([lon, lat])[0]
                 })
                 .attr("cy", function (d) {
-                  let lat = d.author.location.lat;
+                  let lat = d.author.location.lat
                   let lon = d.author.location.lng
-                    return projection([lon, lat])[1];
+                  return that.projection([lon, lat])[1]
                 })
                 .attr("r", "2px")
-                .attr("fill", initialDate)
-    
-            function initialDate(d,i){
-                var d = new Date(d.timestamp);
-                var m = month[d.getMonth()];
-                if (m == "January") {
-                    this.parentElement.appendChild(this);
-                    return "red";
-                } else {
-                    return "#999";
-                };
-            }
+                .attr("fill", this.initialDate)
+
+            commitNodes.exit()
+                        .remove()
         }
 
         d3.queue()
           .defer( d3.json, "https://d3js.org/world-50m.v1.json" )
-          .defer( d3.json , 'http://localhost:8081/v1/repositories/43/commits/list?from=' + new Date(this.from).toISOString() + '&until=' + new Date(this.till).toISOString())
           .await( d3Ready )
 
       }
 
-      getCommits(url, callback) {
-        const params = JSON.stringify({"from":"2017-09-21T00:00:00.000Z","till":"2017-10-06T00:00:00.000Z","limit":10000})
-        d3.request(url)
-          .mimeType("application/json")
-          .post( params, function( xhr ){ 
-            const json = JSON.parse(xhr.responseText)
-            console.log( "commits json: ", json); 
-            callback( null, json ); 
-          } );
+      getCommits(projectID) {
+        fetch('http://localhost:8081/v1/repositories/' + projectID + '/commits/list?from=' + new Date(this.from).toISOString() +
+          '&until=' +
+          new Date(this.till).toISOString()).then((response) => {
+            return response.json();
+          }).then((resp) => {
+            console.log( "jemoerr")
+            console.log("resp", resp);
+            this.commits = resp;
+          });
       }
     }
 
