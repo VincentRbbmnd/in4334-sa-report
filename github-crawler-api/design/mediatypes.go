@@ -74,11 +74,13 @@ var LocationMedia = MediaType("application/vnd.location+json", func() {
 		Attribute("id", Integer, "ID of the location in the database")
 		Attribute("lat", Number, "coordinates lat")
 		Attribute("lng", Number, "coordinates lng")
+		Attribute("location_string", String, "Location as specified by user")
 		Required("id", "lat", "lng")
 	})
 	View("default", func() {
 		Attribute("id")
 		Attribute("lat")
 		Attribute("lng")
+		Attribute("location_string")
 	})
 })

@@ -9,6 +9,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/vaadin-grid/vaadin-grid.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="custom-timeline.html">
 
@@ -20,13 +21,74 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       }
     </style>
-    
-    <custom-timeline></custom-timeline>
+    <div class="card">
+      <h1>Details</h1>
+      <vaadin-grid class="grid" items='[[locations]]' style="max-height: 90vh; overflow-y: auto;">
+        <vaadin-grid-column>
+            <template class="header">Location</template>
+            <template>
+                <div>
+                    [[item.loc]]
+                </div>
+            </template>
+        </vaadin-grid-column>
+        <vaadin-grid-column>
+            <template class="header">Count</template>
+            <template>
+                <div>
+                    [[item.count]]
+                </div>
+            </template>
+        </vaadin-grid-column>
+    </vaadin-grid>
+
+    </div>
   </template>
 
   <script>
     class MyView3 extends Polymer.Element {
       static get is() { return 'my-view3'; }
+      
+      static get properties() {
+        return {
+          commits: {
+            type: Array,
+            observer: '_commitsChanged'
+          },
+          name: {
+            type: String
+          },
+          page: {
+            type: String
+          },
+          locations: {
+            type: Array,
+            value: [],
+          }
+        };
+      }
+
+      ready() {
+        super.ready();
+      }
+
+      _commitsChanged(commits) {
+        this.locations = [];
+        let map = {};
+        if(commits.length > 0) {
+          for(let commit of commits) {
+            if(map[commit.author.location.location_string]) {
+              map[commit.author.location.location_string]++;
+            } else {
+              map[commit.author.location.location_string] = 1;
+            }
+          }
+        }
+        for(let el in map) {
+          this.push('locations', {loc: el, count: map[el]});
+        }
+        console.log(this.locations);
+      }
     }
 
     window.customElements.define(MyView3.is, MyView3);
