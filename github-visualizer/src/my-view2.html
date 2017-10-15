@@ -67,12 +67,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           },
           from: {
             type: String,
-            notify: true
+            notify: true,
+            observer: "_timeChanged"
           },
           till: {
             type: String,
-            notify: true
+            notify: true,
+            observer: "_timeChanged"
           },
+          name: {
+            type: String
+          },
+          page: {
+            type: String
+          }
         };
       }
 
@@ -81,6 +89,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.drawMap();
       }
 
+      _timeChanged(time) {
+        console.log(time, this.name, this.page);
+        if(time && this.name == this.page) {
+          this.drawMap();
+        }
+      }
 
       drawMap() {
         console.log("Starting to make requests...")
@@ -174,7 +188,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         d3.queue()
           .defer( d3.json, "https://d3js.org/world-50m.v1.json" )
-          .defer( d3.json , 'http://localhost:8081/v1/repositories/43/commits/list?from=' + new Date('2017-01-01').toISOString() + '&until=' + new Date().toISOString())
+          .defer( d3.json , 'http://localhost:8081/v1/repositories/43/commits/list?from=' + new Date(this.from).toISOString() + '&until=' + new Date(this.till).toISOString())
           .await( d3Ready )
 
       }
