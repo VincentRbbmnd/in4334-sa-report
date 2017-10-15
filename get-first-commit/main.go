@@ -26,7 +26,7 @@ func main() {
 	for _, repo := range repos {
 		fmt.Println("repo: ", repo.FullName)
 		if !repo.FirstCommitDate.IsZero() {
-			fmt.Println("Skipping, already has first commit date set!")
+			fmt.Println("Skipping, already has first commit date set: ", repo.FirstCommitDate)
 			continue
 		}
 		commit, err := commitDB.GetFirstCommitByRepoID(ctx, repo.ProjectID)
