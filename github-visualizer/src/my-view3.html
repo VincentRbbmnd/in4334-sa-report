@@ -11,6 +11,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/vaadin-grid/vaadin-grid.html">
 <link rel="import" href="shared-styles.html">
+<link rel="import" href="custom-timeline.html">
 
 <dom-module id="my-view3">
   <template>
@@ -18,10 +19,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       :host {
         display: block;
 
-        padding: 10px;
       }
     </style>
-
     <div class="card">
       <h1>Details</h1>
       <vaadin-grid class="grid" items='[[locations]]' style="max-height: 90vh; overflow-y: auto;">
