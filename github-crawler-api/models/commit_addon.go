@@ -14,14 +14,15 @@ import (
 // MediaType Retrieval Functions
 type CommitWithEverything struct {
 	User
-	CommitDate time.Time
-	Parent     []byte
-	Sha        string
-	Message    string
-	ParentSha  string
-	Lat        float64
-	Lng        float64
-	LocationID int
+	CommitDate     time.Time
+	Parent         []byte
+	Sha            string
+	Message        string
+	ParentSha      string
+	Lat            float64
+	Lng            float64
+	LocationString string
+	LocationID     int
 }
 
 type ParentCommitList []ParentCommit
@@ -46,7 +47,7 @@ func (m *CommitDB) ListCommitWithUsersWithLocationForRepo(ctx context.Context, r
 
 	var native []*CommitWithEverything
 	err := m.Db.Scopes().Table("repositories").
-		Select(`users.login,users.type, location_id, message, commit_date, sha, ST_X(point) as lat, ST_Y(point) as lng`).
+		Select(`users.login,users.type, location_id, message, commit_date, sha, location_string, ST_X(point) as lat, ST_Y(point) as lng`).
 		Joins(`LEFT JOIN "Commits" on repository_id = repositories.project_id`).
 		Joins(`LEFT JOIN users on github_user_id = author_id`).
 		Joins(`LEFT JOIN locations on locations.id = location_id`).
@@ -65,7 +66,7 @@ func (m *CommitDB) ListCommitWithUsersWithLocationForRepo(ctx context.Context, r
 		commit := app.Commit{}
 		commit.Sha = t.Sha
 		commit.Message = &t.Message
-		loc := &app.Location{Lat: t.Lat, Lng: t.Lng}
+		loc := &app.Location{Lat: t.Lat, Lng: t.Lng, LocationString: &t.LocationString}
 		commit.Author = &app.Ghuser{ID: t.User.ID, Location: loc, Login: t.User.Login, Type: t.User.Type}
 		commit.Timestamp = t.CommitDate
 		list = append(list, &commit)

@@ -72,6 +72,7 @@ var _ = StorageGroup("GHAPI", func() {
 			Field("point", gorma.String, func() {
 				SQLTag("type:geometry(Point,4326)")
 			})
+			Field("location_string", gorma.String)
 			Field("user_id", gorma.BigDecimal)
 		})
 	})

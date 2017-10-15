@@ -19,12 +19,13 @@ import (
 
 // Location model
 type Location struct {
-	ID        int `gorm:"primary_key"` // primary key
-	CreatedAt time.Time
-	DeletedAt *time.Time
-	Point     string `sql:"type:geometry(Point,4326)"`
-	UpdatedAt time.Time
-	UserID    float64
+	ID             int `gorm:"primary_key"` // primary key
+	CreatedAt      time.Time
+	DeletedAt      *time.Time
+	LocationString string
+	Point          string `sql:"type:geometry(Point,4326)"`
+	UpdatedAt      time.Time
+	UserID         float64
 }
 
 // TableName overrides the table name settings in Gorm to force a specific table name

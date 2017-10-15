@@ -12,31 +12,32 @@ definitions:
           id: 1.1409709e+18
           lat: 0.5667709
           lng: 0.45074025
-        login: Sit et esse maiores sit.
-        type: Consequatur eos atque similique.
-      id: 9.0379845e+18
-      message: Sunt asperiores dolor necessitatibus.
-      sha: Suscipit consectetur sed soluta natus doloribus velit.
-      timestamp: 2006-05-20T18:06:34+02:00
+          location_string: Sit et esse maiores sit.
+        login: Consequatur eos atque similique.
+        type: Consectetur sunt asperiores dolor necessitatibus quasi suscipit.
+      id: 8.348355e+18
+      message: Soluta natus doloribus.
+      sha: Sint cupiditate ratione.
+      timestamp: 1978-06-20T04:46:16+02:00
     properties:
       authorOfCommit:
         $ref: '#/definitions/Ghuser'
       id:
         description: ID of the commit in the database
-        example: 9.0379845e+18
+        example: 8.348355e+18
         format: int64
         type: integer
       message:
         description: Message of the commit
-        example: Sunt asperiores dolor necessitatibus.
+        example: Soluta natus doloribus.
         type: string
       sha:
         description: Unique identifier of the commit
-        example: Suscipit consectetur sed soluta natus doloribus velit.
+        example: Sint cupiditate ratione.
         type: string
       timestamp:
         description: Time the commit happened
-        example: 2006-05-20T18:06:34+02:00
+        example: 1978-06-20T04:46:16+02:00
         format: date-time
         type: string
     required:
@@ -56,12 +57,13 @@ definitions:
           id: 1.1409709e+18
           lat: 0.5667709
           lng: 0.45074025
-        login: Sit et esse maiores sit.
-        type: Consequatur eos atque similique.
-      id: 9.0379845e+18
-      message: Sunt asperiores dolor necessitatibus.
-      sha: Suscipit consectetur sed soluta natus doloribus velit.
-      timestamp: 2006-05-20T18:06:34+02:00
+          location_string: Sit et esse maiores sit.
+        login: Consequatur eos atque similique.
+        type: Consectetur sunt asperiores dolor necessitatibus quasi suscipit.
+      id: 8.348355e+18
+      message: Soluta natus doloribus.
+      sha: Sint cupiditate ratione.
+      timestamp: 1978-06-20T04:46:16+02:00
     items:
       $ref: '#/definitions/Commit'
     title: 'Mediatype identifier: application/vnd.commit+json; type=collection; view=default'
@@ -74,8 +76,9 @@ definitions:
         id: 1.1409709e+18
         lat: 0.5667709
         lng: 0.45074025
-      login: Sit et esse maiores sit.
-      type: Consequatur eos atque similique.
+        location_string: Sit et esse maiores sit.
+      login: Consequatur eos atque similique.
+      type: Consectetur sunt asperiores dolor necessitatibus quasi suscipit.
     properties:
       id:
         description: ID of the user in the database
@@ -86,11 +89,11 @@ definitions:
         $ref: '#/definitions/Location'
       login:
         description: Unique username of the user
-        example: Sit et esse maiores sit.
+        example: Consequatur eos atque similique.
         type: string
       type:
         description: Type of the user
-        example: Consequatur eos atque similique.
+        example: Consectetur sunt asperiores dolor necessitatibus quasi suscipit.
         type: string
     required:
     - id
@@ -104,6 +107,7 @@ definitions:
       id: 1.1409709e+18
       lat: 0.5667709
       lng: 0.45074025
+      location_string: Sit et esse maiores sit.
     properties:
       id:
         description: ID of the location in the database
@@ -120,6 +124,10 @@ definitions:
         example: 0.45074025
         format: double
         type: number
+      location_string:
+        description: Location as specified by user
+        example: Sit et esse maiores sit.
+        type: string
     required:
     - id
     - lat
@@ -136,27 +144,28 @@ definitions:
             id: 1.1409709e+18
             lat: 0.5667709
             lng: 0.45074025
-          login: Sit et esse maiores sit.
-          type: Consequatur eos atque similique.
-        id: 9.0379845e+18
-        message: Sunt asperiores dolor necessitatibus.
-        sha: Suscipit consectetur sed soluta natus doloribus velit.
-        timestamp: 2006-05-20T18:06:34+02:00
-      full_name: Dolor ut.
-      id: 6.858816e+18
+            location_string: Sit et esse maiores sit.
+          login: Consequatur eos atque similique.
+          type: Consectetur sunt asperiores dolor necessitatibus quasi suscipit.
+        id: 8.348355e+18
+        message: Soluta natus doloribus.
+        sha: Sint cupiditate ratione.
+        timestamp: 1978-06-20T04:46:16+02:00
+      full_name: Magnam laudantium.
+      id: 1.4347941e+18
       org: true
-      owner: Non magnam.
-      project_id: 0.11750344
+      owner: Quas harum quaerat enim sed magni eveniet.
+      project_id: 0.038566206
     properties:
       first_commit:
         $ref: '#/definitions/Commit'
       full_name:
         description: Full name of the repo
-        example: Dolor ut.
+        example: Magnam laudantium.
         type: string
       id:
         description: ID of the commit in the database
-        example: 6.858816e+18
+        example: 1.4347941e+18
         format: int64
         type: integer
       org:
@@ -165,11 +174,11 @@ definitions:
         type: boolean
       owner:
         description: Name of the owner of the repository
-        example: Non magnam.
+        example: Quas harum quaerat enim sed magni eveniet.
         type: string
       project_id:
         description: Time the commit happened
-        example: 0.11750344
+        example: 0.038566206
         format: double
         type: number
     required:
@@ -190,17 +199,18 @@ definitions:
             id: 1.1409709e+18
             lat: 0.5667709
             lng: 0.45074025
-          login: Sit et esse maiores sit.
-          type: Consequatur eos atque similique.
-        id: 9.0379845e+18
-        message: Sunt asperiores dolor necessitatibus.
-        sha: Suscipit consectetur sed soluta natus doloribus velit.
-        timestamp: 2006-05-20T18:06:34+02:00
-      full_name: Dolor ut.
-      id: 6.858816e+18
+            location_string: Sit et esse maiores sit.
+          login: Consequatur eos atque similique.
+          type: Consectetur sunt asperiores dolor necessitatibus quasi suscipit.
+        id: 8.348355e+18
+        message: Soluta natus doloribus.
+        sha: Sint cupiditate ratione.
+        timestamp: 1978-06-20T04:46:16+02:00
+      full_name: Magnam laudantium.
+      id: 1.4347941e+18
       org: true
-      owner: Non magnam.
-      project_id: 0.11750344
+      owner: Quas harum quaerat enim sed magni eveniet.
+      project_id: 0.038566206
     - first_commit:
         authorOfCommit:
           id: 5.4301856e+18
@@ -208,35 +218,18 @@ definitions:
             id: 1.1409709e+18
             lat: 0.5667709
             lng: 0.45074025
-          login: Sit et esse maiores sit.
-          type: Consequatur eos atque similique.
-        id: 9.0379845e+18
-        message: Sunt asperiores dolor necessitatibus.
-        sha: Suscipit consectetur sed soluta natus doloribus velit.
-        timestamp: 2006-05-20T18:06:34+02:00
-      full_name: Dolor ut.
-      id: 6.858816e+18
+            location_string: Sit et esse maiores sit.
+          login: Consequatur eos atque similique.
+          type: Consectetur sunt asperiores dolor necessitatibus quasi suscipit.
+        id: 8.348355e+18
+        message: Soluta natus doloribus.
+        sha: Sint cupiditate ratione.
+        timestamp: 1978-06-20T04:46:16+02:00
+      full_name: Magnam laudantium.
+      id: 1.4347941e+18
       org: true
-      owner: Non magnam.
-      project_id: 0.11750344
-    - first_commit:
-        authorOfCommit:
-          id: 5.4301856e+18
-          locationForUser:
-            id: 1.1409709e+18
-            lat: 0.5667709
-            lng: 0.45074025
-          login: Sit et esse maiores sit.
-          type: Consequatur eos atque similique.
-        id: 9.0379845e+18
-        message: Sunt asperiores dolor necessitatibus.
-        sha: Suscipit consectetur sed soluta natus doloribus velit.
-        timestamp: 2006-05-20T18:06:34+02:00
-      full_name: Dolor ut.
-      id: 6.858816e+18
-      org: true
-      owner: Non magnam.
-      project_id: 0.11750344
+      owner: Quas harum quaerat enim sed magni eveniet.
+      project_id: 0.038566206
     items:
       $ref: '#/definitions/Repository'
     title: 'Mediatype identifier: application/vnd.repository+json; type=collection;
@@ -301,8 +294,8 @@ paths:
         required: true
         type: integer
       produces:
-      - application/vnd.repository+json
       - application/vnd.goa.error
+      - application/vnd.repository+json
       responses:
         "200":
           description: OK

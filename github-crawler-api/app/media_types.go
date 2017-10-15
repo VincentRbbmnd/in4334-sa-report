@@ -102,6 +102,8 @@ type Location struct {
 	Lat float64 `form:"lat" json:"lat" xml:"lat"`
 	// coordinates lng
 	Lng float64 `form:"lng" json:"lng" xml:"lng"`
+	// Location as specified by user
+	LocationString *string `form:"location_string,omitempty" json:"location_string,omitempty" xml:"location_string,omitempty"`
 }
 
 // Validate validates the Location media type instance.
