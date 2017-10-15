@@ -11,7 +11,7 @@
 
 - Make sure you have the binary file for execution (Followed the build instructions)
 - The binary will connect to the raspberry pi containing the GitHub data
-- Run the binary with flags `./binary -user DB_USER_NAME -pass DB_USER_PASS` to run with the PI
+- Run the binary with flags `./binary -user DB_USER_NAME -pass DB_USER_PASS -port 8082` to run with the PI
 
 - Other flags:
 ```json

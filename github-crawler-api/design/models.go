@@ -46,23 +46,6 @@ var _ = StorageGroup("GHAPI", func() {
 			})
 		})
 
-		// Commit model
-		Model("Repository", func() {
-			RendersTo(RepositoryMedia)
-			Description("Github repository model in DB")
-			Field("id", gorma.Integer, func() {
-				PrimaryKey()
-			})
-			Field("owner", gorma.String)
-			Field("org", gorma.Boolean)
-			Field("full_name", gorma.String)
-			Field("user_type", gorma.String)
-			Field("project_id", gorma.BigDecimal)
-			Field("raw", gorma.String, func() {
-				SQLTag("type:jsonb")
-			})
-		})
-
 		// Repo model
 		Model("Repository", func() {
 			RendersTo(RepositoryMedia)
