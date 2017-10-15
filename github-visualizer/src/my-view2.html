@@ -231,18 +231,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           .await( d3Ready )
 
       }
-
-      getCommits(projectID) {
-        fetch('http://localhost:8081/v1/repositories/' + projectID + '/commits/list?from=' + new Date(this.from).toISOString() +
-          '&until=' +
-          new Date(this.till).toISOString()).then((response) => {
-            return response.json();
-          }).then((resp) => {
-            console.log( "jemoerr")
-            console.log("resp", resp);
-            this.commits = resp;
-          });
-      }
     }
 
     window.customElements.define(MyView2.is, MyView2);
