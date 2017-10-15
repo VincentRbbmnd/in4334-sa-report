@@ -62,11 +62,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           },
           from: {
             type: String,
-            notify: true
+            notify: true,
+            observer: '_timeChanged'
           },
           till: {
             type: String,
-            notify: true
+            notify: true,
+            observer: '_timeChanged'
           },
           markers: {
             type: Object,
@@ -97,6 +99,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Boolean,
             notify: true,
             value: false
+          },
+          name: {
+            type: String
+          },
+          page: {
+            type: String
           }
         };
       }
@@ -132,6 +140,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }, {
           once: true
         });
+      }
+
+      _timeChanged(time) {
+        if(time && this.name == this.page) {
+          this.getCommits();
+        }
       }
 
       getCommits() {
