@@ -22,6 +22,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="my-icons.html">
 <link rel="import" href="../bower_components/vaadin-date-picker/vaadin-date-picker.html">
+<link rel="import" href="../bower_components/vaadin-combo-box/vaadin-combo-box.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
@@ -34,7 +35,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <dom-module id="my-app">
   <template>
     <style include="iron-flex iron-flex-alignment">
-       :host {
+      :host {
 
         --app-primary-color: #4285f4;
         --app-secondary-color: black;
@@ -85,6 +86,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <!-- Drawer content -->
       <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]">
         <app-toolbar>Menu</app-toolbar>
+        <div class="layout horizontal center-justified">
+          <vaadin-combo-box selected-item="{{selectedProject}}" item-label-path="full_name" label="Projects" items="[[projects]]">
+              <template>
+                 [[item.full_name]]
+                </template>
+          </vaadin-combo-box>
+        </div>
         <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
           <a name="view1" href="[[rootPath]]view1">Home</a>
           <a name="view2" href="[[rootPath]]view2">D3 playground</a>
@@ -133,6 +141,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             reflectToAttribute: true,
             observer: '_pageChanged',
           },
+          projects: {
+            type: Object,
+            notify: true,
+            value: []
+          },
           from: {
             type: String,
             notify: true,
@@ -141,6 +154,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: String,
             notify: true
 
+          },
+          selectedProject:{
+            type: String,
+            notify: true,
+            observer: '_selectedProjectChanged'
           },
           routeData: Object,
           subroute: String,
@@ -161,20 +179,38 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         let today = new Date();
         this.till = this.formatDate(today);
         this.from = this.formatDate(new Date('2017-01-01'));
-        console.log("from:: ", this.from);
+        this.getRepositories();
+        
+      }
+
+      getRepositories() {
+        fetch('http://localhost:8081/v1/repositories/list').then((response) => {
+          return response.json();
+        }).then((resp) => {
+          this.selectedProject = resp[0];
+          this.projects = resp;
+        });
+      }
+
+      _selectedProjectChanged(){
+
+        console.log("proejct chagned", this.selectedProject);
+        this.$.view1.getCommits(this.selectedProject.id);
+        // this.$.view1.getCommits(this.selectedProject.id);
+        
       }
 
       formatDate(d) {
         console.log("d: ", d);
         let month = (d.getMonth() + 1);
-        let day =  d.getDate();
+        let day = d.getDate();
         let year = d.getFullYear();
         console.log("day length", day);
-        if(day < 10){
+        if (day < 10) {
           day = "0" + day;
         }
-        if(month < 10){
-          month = "0"+ month;
+        if (month < 10) {
+          month = "0" + month;
         }
         return year + "-" + month + "-" + day;
       }

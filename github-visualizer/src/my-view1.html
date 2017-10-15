@@ -115,7 +115,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       ready() {
         super.ready();
-        this.getCommits();
+        // this.getCommits();
         document.addEventListener('api-load', (e) => {
           this.oms = new OverlappingMarkerSpiderfier(this.map, {
             markersWontMove: true,
@@ -148,12 +148,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
 
-      getCommits() {
-        fetch('http://localhost:8081/v1/repositories/42/commits/list?from=' + new Date(this.from).toISOString() +
+      getCommits(projectID) {
+        fetch('http://localhost:8081/v1/repositories/'+projectID+'/commits/list?from=' + new Date(this.from).toISOString() +
           '&until=' +
           new Date(this.till).toISOString()).then((response) => {
           return response.json();
         }).then((resp) => {
+          console.log("resp", resp);
           this.commits = resp;
         });
       }
