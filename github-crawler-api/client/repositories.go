@@ -11,7 +11,6 @@
 package client
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"net/http"
@@ -26,8 +25,8 @@ func ListRepositoriesPath() string {
 }
 
 // Retrieve all repositories in DB
-func (c *Client) ListRepositories(ctx context.Context, path string, payload *ListPayload, contentType string) (*http.Response, error) {
-	req, err := c.NewListRepositoriesRequest(ctx, path, payload, contentType)
+func (c *Client) ListRepositories(ctx context.Context, path string) (*http.Response, error) {
+	req, err := c.NewListRepositoriesRequest(ctx, path)
 	if err != nil {
 		return nil, err
 	}
@@ -35,29 +34,15 @@ func (c *Client) ListRepositories(ctx context.Context, path string, payload *Lis
 }
 
 // NewListRepositoriesRequest create the request corresponding to the list action endpoint of the repositories resource.
-func (c *Client) NewListRepositoriesRequest(ctx context.Context, path string, payload *ListPayload, contentType string) (*http.Request, error) {
-	var body bytes.Buffer
-	if contentType == "" {
-		contentType = "*/*" // Use default encoder
-	}
-	err := c.Encoder.Encode(payload, &body, contentType)
-	if err != nil {
-		return nil, fmt.Errorf("failed to encode body: %s", err)
-	}
+func (c *Client) NewListRepositoriesRequest(ctx context.Context, path string) (*http.Request, error) {
 	scheme := c.Scheme
 	if scheme == "" {
 		scheme = "http"
 	}
 	u := url.URL{Host: c.Host, Scheme: scheme, Path: path}
-	req, err := http.NewRequest("GET", u.String(), &body)
+	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
 		return nil, err
-	}
-	header := req.Header
-	if contentType == "*/*" {
-		header.Set("Content-Type", "application/json")
-	} else {
-		header.Set("Content-Type", contentType)
 	}
 	return req, nil
 }

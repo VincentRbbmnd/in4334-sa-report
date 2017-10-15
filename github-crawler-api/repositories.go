@@ -2,6 +2,7 @@ package main
 
 import (
 	"github-crawler-api/app"
+
 	"github.com/goadesign/goa"
 )
 
@@ -19,19 +20,21 @@ func NewRepositoriesController(service *goa.Service) *RepositoriesController {
 func (c *RepositoriesController) List(ctx *app.ListRepositoriesContext) error {
 	// RepositoriesController_List: start_implement
 
-	// Put your logic here
+	repos := repoDB.ListRepository(ctx)
+	return ctx.OK(repos)
 
 	// RepositoriesController_List: end_implement
-	res := app.CommitCollection{}
-	return ctx.OK(res)
 }
 
 // Show runs the show action.
 func (c *RepositoriesController) Show(ctx *app.ShowRepositoriesContext) error {
 	// RepositoriesController_Show: start_implement
 
-	// Put your logic here
-
+	repo, err := repoDB.OneRepository(ctx, ctx.RepoID)
+	if err != nil {
+		return ctx.BadRequest(err)
+	}
+	return ctx.OK(repo)
 	// RepositoriesController_Show: end_implement
 	res := &app.Repository{}
 	return ctx.OK(res)

@@ -114,6 +114,8 @@ func (mt *Location) Validate() (err error) {
 //
 // Identifier: application/vnd.repository+json; view=default
 type Repository struct {
+	// First commit of the repository
+	FirstCommit *Commit `form:"first_commit,omitempty" json:"first_commit,omitempty" xml:"first_commit,omitempty"`
 	// Full name of the repo
 	FullName string `form:"full_name" json:"full_name" xml:"full_name"`
 	// ID of the commit in the database
@@ -136,5 +138,27 @@ func (mt *Repository) Validate() (err error) {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "full_name"))
 	}
 
+	if mt.FirstCommit != nil {
+		if err2 := mt.FirstCommit.Validate(); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	return
+}
+
+// RepositoryCollection is the media type for an array of Repository (default view)
+//
+// Identifier: application/vnd.repository+json; type=collection; view=default
+type RepositoryCollection []*Repository
+
+// Validate validates the RepositoryCollection media type instance.
+func (mt RepositoryCollection) Validate() (err error) {
+	for _, e := range mt {
+		if e != nil {
+			if err2 := e.Validate(); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
 	return
 }

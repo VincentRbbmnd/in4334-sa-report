@@ -44,18 +44,49 @@ func (c *Client) NewListCommitsRequest(ctx context.Context, path string, from *t
 	u := url.URL{Host: c.Host, Scheme: scheme, Path: path}
 	values := u.Query()
 	if from != nil {
-		tmp6 := from.Format(time.RFC3339)
-		values.Set("from", tmp6)
+		tmp7 := from.Format(time.RFC3339)
+		values.Set("from", tmp7)
 	}
 	if limit != nil {
-		tmp7 := strconv.Itoa(*limit)
-		values.Set("limit", tmp7)
+		tmp8 := strconv.Itoa(*limit)
+		values.Set("limit", tmp8)
 	}
 	if until != nil {
-		tmp8 := until.Format(time.RFC3339)
-		values.Set("until", tmp8)
+		tmp9 := until.Format(time.RFC3339)
+		values.Set("until", tmp9)
 	}
 	u.RawQuery = values.Encode()
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	return req, nil
+}
+
+// ShowCommitsPath computes a request path to the show action of commits.
+func ShowCommitsPath(repoID int, sha string) string {
+	param0 := strconv.Itoa(repoID)
+	param1 := sha
+
+	return fmt.Sprintf("/v1/repositories/%s/commits/%s", param0, param1)
+}
+
+// Retrieve commit from db
+func (c *Client) ShowCommits(ctx context.Context, path string) (*http.Response, error) {
+	req, err := c.NewShowCommitsRequest(ctx, path)
+	if err != nil {
+		return nil, err
+	}
+	return c.Client.Do(ctx, req)
+}
+
+// NewShowCommitsRequest create the request corresponding to the show action endpoint of the commits resource.
+func (c *Client) NewShowCommitsRequest(ctx context.Context, path string) (*http.Request, error) {
+	scheme := c.Scheme
+	if scheme == "" {
+		scheme = "http"
+	}
+	u := url.URL{Host: c.Host, Scheme: scheme, Path: path}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
 		return nil, err

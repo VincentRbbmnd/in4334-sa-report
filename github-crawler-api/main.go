@@ -19,6 +19,7 @@ import (
 
 var db *gorm.DB
 var commitDB *models.CommitDB
+var repoDB *models.RepositoryDB
 var githubAPIKey *string
 
 func main() {
@@ -55,6 +56,7 @@ func initDatabase(logMode bool) {
 	db.LogMode(logMode)
 
 	commitDB = models.NewCommitDB(db)
+	repoDB = models.NewRepositoryDB(db)
 
 	db.DB().SetMaxOpenConns(50)
 }

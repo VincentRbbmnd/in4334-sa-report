@@ -98,26 +98,6 @@ definitions:
     - type
     title: 'Mediatype identifier: application/vnd.ghuser+json; view=default'
     type: object
-  ListPayload:
-    example:
-      from: 2003-04-07T07:12:11+02:00
-      limit: 3.0971241e+18
-      till: 1994-01-29T15:10:24+01:00
-    properties:
-      from:
-        example: 2003-04-07T07:12:11+02:00
-        format: date-time
-        type: string
-      limit:
-        example: 3.0971241e+18
-        format: int64
-        type: integer
-      till:
-        example: 1994-01-29T15:10:24+01:00
-        format: date-time
-        type: string
-    title: ListPayload
-    type: object
   Location:
     description: Location as geocoordinates (default view)
     example:
@@ -149,12 +129,27 @@ definitions:
   Repository:
     description: Commit data (default view)
     example:
+      first_commit:
+        authorOfCommit:
+          id: 5.4301856e+18
+          locationForUser:
+            id: 1.1409709e+18
+            lat: 0.5667709
+            lng: 0.45074025
+          login: Sit et esse maiores sit.
+          type: Consequatur eos atque similique.
+        id: 9.0379845e+18
+        message: Sunt asperiores dolor necessitatibus.
+        sha: Suscipit consectetur sed soluta natus doloribus velit.
+        timestamp: 2006-05-20T18:06:34+02:00
       full_name: Dolor ut.
       id: 6.858816e+18
       org: true
       owner: Non magnam.
       project_id: 0.11750344
     properties:
+      first_commit:
+        $ref: '#/definitions/Commit'
       full_name:
         description: Full name of the repo
         example: Dolor ut.
@@ -184,6 +179,69 @@ definitions:
     - project_id
     title: 'Mediatype identifier: application/vnd.repository+json; view=default'
     type: object
+  RepositoryCollection:
+    description: RepositoryCollection is the media type for an array of Repository
+      (default view)
+    example:
+    - first_commit:
+        authorOfCommit:
+          id: 5.4301856e+18
+          locationForUser:
+            id: 1.1409709e+18
+            lat: 0.5667709
+            lng: 0.45074025
+          login: Sit et esse maiores sit.
+          type: Consequatur eos atque similique.
+        id: 9.0379845e+18
+        message: Sunt asperiores dolor necessitatibus.
+        sha: Suscipit consectetur sed soluta natus doloribus velit.
+        timestamp: 2006-05-20T18:06:34+02:00
+      full_name: Dolor ut.
+      id: 6.858816e+18
+      org: true
+      owner: Non magnam.
+      project_id: 0.11750344
+    - first_commit:
+        authorOfCommit:
+          id: 5.4301856e+18
+          locationForUser:
+            id: 1.1409709e+18
+            lat: 0.5667709
+            lng: 0.45074025
+          login: Sit et esse maiores sit.
+          type: Consequatur eos atque similique.
+        id: 9.0379845e+18
+        message: Sunt asperiores dolor necessitatibus.
+        sha: Suscipit consectetur sed soluta natus doloribus velit.
+        timestamp: 2006-05-20T18:06:34+02:00
+      full_name: Dolor ut.
+      id: 6.858816e+18
+      org: true
+      owner: Non magnam.
+      project_id: 0.11750344
+    - first_commit:
+        authorOfCommit:
+          id: 5.4301856e+18
+          locationForUser:
+            id: 1.1409709e+18
+            lat: 0.5667709
+            lng: 0.45074025
+          login: Sit et esse maiores sit.
+          type: Consequatur eos atque similique.
+        id: 9.0379845e+18
+        message: Sunt asperiores dolor necessitatibus.
+        sha: Suscipit consectetur sed soluta natus doloribus velit.
+        timestamp: 2006-05-20T18:06:34+02:00
+      full_name: Dolor ut.
+      id: 6.858816e+18
+      org: true
+      owner: Non magnam.
+      project_id: 0.11750344
+    items:
+      $ref: '#/definitions/Repository'
+    title: 'Mediatype identifier: application/vnd.repository+json; type=collection;
+      view=default'
+    type: array
   error:
     description: Error response media type (default view)
     example:
@@ -243,8 +301,8 @@ paths:
         required: true
         type: integer
       produces:
-      - application/vnd.goa.error
       - application/vnd.repository+json
+      - application/vnd.goa.error
       responses:
         "200":
           description: OK
@@ -261,6 +319,41 @@ paths:
       summary: show repositories
       tags:
       - repositories
+  /repositories/{repoID}/commits/{sha}:
+    get:
+      description: Retrieve commit from db
+      operationId: commits#show
+      parameters:
+      - description: Repository ID
+        in: path
+        minimum: 1
+        name: repoID
+        required: true
+        type: integer
+      - description: SHA of the commit
+        in: path
+        name: sha
+        required: true
+        type: string
+      produces:
+      - application/vnd.goa.error
+      - application/vnd.commit+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Commit'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/error'
+        "404":
+          description: Not Found
+      schemes:
+      - http
+      summary: show commits
+      tags:
+      - commits
   /repositories/{repoID}/commits/list:
     get:
       description: Retrieve commits between timespan with users
@@ -312,20 +405,14 @@ paths:
     get:
       description: Retrieve all repositories in DB
       operationId: repositories#list
-      parameters:
-      - in: body
-        name: payload
-        required: true
-        schema:
-          $ref: '#/definitions/ListPayload'
       produces:
       - application/vnd.goa.error
-      - application/vnd.commit+json; type=collection
+      - application/vnd.repository+json; type=collection
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/CommitCollection'
+            $ref: '#/definitions/RepositoryCollection'
         "400":
           description: Bad Request
           schema:
@@ -348,7 +435,7 @@ responses:
   OK:
     description: OK
     schema:
-      $ref: '#/definitions/Repository'
+      $ref: '#/definitions/Commit'
 schemes:
 - http
 swagger: "2.0"

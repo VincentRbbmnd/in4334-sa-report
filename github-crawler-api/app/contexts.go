@@ -111,12 +111,67 @@ func (ctx *ListCommitsContext) NotFound() error {
 	return nil
 }
 
+// ShowCommitsContext provides the commits show action context.
+type ShowCommitsContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	RepoID int
+	Sha    string
+}
+
+// NewShowCommitsContext parses the incoming request URL and body, performs validations and creates the
+// context used by the commits controller show action.
+func NewShowCommitsContext(ctx context.Context, r *http.Request, service *goa.Service) (*ShowCommitsContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := ShowCommitsContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramRepoID := req.Params["repoID"]
+	if len(paramRepoID) > 0 {
+		rawRepoID := paramRepoID[0]
+		if repoID, err2 := strconv.Atoi(rawRepoID); err2 == nil {
+			rctx.RepoID = repoID
+		} else {
+			err = goa.MergeErrors(err, goa.InvalidParamTypeError("repoID", rawRepoID, "integer"))
+		}
+		if rctx.RepoID < 1 {
+			err = goa.MergeErrors(err, goa.InvalidRangeError(`repoID`, rctx.RepoID, 1, true))
+		}
+	}
+	paramSha := req.Params["sha"]
+	if len(paramSha) > 0 {
+		rawSha := paramSha[0]
+		rctx.Sha = rawSha
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *ShowCommitsContext) OK(r *Commit) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.commit+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *ShowCommitsContext) BadRequest(r error) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.goa.error")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// NotFound sends a HTTP response with status code 404.
+func (ctx *ShowCommitsContext) NotFound() error {
+	ctx.ResponseData.WriteHeader(404)
+	return nil
+}
+
 // ListRepositoriesContext provides the repositories list action context.
 type ListRepositoriesContext struct {
 	context.Context
 	*goa.ResponseData
 	*goa.RequestData
-	Payload *ListPayload
 }
 
 // NewListRepositoriesContext parses the incoming request URL and body, performs validations and creates the
@@ -132,10 +187,10 @@ func NewListRepositoriesContext(ctx context.Context, r *http.Request, service *g
 }
 
 // OK sends a HTTP response with status code 200.
-func (ctx *ListRepositoriesContext) OK(r CommitCollection) error {
-	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.commit+json; type=collection")
+func (ctx *ListRepositoriesContext) OK(r RepositoryCollection) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.repository+json; type=collection")
 	if r == nil {
-		r = CommitCollection{}
+		r = RepositoryCollection{}
 	}
 	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
 }

@@ -36,6 +36,7 @@ func initService(service *goa.Service) {
 type CommitsController interface {
 	goa.Muxer
 	List(*ListCommitsContext) error
+	Show(*ShowCommitsContext) error
 }
 
 // MountCommitsController "mounts" a Commits resource controller on the given service.
@@ -43,6 +44,7 @@ func MountCommitsController(service *goa.Service, ctrl CommitsController) {
 	initService(service)
 	var h goa.Handler
 	service.Mux.Handle("OPTIONS", "/v1/repositories/:repoID/commits/list", ctrl.MuxHandler("preflight", handleCommitsOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/v1/repositories/:repoID/commits/:sha", ctrl.MuxHandler("preflight", handleCommitsOrigin(cors.HandlePreflight()), nil))
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -59,6 +61,22 @@ func MountCommitsController(service *goa.Service, ctrl CommitsController) {
 	h = handleCommitsOrigin(h)
 	service.Mux.Handle("GET", "/v1/repositories/:repoID/commits/list", ctrl.MuxHandler("list", h, nil))
 	service.LogInfo("mount", "ctrl", "Commits", "action", "List", "route", "GET /v1/repositories/:repoID/commits/list")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewShowCommitsContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Show(rctx)
+	}
+	h = handleCommitsOrigin(h)
+	service.Mux.Handle("GET", "/v1/repositories/:repoID/commits/:sha", ctrl.MuxHandler("show", h, nil))
+	service.LogInfo("mount", "ctrl", "Commits", "action", "Show", "route", "GET /v1/repositories/:repoID/commits/:sha")
 }
 
 // handleCommitsOrigin applies the CORS response headers corresponding to the origin.
@@ -111,16 +129,10 @@ func MountRepositoriesController(service *goa.Service, ctrl RepositoriesControll
 		if err != nil {
 			return err
 		}
-		// Build the payload
-		if rawPayload := goa.ContextRequest(ctx).Payload; rawPayload != nil {
-			rctx.Payload = rawPayload.(*ListPayload)
-		} else {
-			return goa.MissingPayloadError()
-		}
 		return ctrl.List(rctx)
 	}
 	h = handleRepositoriesOrigin(h)
-	service.Mux.Handle("GET", "/v1/repositories/list", ctrl.MuxHandler("list", h, unmarshalListRepositoriesPayload))
+	service.Mux.Handle("GET", "/v1/repositories/list", ctrl.MuxHandler("list", h, nil))
 	service.LogInfo("mount", "ctrl", "Repositories", "action", "List", "route", "GET /v1/repositories/list")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
@@ -164,14 +176,4 @@ func handleRepositoriesOrigin(h goa.Handler) goa.Handler {
 
 		return h(ctx, rw, req)
 	}
-}
-
-// unmarshalListRepositoriesPayload unmarshals the request body into the context request data Payload field.
-func unmarshalListRepositoriesPayload(ctx context.Context, service *goa.Service, req *http.Request) error {
-	payload := &listPayload{}
-	if err := service.DecodeRequest(req, payload); err != nil {
-		return err
-	}
-	goa.ContextRequest(ctx).Payload = payload.Publicize()
-	return nil
 }

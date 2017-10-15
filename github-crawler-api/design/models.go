@@ -55,7 +55,7 @@ var _ = StorageGroup("GHAPI", func() {
 			})
 			Field("owner", gorma.String)
 			Field("org", gorma.Boolean)
-			Field("project_id", gorma.Integer)
+			Field("project_id", gorma.BigDecimal)
 			Field("user_type", gorma.String)
 			Field("full_name", gorma.String)
 			Field("raw", gorma.String, func() {

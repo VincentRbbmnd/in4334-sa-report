@@ -35,6 +35,7 @@ var RepositoryMedia = MediaType("application/vnd.repository+json", func() {
 		Attribute("org", Boolean, "If owner is an organization")
 		Attribute("project_id", Number, "Time the commit happened")
 		Attribute("full_name", String, "Full name of the repo")
+		Attribute("first_commit", CommitMedia, "First commit of the repository")
 		Required("id", "owner", "full_name", "project_id")
 	})
 	View("default", func() {
@@ -43,6 +44,7 @@ var RepositoryMedia = MediaType("application/vnd.repository+json", func() {
 		Attribute("full_name")
 		Attribute("project_id")
 		Attribute("org")
+		Attribute("first_commit")
 	})
 })
 

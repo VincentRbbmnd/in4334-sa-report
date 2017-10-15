@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github-crawler-api/app"
 
 	"github.com/goadesign/goa"
@@ -20,7 +19,6 @@ func NewCommitsController(service *goa.Service) *CommitsController {
 // List runs the list action.
 func (c *CommitsController) List(ctx *app.ListCommitsContext) error {
 	// CommitsController_List: start_implement
-	fmt.Println(ctx.From)
 	res := commitDB.ListCommitWithUsersWithLocationForRepo(ctx, ctx.RepoID, ctx.From, ctx.Until, ctx.Limit)
 	// CommitsController_List: end_implement
 	// res := app.CommitCollection{}
@@ -28,12 +26,15 @@ func (c *CommitsController) List(ctx *app.ListCommitsContext) error {
 }
 
 // Show runs the show action.
-// func (c *CommitsController) Show(ctx *app.ShowCommitsContext) error {
-// 	// CommitsController_Show: start_implement
+func (c *CommitsController) Show(ctx *app.ShowCommitsContext) error {
+	// CommitsController_Show: start_implement
 
-// 	// Put your logic here
-
-// 	// CommitsController_Show: end_implement
-// 	res := &app.Commit{}
-// 	return ctx.OK(res)
-// }
+	commit, err := commitDB.OneCommitForSHA(ctx, ctx.Sha)
+	if err != nil {
+		return ctx.BadRequest(err)
+	}
+	return ctx.OK(commit)
+	// CommitsController_Show: end_implement
+	res := &app.Commit{}
+	return ctx.OK(res)
+}

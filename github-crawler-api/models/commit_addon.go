@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/goadesign/goa"
+	"github.com/jinzhu/gorm"
 )
 
 // MediaType Retrieval Functions
@@ -45,7 +46,7 @@ func (m *CommitDB) ListCommitWithUsersWithLocationForRepo(ctx context.Context, r
 
 	var native []*CommitWithEverything
 	err := m.Db.Scopes().Table("repositories").
-		Select(`users.login,users.type, location_id, message,commit_date, sha, ST_X(point) as lat, ST_Y(point) as lng`).
+		Select(`users.login,users.type, location_id, message, commit_date, sha, ST_X(point) as lat, ST_Y(point) as lng`).
 		Joins(`LEFT JOIN "Commits" on repository_id = repositories.project_id`).
 		Joins(`LEFT JOIN users on github_user_id = author_id`).
 		Joins(`LEFT JOIN locations on locations.id = location_id`).
@@ -71,4 +72,39 @@ func (m *CommitDB) ListCommitWithUsersWithLocationForRepo(ctx context.Context, r
 	}
 
 	return list
+}
+
+// GetFirstCommitForRepository gets first commit for repository (TODO: FIND FASTER WAY TO QUERY)
+func (m *CommitDB) GetFirstCommitForRepository(ctx context.Context, repoID int) (*app.Commit, error) {
+	defer goa.MeasureSince([]string{"goa", "db", "commit", "onecommit"}, time.Now())
+
+	var native Commit
+	err := m.Db.Scopes().Table("Commits").Where("id = ?", repoID).
+		Order("commit_date asc").
+		Limit(1).
+		Find(&native).Error
+
+	if err != nil && err != gorm.ErrRecordNotFound {
+		goa.LogError(ctx, "error getting Commit", "error", err.Error())
+		return nil, err
+	}
+
+	view := *native.CommitToCommit()
+	return &view, err
+}
+
+// OneCommitForSHA loads a Commit and builds the default view of media type Commit.
+func (m *CommitDB) OneCommitForSHA(ctx context.Context, sha string) (*app.Commit, error) {
+	defer goa.MeasureSince([]string{"goa", "db", "commit", "onecommit"}, time.Now())
+
+	var native Commit
+	err := m.Db.Scopes().Table("Commits").Where("sha = ?", sha).Find(&native).Error
+
+	if err != nil && err != gorm.ErrRecordNotFound {
+		goa.LogError(ctx, "error getting Commit", "error", err.Error())
+		return nil, err
+	}
+
+	view := *native.CommitToCommit()
+	return &view, err
 }

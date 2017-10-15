@@ -20,6 +20,7 @@ import (
 	uuid "github.com/goadesign/goa/uuid"
 	"github.com/spf13/cobra"
 	"log"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -40,10 +41,17 @@ type (
 		PrettyPrint bool
 	}
 
+	// ShowCommitsCommand is the command line data structure for the show action of commits
+	ShowCommitsCommand struct {
+		// Repository ID
+		RepoID int
+		// SHA of the commit
+		Sha         string
+		PrettyPrint bool
+	}
+
 	// ListRepositoriesCommand is the command line data structure for the list action of repositories
 	ListRepositoriesCommand struct {
-		Payload     string
-		ContentType string
 		PrettyPrint bool
 	}
 
@@ -75,16 +83,7 @@ func RegisterCommands(app *cobra.Command, c *client.Client) {
 	sub = &cobra.Command{
 		Use:   `repositories ["/v1/repositories/list"]`,
 		Short: ``,
-		Long: `
-
-Payload example:
-
-{
-   "from": "2003-04-07T07:12:11+02:00",
-   "limit": 3097124253969176134,
-   "till": "1994-01-29T15:10:24+01:00"
-}`,
-		RunE: func(cmd *cobra.Command, args []string) error { return tmp2.Run(c, args) },
+		RunE:  func(cmd *cobra.Command, args []string) error { return tmp2.Run(c, args) },
 	}
 	tmp2.RegisterFlags(sub, c)
 	sub.PersistentFlags().BoolVar(&tmp2.PrettyPrint, "pp", false, "Pretty print response body")
@@ -92,16 +91,25 @@ Payload example:
 	app.AddCommand(command)
 	command = &cobra.Command{
 		Use:   "show",
-		Short: `Retrieve repository from db`,
+		Short: `show action`,
 	}
-	tmp3 := new(ShowRepositoriesCommand)
+	tmp3 := new(ShowCommitsCommand)
 	sub = &cobra.Command{
-		Use:   `repositories ["/v1/repositories/REPOID"]`,
+		Use:   `commits ["/v1/repositories/REPOID/commits/SHA"]`,
 		Short: ``,
 		RunE:  func(cmd *cobra.Command, args []string) error { return tmp3.Run(c, args) },
 	}
 	tmp3.RegisterFlags(sub, c)
 	sub.PersistentFlags().BoolVar(&tmp3.PrettyPrint, "pp", false, "Pretty print response body")
+	command.AddCommand(sub)
+	tmp4 := new(ShowRepositoriesCommand)
+	sub = &cobra.Command{
+		Use:   `repositories ["/v1/repositories/REPOID"]`,
+		Short: ``,
+		RunE:  func(cmd *cobra.Command, args []string) error { return tmp4.Run(c, args) },
+	}
+	tmp4.RegisterFlags(sub, c)
+	sub.PersistentFlags().BoolVar(&tmp4.PrettyPrint, "pp", false, "Pretty print response body")
 	command.AddCommand(sub)
 	app.AddCommand(command)
 }
@@ -269,25 +277,25 @@ func (cmd *ListCommitsCommand) Run(c *client.Client, args []string) error {
 	}
 	logger := goa.NewLogger(log.New(os.Stderr, "", log.LstdFlags))
 	ctx := goa.WithLogger(context.Background(), logger)
-	var tmp4 *time.Time
+	var tmp5 *time.Time
 	if cmd.From != "" {
 		var err error
-		tmp4, err = timeVal(cmd.From)
+		tmp5, err = timeVal(cmd.From)
 		if err != nil {
 			goa.LogError(ctx, "failed to parse flag into *time.Time value", "flag", "--from", "err", err)
 			return err
 		}
 	}
-	var tmp5 *time.Time
+	var tmp6 *time.Time
 	if cmd.Until != "" {
 		var err error
-		tmp5, err = timeVal(cmd.Until)
+		tmp6, err = timeVal(cmd.Until)
 		if err != nil {
 			goa.LogError(ctx, "failed to parse flag into *time.Time value", "flag", "--until", "err", err)
 			return err
 		}
 	}
-	resp, err := c.ListCommits(ctx, path, tmp4, intFlagVal("limit", cmd.Limit), tmp5)
+	resp, err := c.ListCommits(ctx, path, tmp5, intFlagVal("limit", cmd.Limit), tmp6)
 	if err != nil {
 		goa.LogError(ctx, "failed", "err", err)
 		return err
@@ -309,6 +317,34 @@ func (cmd *ListCommitsCommand) RegisterFlags(cc *cobra.Command, c *client.Client
 	cc.Flags().StringVar(&cmd.Until, "until", until, `Till ID`)
 }
 
+// Run makes the HTTP request corresponding to the ShowCommitsCommand command.
+func (cmd *ShowCommitsCommand) Run(c *client.Client, args []string) error {
+	var path string
+	if len(args) > 0 {
+		path = args[0]
+	} else {
+		path = fmt.Sprintf("/v1/repositories/%v/commits/%v", cmd.RepoID, url.QueryEscape(cmd.Sha))
+	}
+	logger := goa.NewLogger(log.New(os.Stderr, "", log.LstdFlags))
+	ctx := goa.WithLogger(context.Background(), logger)
+	resp, err := c.ShowCommits(ctx, path)
+	if err != nil {
+		goa.LogError(ctx, "failed", "err", err)
+		return err
+	}
+
+	goaclient.HandleResponse(c.Client, resp, cmd.PrettyPrint)
+	return nil
+}
+
+// RegisterFlags registers the command flags with the command line.
+func (cmd *ShowCommitsCommand) RegisterFlags(cc *cobra.Command, c *client.Client) {
+	var repoID int
+	cc.Flags().IntVar(&cmd.RepoID, "repoID", repoID, `Repository ID`)
+	var sha string
+	cc.Flags().StringVar(&cmd.Sha, "sha", sha, `SHA of the commit`)
+}
+
 // Run makes the HTTP request corresponding to the ListRepositoriesCommand command.
 func (cmd *ListRepositoriesCommand) Run(c *client.Client, args []string) error {
 	var path string
@@ -317,16 +353,9 @@ func (cmd *ListRepositoriesCommand) Run(c *client.Client, args []string) error {
 	} else {
 		path = "/v1/repositories/list"
 	}
-	var payload client.ListPayload
-	if cmd.Payload != "" {
-		err := json.Unmarshal([]byte(cmd.Payload), &payload)
-		if err != nil {
-			return fmt.Errorf("failed to deserialize payload: %s", err)
-		}
-	}
 	logger := goa.NewLogger(log.New(os.Stderr, "", log.LstdFlags))
 	ctx := goa.WithLogger(context.Background(), logger)
-	resp, err := c.ListRepositories(ctx, path, &payload, cmd.ContentType)
+	resp, err := c.ListRepositories(ctx, path)
 	if err != nil {
 		goa.LogError(ctx, "failed", "err", err)
 		return err
@@ -338,8 +367,6 @@ func (cmd *ListRepositoriesCommand) Run(c *client.Client, args []string) error {
 
 // RegisterFlags registers the command flags with the command line.
 func (cmd *ListRepositoriesCommand) RegisterFlags(cc *cobra.Command, c *client.Client) {
-	cc.Flags().StringVar(&cmd.Payload, "payload", "", "Request body encoded in JSON")
-	cc.Flags().StringVar(&cmd.ContentType, "content", "", "Request content type override, e.g. 'application/x-www-form-urlencoded'")
 }
 
 // Run makes the HTTP request corresponding to the ShowRepositoriesCommand command.

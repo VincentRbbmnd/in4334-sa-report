@@ -150,6 +150,8 @@ func (c *Client) DecodeLocation(resp *http.Response) (*Location, error) {
 //
 // Identifier: application/vnd.repository+json; view=default
 type Repository struct {
+	// First commit of the repository
+	FirstCommit *Commit `form:"first_commit,omitempty" json:"first_commit,omitempty" xml:"first_commit,omitempty"`
 	// Full name of the repo
 	FullName string `form:"full_name" json:"full_name" xml:"full_name"`
 	// ID of the commit in the database
@@ -172,6 +174,11 @@ func (mt *Repository) Validate() (err error) {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "full_name"))
 	}
 
+	if mt.FirstCommit != nil {
+		if err2 := mt.FirstCommit.Validate(); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
 	return
 }
 
@@ -180,4 +187,28 @@ func (c *Client) DecodeRepository(resp *http.Response) (*Repository, error) {
 	var decoded Repository
 	err := c.Decoder.Decode(&decoded, resp.Body, resp.Header.Get("Content-Type"))
 	return &decoded, err
+}
+
+// RepositoryCollection is the media type for an array of Repository (default view)
+//
+// Identifier: application/vnd.repository+json; type=collection; view=default
+type RepositoryCollection []*Repository
+
+// Validate validates the RepositoryCollection media type instance.
+func (mt RepositoryCollection) Validate() (err error) {
+	for _, e := range mt {
+		if e != nil {
+			if err2 := e.Validate(); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
+// DecodeRepositoryCollection decodes the RepositoryCollection instance encoded in resp body.
+func (c *Client) DecodeRepositoryCollection(resp *http.Response) (RepositoryCollection, error) {
+	var decoded RepositoryCollection
+	err := c.Decoder.Decode(&decoded, resp.Body, resp.Header.Get("Content-Type"))
+	return decoded, err
 }

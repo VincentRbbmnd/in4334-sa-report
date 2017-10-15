@@ -26,6 +26,19 @@ var _ = Resource("commits", func() {
 		Response(NotFound)
 		Response(BadRequest, ErrorMedia)
 	})
+	Action("show", func() {
+		Routing(
+			GET("/:sha"),
+		)
+		Description("Retrieve commit from db")
+		Params(func() {
+			Param("sha", String, "SHA of the commit", func() {
+			})
+		})
+		Response(OK)
+		Response(NotFound)
+		Response(BadRequest, ErrorMedia)
+	})
 })
 
 var _ = Resource("repositories", func() {
@@ -49,9 +62,8 @@ var _ = Resource("repositories", func() {
 		Routing(
 			GET("/list"),
 		)
-		Payload(ListPayload)
 		Description("Retrieve all repositories in DB")
-		Response(OK, CollectionOf(CommitMedia))
+		Response(OK, CollectionOf(RepositoryMedia))
 		Response(BadRequest, ErrorMedia)
 	})
 })
