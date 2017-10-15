@@ -1,0 +1,203 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="../bower_components/paper-range-slider/paper-range-slider.html">
+
+
+<dom-module id="custom-timeline">
+  <template>
+    <style include="shared-styles iron-flex iron-flex-alignment">
+      :host {
+        display: block;
+        padding-top: 20px;
+        width: 100%;
+      }
+
+      #sliderContainer {
+        width: 100%;
+        position: relative;
+        height: 59px;
+
+      }
+
+      #yearIndicators {
+        width: 100%;
+        position: relative;
+        height: 59px;
+      }
+
+      #rangeSlider {
+        position: absolute;
+        top: 0;
+      }
+
+      .textDisplay {
+        text-align: center;
+      }
+
+      .line {
+        background-color: #4285f4;
+        width: 3px;
+        height: 35px;
+      }
+
+      .year {
+        height: 59px;
+        font-size: 12px;
+      }
+
+      .yearText {
+        text-align: center;
+      }
+
+      .yearWrapper {
+        position: absolute;
+        left: 0;
+      }
+    </style>
+    <div class="layout vertical">
+        <div class="textDisplay">
+            Commit range:
+          </div>
+          <div class="textDisplay">
+            {{_formatDate(fromDate)}} - {{_formatDate(tillDate)}}
+          </div>
+      <div id="sliderContainer" class="layout horizontal">
+        <div id="yearIndicators">
+          <template is="dom-repeat" items="{{years}}" as="year">
+            <div class="yearWrapper">
+              <div class="year layout vertical">
+                <div class="layout horizontal center-justified">
+                  <div class="line"></div>
+                </div>
+                <div class="yearText">
+                  {{year}}
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+        <paper-range-slider id="rangeSlider" value-max="{{selectedMax}}" value-min={{selectedMin}} step="1" snaps min="[[min]]" max="[[max]]"></paper-range-slider>
+      </div>
+    </div>
+
+  </template>
+
+  <script>
+    class CustomTimeLine extends Polymer.Element {
+      static get is() { return 'custom-timeline'; }
+
+      static get properties() {
+        return {
+          possibleValues: {
+            type: Object,
+            notify: true,
+            value: []
+          },
+          years: {
+            type: Object,
+            notify: true,
+            value: []
+          },
+          min: {
+            type: Number,
+            notify: true,
+            value: 0
+          },
+          max: {
+            type: Number,
+            notify: true,
+            value: 0
+          },
+          selectedMax: {
+            type: Number,
+            notify: true,
+            observer: '_sliderChanged'
+          },
+          selectedMin: {
+            type: Number,
+            notify: true,
+            observer: '_sliderChanged'
+          },
+          fromDate: {
+            type: Date,
+            notify: true
+          },
+          tillDate: {
+            type: Date,
+            notify: true
+          }
+        };
+      }
+      ready() {
+        super.ready();
+        this.$.rangeSlider.sliderWidth = this.offsetWidth + "px";
+        let end = new Date("10-15-2017");
+        let begin = new Date("01-01-2010");
+        let realYear = ""
+        let yearCounter = 0;
+        while (begin < end) {
+          if (begin.getFullYear() != realYear) {
+            realYear = begin.getFullYear();
+            this.years.push(begin.getFullYear());
+            yearCounter++;
+          }
+          this.possibleValues.push({ "id": this.max, "date": begin.toString() })
+          begin.setDate(begin.getDate() + 1);
+          this.max++;
+        }
+        this.selectedMax = this.max;
+        this.selectedMin = this.max - 30;
+
+        console.log(this.shadowRoot.querySelector("#sliderContainer"));
+        setTimeout(() => {
+          let numberOfYears = this.shadowRoot.querySelector("#yearIndicators").children;
+          let offsetWidth = this.offsetWidth ;
+          for (var i = 0; i < numberOfYears.length; i++) {
+              numberOfYears[i].style.left = (i * (this.offsetWidth / (numberOfYears.length - 1)))+ "px";
+          }
+        }, 10);
+
+      }
+
+      test(year) {
+        console.log("yest: ", year);
+      }
+
+      _sliderChanged() {
+        if (this.possibleValues[0] === undefined) {
+          return;
+        }
+        this.fromDate = new Date(this.possibleValues[this.selectedMin].date);
+        this.tillDate = new Date(this.possibleValues[this.selectedMax - 1].date);
+      }
+
+      _formatDate(date) {
+        // let date = new Date(date);
+        var monthNames = [
+          "January", "February", "March",
+          "April", "May", "June", "July",
+          "August", "September", "October",
+          "November", "December"
+        ];
+
+        var day = date.getDate();
+        var monthIndex = date.getMonth();
+        var year = date.getFullYear();
+
+        return day + ' ' + monthNames[monthIndex] + ' ' + year;
+      }
+    }
+
+    window.customElements.define(CustomTimeLine.is, CustomTimeLine);
+  </script>
+</dom-module>
