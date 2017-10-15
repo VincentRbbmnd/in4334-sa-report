@@ -18,7 +18,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <dom-module id="my-view1">
   <template>
     <style include="shared-styles">
-       :host {
+      :host {
         display: block;
 
         padding: 10px;
@@ -105,7 +105,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           },
           page: {
             type: String
-          }
+          },
+          selectedProject: {
+            type: String,
+            notify: true,
+            observer: '_selectedProjectChanged'
+          },
         };
       }
 
@@ -138,25 +143,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.apiLoaded = true;
           this.commitsChanged();
         }, {
-          once: true
-        });
+            once: true
+          });
+      }
+
+      _selectedProjectChanged() {
+        this.getCommits(this.selectedProject.id);
       }
 
       _timeChanged(time) {
-        if(time && this.name == this.page) {
-          this.getCommits();
+        if (this.selectedProject === undefined) {
+          return;
+        }
+        if (time && this.name == this.page) {
+          this.getCommits(this.selectedProject.id);
         }
       }
 
       getCommits(projectID) {
-        fetch('http://localhost:8081/v1/repositories/'+projectID+'/commits/list?from=' + new Date(this.from).toISOString() +
+        fetch('http://localhost:8081/v1/repositories/' + projectID + '/commits/list?from=' + new Date(this.from).toISOString() +
           '&until=' +
           new Date(this.till).toISOString()).then((response) => {
-          return response.json();
-        }).then((resp) => {
-          console.log("resp", resp);
-          this.commits = resp;
-        });
+            return response.json();
+          }).then((resp) => {
+            console.log("resp", resp);
+            this.commits = resp;
+          });
       }
 
       commitsChanged() {
