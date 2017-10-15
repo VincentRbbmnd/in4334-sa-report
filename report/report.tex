@@ -73,7 +73,12 @@ With GitHub providing programmatic access to all OSS repository and user data\ci
 These new insights can then be applied to to e.g. develop new software development methods, improve existing (collaboration) platforms (like GitHub) or coding standards, which improve developer collaboration \cite{Jermakovics2013}.
 Outside of the OSS community, a better understanding of how the OSS community functions helps commercial IT projects adopt typical OSS practices, e.g. promoting open collaboration \cite{Kalliamvakou:2015:OSC:2818754.2818825}, and may help IT planners make more informed decisions and develop more effective strategies for using OSS software \cite{madey2002}. 
 
-One way for researchers to analyze the gathered data, is by visualizing it \cite{Heller}, however, up until now there have not been a lot of tools or platforms which provide visual insight into e.g. collaboration over time on a specific repository.
+One way for researchers to analyze the gathered data, is by visualizing it \cite{Heller}.
+One of the objective of the Software Visualization field is to aid stakeholders in developing a greater understanding of software systems, their evolution and development.
+"The basic idea of visual data exploration is to present the data in some visual form, allowing the human to get insight into the data, draw conclusions, and directly interact with the data. 
+Visual data mining techniques have proven to be of high value in exploratory data analysis and they also have high potential for exploring large databases." \cite{981847}.
+To give developers insights in repositories, GitHub also provides some visualizations, one of these visualization is "Developer Contribution", which shows amount of commits made during a period of time.
+Up until now there have not been a lot of tools or platforms which provide visual insight into e.g. collaboration over time on a specific repository.
 Tools which are available are outdated \cite{Heller} or not sufficient, for example a visualization of GitHub's newest and most popular repositories \cite{donnemartin2016}, a GitHub repository history visualizer \cite{artzub2013}, and a repository stats visualizer \cite{bajaj2013}.
 Although these examples are visualization tools for GitHub, they provide insufficient information on developer collaboration in OSS projects.
 
@@ -147,6 +152,7 @@ This way coordinates were found for all specified locations on which the Google 
 
 \section{Results}
 The self developed crawler can be found at \url{https://github.com/VincentRbbmnd/in4334-sa-report} and will keep gathering data to make sure our database stays up to date with the current state of the GitHub platform.
+
 \begin{figure}
 \includegraphics[scale=0.3]{visualizer-example.PNG} 
 \caption{Example visualization of developer collaboration (early stage version)}
@@ -156,6 +162,14 @@ The self developed crawler can be found at \url{https://github.com/VincentRbbmnd
 Figure ~\ref{fig:collaboration} shows an example of an early stage visualization in the process of building the visualizer.
 Here, nodes depict developers and lines depict collaboration between developers.
 When at a lower zoom level, nodes get un-grouped and lines between individual developers will be shown.
+
+\begin{figure}
+\includegraphics[scale=0.4]{d3-example-rails.PNG} 
+\caption{Example visualization of commits during a certain time period}
+\label{fig:commits-period}
+\end{figure}
+
+Figure ~\ref{fig:commits-period} shows an example of a map built with the D3 library, with all dots representing commits belonging to a repository, with the red dots representing commits made during a selected period of time.
 
 Preliminary results contain 1000 repositories with over 5 million commits belonging to 160.000 users. 
 Not all of the user gave information on their whereabouts, but about 84.000 did.
