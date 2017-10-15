@@ -74,6 +74,17 @@ func (m *CommitDB) GetLastCommitByRepoID(ctx context.Context, repoID int) (*Comm
 	return &native, err
 }
 
+func (m *CommitDB) GetFirstCommitByRepoID(ctx context.Context, repoID int) (*Commit, error) {
+
+	var native Commit
+	err := m.Db.Table(m.TableName()).Where("repository_id = ?", repoID).Order("created_at ASC LIMIT 1").Find(&native).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil, err
+	}
+
+	return &native, err
+}
+
 // List returns an array of Commit
 func (m *CommitDB) List(ctx context.Context) ([]*Commit, error) {
 
