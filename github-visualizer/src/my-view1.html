@@ -135,14 +135,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       getCommits() {
-          '&until=' +
-          new Date(this.till).toISOString());
         fetch('http://localhost:8081/v1/repositories/42/commits/list?from=' + new Date(this.from).toISOString() +
           '&until=' +
           new Date(this.till).toISOString()).then((response) => {
-           return response.json();
+          return response.json();
         }).then((resp) => {
-            this.commits = resp;
+          this.commits = resp;
         });
       }
 
