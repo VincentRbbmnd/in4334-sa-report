@@ -78,7 +78,7 @@ func (m *CommitDB) GetFirstCommitByRepoID(ctx context.Context, repoID int64) (*C
 
 	var native Commit
 	// err := m.Db.Table(m.TableName()).Where("repository_id = ?", repoID).Order("commit_date ASC LIMIT 1").Find(&native).Error
-	err := m.Db.Raw("SELECT * FROM 'Commits' WHERE repository_id = ? ORDER BY commit_date ASC LIMIT 1", repoID).Scan(&native).Error
+	err := m.Db.Raw("SELECT * FROM Commits WHERE repository_id = ? ORDER BY commit_date ASC LIMIT 1", repoID).Scan(&native).Error
 
 	if err == gorm.ErrRecordNotFound {
 		return nil, err
