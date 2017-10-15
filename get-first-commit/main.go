@@ -38,5 +38,9 @@ func main() {
 
 		repo.FirstCommitDate = commit.CommitDate
 		err = repoDB.Update(ctx, repo)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("Successfully updated")
 	}
 }
