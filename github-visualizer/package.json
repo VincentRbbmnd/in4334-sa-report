@@ -15,6 +15,8 @@
   },
   "dependencies": {
     "d3": "^4.11.0",
+    "leaflet": "^1.2.0",
+    "leaflet-webgl-heatmap": "^0.2.7",
     "polymer-cli": "1.5.7",
     "topojson": "^3.0.2"
   }

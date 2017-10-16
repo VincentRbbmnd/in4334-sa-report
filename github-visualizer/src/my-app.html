@@ -97,6 +97,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <a name="view1" href="[[rootPath]]view1">Home</a>
           <a name="view3" href="[[rootPath]]view3">Details</a>
           <a name="view2" href="[[rootPath]]view2">D3 playground</a>
+          <a name="heatmap" href="[[rootPath]]heatmap">Heatmap</a>
         </iron-selector>
         <dom-if if="pageIsView1(page)">
           <template>
@@ -124,6 +125,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <my-view1 selected-project="[[selectedProject]]" commits="{{commits}}" page="[[page]]" from="[[from]]" till="[[till]]" id="view1" name="view1"></my-view1>
           <my-view2 page="[[page]]" from="[[from]]" till="[[till]]" commits="[[commits]]" name="view2"></my-view2>
           <my-view3 commits="[[commits]]" name="view3"></my-view3>
+          <my-heatmap commits="[[commits]]" name="heatmap" page="[[page]]"></my-heatmap>
           <my-view404 name="view404"></my-view404>
         </iron-pages>
       </app-header-layout>
