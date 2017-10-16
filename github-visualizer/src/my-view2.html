@@ -10,6 +10,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="shared-styles.html">
+<link rel="import" href="custom-timeline.html">
+
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <script src="..\node_modules\d3\build\d3.min.js"></script>
 <script src="..\node_modules\d3-queue\build\d3-queue.min.js"></script>
@@ -21,8 +23,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <style include="shared-styles iron-flex iron-flex-alignment">
        :host {
           display: block;
-
-          padding: 10px;
+          width: 100%;
+        height: calc(100vh - 64px);
         }
 
         #sliderContainer {
@@ -34,19 +36,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         #svg {
           z-index: 1;
           position: absolute;
-          top: 0;
+          top: 170px;
           left: 0;
           right: 0;
           bottom: 0;
         }
     </style>
-
+    <div class="layout vertical">
+        <custom-timeline id="timeLine" till-date="{{till}}" from-date="{{from}}"></custom-timeline>
     <svg id="svg" width="1200" height="850"></svg>
+    
+    </div>
+        
 
-    <div id="sliderContainer">
+    <!-- <div id="sliderContainer">
       <input id="timeslide" type="range" min="0" max="11" value="0" step="1"/><br>
       <span id="range">January</span>
-    </div>
+    </div> -->
   </template>
 
   <script>
@@ -67,11 +73,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           },
           from: {
             type: String,
-            notify: true
+            notify: true,
+            observer: '_timeChanged'
           },
           till: {
             type: String,
-            notify: true
+            notify: true,
+            observer: '_timeChanged'
           },
           name: {
             type: String
@@ -87,6 +95,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           },
           path: {
             type: Object
+          },
+          selectedProject: {
+            type: String,
+            notify: true,
+            observer: '_selectedProjectChanged'
           }
         };
       }
@@ -106,6 +119,35 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         } else {
             return "#999";
         };
+      }
+
+      _timeChanged(time) {
+        if (this.selectedProject === undefined) {
+          return;
+        }
+        if (time) {
+          this._debounceFilter = Polymer.Debouncer.debounce(this._debounceFilter, Polymer.Async.timeOut.after(500), () => {
+            this.getCommits(this.selectedProject.id);
+          });
+        }
+      }
+
+      _selectedProjectChanged() {
+        if (this.selectedProject === null) {
+          return;
+        }
+        this.getCommits(this.selectedProject.id);
+      }
+
+      getCommits(projectID) {
+        fetch('http://localhost:8081/v1/repositories/' + this.selectedProject.id + '/commits/list?from=' + new Date(this.from).toISOString() +
+          '&until=' +
+          new Date(this.till).toISOString()).then((response) => {
+            return response.json();
+          }).then((resp) => {
+            console.log("resp: ", resp);
+            this.commits = resp;
+          });
       }
 
       commitsChanged() {
