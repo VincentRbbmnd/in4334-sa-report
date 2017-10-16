@@ -12,6 +12,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="../bower_components/google-map/google-map.html">
 <link rel="import" href="../bower_components/google-apis/google-maps-api.html">
+<link rel="import" href="custom-timeline.html">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/OverlappingMarkerSpiderfier/1.0.3/oms.min.js"></script>
 <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
 
@@ -20,8 +21,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <style include="shared-styles">
       :host {
         display: block;
+        height: calc(100vh - 64px);
+        background-color: white;
+      }
 
-        padding: 10px;
+      #wrapper {
+        position: relative;
+        height: 600px;
       }
 
       #map {
@@ -33,9 +39,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         bottom: 0;
       }
     </style>
+    <div class="layout vertical">
+      <div id="timeline">
+        <custom-timeline></custom-timeline>
+      </div>
+      <div id="wrapper">
+        <google-map disable-default-ui id="map" map="{{map}}" latitude="0" longitude="0" zoom="2" api-key="AIzaSyBFRdnjO9WVvl3Voqj84bLvVMVIjDfBjlk">
+        </google-map>
+      </div>
+   
+    </div>
 
-    <google-map disable-default-ui id="map" map="{{map}}" latitude="0" longitude="0" zoom="2" api-key="AIzaSyBFRdnjO9WVvl3Voqj84bLvVMVIjDfBjlk">
-    </google-map>
+
   </template>
 
   <script>
@@ -121,8 +136,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       ready() {
         super.ready();
-        // this.getCommits();
         document.addEventListener('api-load', (e) => {
+          this._setMapElement();
+
           this.oms = new OverlappingMarkerSpiderfier(this.map, {
             markersWontMove: true,
             markersWontHide: true,
@@ -146,6 +162,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }, {
             once: true
           });
+      }
+
+      _setMapElement() {
+        console.log(this.$.timeline.offsetHeight)
+        console.log(this.offsetHeight);
+        this.$.wrapper.style.height = this.offsetHeight - this.$.timeline.offsetHeight+"px";
+
       }
 
       _selectedProjectChanged() {
