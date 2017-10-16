@@ -175,8 +175,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _setMapElement() {
-        console.log(this.$.timeline.offsetHeight)
-        console.log(this.offsetHeight);
         this.$.wrapper.style.height = this.offsetHeight - this.$.timeline.offsetHeight + "px";
 
       }
@@ -185,12 +183,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (this.selectedProject === null) {
           return;
         }
-        console.log(this.selectedProject);
         this.getCommits(this.selectedProject.id);
       }
 
       _timeChanged(time) {
-        console.log("time: ", time);
         if (this.selectedProject === undefined) {
           return;
         }

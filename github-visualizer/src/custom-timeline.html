@@ -93,7 +93,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </template>
 
   <script>
-    class CustomTimeLine extends Polymer.Element {
+    class CustomTimeLine extends Polymer.mixinBehaviors(Polymer.IronResizableBehavior, Polymer.Element) {
       static get is() { return 'custom-timeline'; }
 
       static get properties() {
@@ -140,9 +140,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
       ready() {
         super.ready();
-        this.$.rangeSlider.sliderWidth = this.offsetWidth + "px";
-        let end = new Date("10-15-2017");
+        this.drawTimeLine();
+        this.addEventListener('iron-resize', this.resize.bind(this));
+
+      }
+
+      resize() {
+        this._debounceFilter = Polymer.Debouncer.debounce(this._debounceFilter, Polymer.Async.timeOut.after(100), () => {
+          this._drawYears();
+        });
+      }
+
+      drawTimeLine() {
+        this.max = 0;
+        this.possibleValues = [];
+        this.years = [];
+        this.$.rangeSlider.sliderWidth = 'calc(100vw - 270px)';
+
         let begin = new Date("01-01-2010");
+        let end = new Date();
+
         let realYear = ""
         let yearCounter = 0;
         while (begin < end) {
@@ -157,21 +174,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
         this.selectedMax = this.max;
         this.selectedMin = this.max - 30;
+        this._drawYears();
+      }
+
+      _drawYears() {
         setTimeout(() => {
           let numberOfYears = this.shadowRoot.querySelector("#yearIndicators").children;
           let offsetWidth = this.offsetWidth;
-          for (var i = 0; i < numberOfYears.length-1; i++) {
+          for (var i = 0; i < numberOfYears.length - 1; i++) {
             numberOfYears[i].style.left = Math.round((this.offsetWidth - 30) * (this.years[i].id / this.max)) + "px";
           }
         }, 10);
-
-      }
-
-      test(year) {
-        console.log("yest: ", year);
       }
 
       _sliderChanged() {
+        if (this.selectedMin === undefined || this.selectedMax === undefined) {
+          return;
+        }
         if (this.possibleValues[0] === undefined) {
           return;
         }
