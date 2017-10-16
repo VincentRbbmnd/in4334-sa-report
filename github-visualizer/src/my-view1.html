@@ -50,7 +50,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
     <div class="layout vertical">
       <div id="timeline">
-        <custom-timeline till-date="{{till}}" from-date="{{from}}"></custom-timeline>
+        <custom-timeline id="timeLine" till-date="{{till}}" from-date="{{from}}"></custom-timeline>
       </div>
       <div id="wrapper">
         <google-map disable-default-ui id="map" map="{{map}}" latitude="0" longitude="0" zoom="2" api-key="AIzaSyBFRdnjO9WVvl3Voqj84bLvVMVIjDfBjlk">
@@ -147,6 +147,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           });
       }
 
+      resizeTimeLine(){
+        this.$.timeLine.resize();
+      }
+
+      tryToReInitMap(){
+        // if(this.apiLoaded){
+          this.initMap();
+        // }
+      }
+
       initMap() {
         let mapOptions = {
           center: new google.maps.LatLng(0, 0),
@@ -177,9 +187,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.markerCluster.setMaxZoom(14);
         this.apiLoaded = true;
         this.commitsChanged();
+        this.$.map.resize();
       }
 
       _setMapElement() {
+        console.log("set height: ", this.offsetHeight);
         this.$.wrapper.style.height = this.offsetHeight - this.$.timeline.offsetHeight + "px";
       }
 
