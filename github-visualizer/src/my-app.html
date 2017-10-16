@@ -99,16 +99,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <a name="view2" href="[[rootPath]]view2">D3 playground</a>
           <a name="heatmap" href="[[rootPath]]heatmap">Heatmap</a>
         </iron-selector>
-        <dom-if if="pageIsView1(page)">
-          <template>
-            <div class="layout vertical" id="commitMapMenu">
-              <vaadin-date-picker has-value id="fromPicker" value="{{from}}" label="Date from">
-              </vaadin-date-picker>
-              <vaadin-date-picker value="{{till}}" label="Date till">
-              </vaadin-date-picker>
-            </div>
-          </template>
-        </dom-if>
       </app-drawer>
 
       <!-- Main content -->
@@ -122,7 +112,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </app-header>
 
         <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
-          <my-view1 selected-project="[[selectedProject]]" commits="{{commits}}" page="[[page]]" from="[[from]]" till="[[till]]" id="view1" name="view1"></my-view1>
+          <my-view1 selected-project="[[selectedProject]]" commits="{{commits}}" page="[[page]]" id="view1" name="view1"></my-view1>
           <my-view2 page="[[page]]" from="[[from]]" till="[[till]]" commits="[[commits]]" name="view2"></my-view2>
           <my-view3 commits="[[commits]]" name="view3"></my-view3>
           <my-heatmap commits="[[commits]]" name="heatmap" page="[[page]]"></my-heatmap>
@@ -147,15 +137,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Object,
             notify: true,
             value: []
-          },
-          from: {
-            type: String,
-            notify: true,
-          },
-          till: {
-            type: String,
-            notify: true
-
           },
           selectedProject:{
             type: String,
@@ -183,9 +164,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       ready() {
         super.ready();
-        let today = new Date();
-        this.till = this.formatDate(today);
-        this.from = this.formatDate(new Date('2017-01-01'));
         this.getRepositories();
         
       }
