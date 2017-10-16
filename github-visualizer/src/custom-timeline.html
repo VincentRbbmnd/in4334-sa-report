@@ -86,7 +86,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </div>
           </template>
         </div>
-        <paper-range-slider id="rangeSlider" value-max="{{selectedMax}}" value-min={{selectedMin}} step="1" snaps min="[[min]]" max="[[max]]"></paper-range-slider>
+        <paper-range-slider slider-width="{{sliderWidth}}" id="rangeSlider" value-max="{{selectedMax}}" value-min={{selectedMin}} step="1" snaps min="[[min]]" max="[[max]]"></paper-range-slider>
       </div>
     </div>
 
@@ -135,6 +135,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           tillDate: {
             type: Date,
             notify: true
+          },
+          sliderWidth: {
+            type: String,
+            observer: '_sliderWidthChanged'
           }
         };
       }
@@ -149,6 +153,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this._debounceFilter = Polymer.Debouncer.debounce(this._debounceFilter, Polymer.Async.timeOut.after(100), () => {
           this._drawYears();
         });
+      }
+
+      
+      _sliderWidthChanged(width) {
+        if (width != "") {
+          this.$.rangeSlider.updateStyles({
+            '--paper-range-slider-width': width,
+          });
+        }
       }
 
       drawTimeLine() {
