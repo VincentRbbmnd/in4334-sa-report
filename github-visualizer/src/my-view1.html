@@ -150,8 +150,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       initMap() {
         let mapOptions = {
           center: new google.maps.LatLng(0, 0),
-          zoom: 2,
+          zoom: 1,
           mapTypeId: 'roadmap',
+          disableDefaultUI: true
         };
         this.map = new google.maps.Map(this.$.map, mapOptions);
         this._setMapElement();
