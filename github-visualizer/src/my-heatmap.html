@@ -13,7 +13,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <script src="../node_modules/leaflet-webgl-heatmap/dist/leaflet-webgl-heatmap.min.js"></script>
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="../leaflet/leaflet.html">
-
+<link rel="import" href="custom-timeline.html">
 
 <dom-module id="my-heatmap">
     <template>
@@ -23,13 +23,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
                 padding: 10px;
             }
+
+            #heatmapdiv {
+                width: calc(100vw - 260px);
+                height: calc(100vh - 200px);
+            }
         </style>
 
         <!-- <div class="card">
             <h1 on-click="_loadHeatMap">Heatmap</h1>
         </div> -->
-        <div style="width: 100vw; height: 100vh;" id="heatmapdiv"></div>
-        
+        <custom-timeline id="timeLine" till-date="{{till}}" from-date="{{from}}"></custom-timeline>
+        <div style="position:relative" id="wrapper">
+            <div id="heatmapdiv"></div>
+        </div>
+
     </template>
 
     <script>
@@ -56,6 +64,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     },
                     heatmap: {
                         type: Object,
+                    },
+                    from: {
+                        type: String,
+                        notify: true,
+                        observer: '_timeChanged'
+                    },
+                    till: {
+                        type: String,
+                        notify: true,
+                        observer: '_timeChanged'
+                    },
+                    selectedProject: {
+                        type: String,
+                        notify: true,
+                        observer: '_selectedProjectChanged'
                     }
                 };
             }
@@ -64,6 +87,38 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 super.ready();
                 this._loadHeatMap();
                 this._commitsChanged(this.commits);
+            }
+
+            _timeChanged(time) {
+                if (this.selectedProject === undefined) {
+                    return;
+                }
+                if (time) {
+                    this._debounceFilter = Polymer.Debouncer.debounce(this._debounceFilter, Polymer.Async.timeOut
+                        .after(500), () => {
+                            this.getCommits(this.selectedProject.id);
+                        });
+                }
+            }
+
+            _selectedProjectChanged() {
+                if (this.selectedProject === null) {
+                    return;
+                }
+                this.getCommits(this.selectedProject.id);
+            }
+
+
+            getCommits(projectID) {
+                fetch('http://localhost:8081/v1/repositories/' + this.selectedProject.id +
+                    '/commits/list?from=' + new Date(this.from).toISOString() +
+                    '&until=' +
+                    new Date(this.till).toISOString()).then((response) => {
+                    return response.json();
+                }).then((resp) => {
+                    console.log("resp: ", resp);
+                    this.commits = resp;
+                });
             }
 
             _loadHeatMap() {
@@ -193,7 +248,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
 
             _pageChanged(page) {
-                if(page == this.name) {
+                if (page == this.name) {
                     this._commitsChanged(this.commits);
                 }
             }
@@ -201,15 +256,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             _commitsChanged(commits) {
                 let locations = [];
                 if (this.map && commits.length > 0) {
-                    for(let el of commits) {
-                        locations.push([this.randomize(el.author.location.lat), this.randomize(el.author.location.lng)]);
+                    for (let el of commits) {
+                        locations.push([this.randomize(el.author.location.lat), this.randomize(el.author.location
+                            .lng)]);
                     }
                     this.heatmap.setData(locations);
                 }
             }
 
             randomize(float) {
-                if(Math.random() > 0.5) {
+                if (Math.random() > 0.5) {
                     return float - Math.random() * (Math.random() * 0.8);
                 } else {
                     return float + Math.random() * (Math.random() * 0.8);

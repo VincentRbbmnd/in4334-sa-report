@@ -35,7 +35,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <dom-module id="my-app">
   <template>
     <style include="iron-flex iron-flex-alignment">
-      :host {
+       :host {
 
         --app-primary-color: #4285f4;
         --app-secondary-color: black;
@@ -116,7 +116,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <my-collaboration selected-project="[[selectedProject]]" commits="{{commits}}" page="[[page]]" id="collaboration" name="collaboration"></my-collaboration>
           <my-view2 page="[[page]]" from="[[from]]" till="[[till]]" commits="[[commits]]" name="view2"></my-view2>
           <my-view3 commits="[[commits]]" name="view3"></my-view3>
-          <my-heatmap commits="[[commits]]" name="heatmap" page="[[page]]"></my-heatmap>
+          <my-heatmap selected-project="[[selectedProject]]" commits="[[commits]]" name="heatmap" page="[[page]]"></my-heatmap>
           <my-view404 name="view404"></my-view404>
         </iron-pages>
       </app-header-layout>
@@ -125,7 +125,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <script>
     class MyApp extends Polymer.Element {
-      static get is() { return 'my-app'; }
+      static get is() {
+        return 'my-app';
+      }
 
       static get properties() {
         return {
@@ -206,7 +208,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // If no page was found in the route data, page will be an empty string.
         // Deault to 'view1' in that case.
         this.page = page || 'collaboration';
-        
+
         // Close a non-persistent drawer when the page & route are changed.
         if (!this.$.drawer.persistent) {
           this.$.drawer.close();
