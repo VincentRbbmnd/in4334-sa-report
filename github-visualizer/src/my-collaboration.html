@@ -1,0 +1,84 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="../bower_components/google-map/google-map.html">
+<link rel="import" href="../bower_components/google-apis/google-maps-api.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="my-view1.html">
+<link rel="import" href="custom-timeline.html">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/OverlappingMarkerSpiderfier/1.0.3/oms.min.js"></script>
+<script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
+
+<dom-module id="my-collaboration">
+  <template>
+    <style include="shared-styles iron-flex iron-flex-alignment">
+      :host {
+        display: block;
+      }
+    </style>
+    <div class="layout horizontal">
+        <my-view1 selected-project="[[selectedProject]]" commits="{{commits}}" id="view1"></my-view1>
+
+        <my-view1 selected-project="[[selectedProject]]" page="[[page]]" id="viewCompare"></my-view1>
+
+    </div>
+
+
+  </template>
+
+  <script>
+    class MyCollaboration extends Polymer.Element {
+      static get is() {
+        return 'my-collaboration';
+      }
+
+      static get properties() {
+        return {
+          commits: {
+            type: Object,
+            value: [],
+            // observer: 'commitsChanged',
+            notify: true
+          },
+          name: {
+            type: String
+          },
+          page: {
+            type: String
+          },
+          selectedProject: {
+            type: String,
+            notify: true
+            // observer: '_selectedProjectChanged'
+          },
+        };
+      }
+
+      constructor() {
+        super();
+      }
+
+      ready() {
+        super.ready();
+        document.addEventListener('api-load', (e) => {
+          this.$.view1.initMap();
+          this.$.viewCompare.initMap();
+        }, {
+            once: true
+          });
+      }
+
+    }
+
+    window.customElements.define(MyCollaboration.is, MyCollaboration);
+  </script>
+</dom-module>

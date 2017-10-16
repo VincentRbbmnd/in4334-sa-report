@@ -155,7 +155,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.max = 0;
         this.possibleValues = [];
         this.years = [];
-        this.$.rangeSlider.sliderWidth = 'calc(100vw - 270px)';
+        this.$.rangeSlider.sliderWidth = this.offsetWidth + "px";
 
         let begin = new Date("01-01-2010");
         let end = new Date();
@@ -178,6 +178,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _drawYears() {
+        this.$.rangeSlider.sliderWidth = this.offsetWidth+"px";
+        
         setTimeout(() => {
           let numberOfYears = this.shadowRoot.querySelector("#yearIndicators").children;
           let offsetWidth = this.offsetWidth;
