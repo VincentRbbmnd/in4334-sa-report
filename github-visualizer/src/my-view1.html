@@ -172,6 +172,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _selectedProjectChanged() {
+        if(this.selectedProject === null){
+          return;
+        }
+        console.log(this.selectedProject);
         this.getCommits(this.selectedProject.id);
       }
 
@@ -185,7 +189,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       getCommits(projectID) {
-        fetch('http://localhost:8081/v1/repositories/' + projectID + '/commits/list?from=' + new Date(this.from).toISOString() +
+        fetch('http://localhost:8081/v1/repositories/' + this.selectedProject.id + '/commits/list?from=' + new Date(this.from).toISOString() +
           '&until=' +
           new Date(this.till).toISOString()).then((response) => {
             return response.json();

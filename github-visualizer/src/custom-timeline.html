@@ -160,7 +160,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         setTimeout(() => {
           let numberOfYears = this.shadowRoot.querySelector("#yearIndicators").children;
           let offsetWidth = this.offsetWidth;
-          for (var i = 0; i < numberOfYears.length; i++) {
+          for (var i = 0; i < numberOfYears.length-1; i++) {
             numberOfYears[i].style.left = Math.round((this.offsetWidth - 30) * (this.years[i].id / this.max)) + "px";
           }
         }, 10);
