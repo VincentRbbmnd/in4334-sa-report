@@ -41,7 +41,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
     <div class="layout vertical">
       <div id="timeline">
-        <custom-timeline></custom-timeline>
+        <custom-timeline till-date="{{till}}" from-date="{{from}}"></custom-timeline>
       </div>
       <div id="wrapper">
         <google-map disable-default-ui id="map" map="{{map}}" latitude="0" longitude="0" zoom="2" api-key="AIzaSyBFRdnjO9WVvl3Voqj84bLvVMVIjDfBjlk">
@@ -172,7 +172,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _selectedProjectChanged() {
-        if(this.selectedProject === null){
+        if (this.selectedProject === null) {
           return;
         }
         console.log(this.selectedProject);
@@ -180,11 +180,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _timeChanged(time) {
+        console.log("time: ", time);
         if (this.selectedProject === undefined) {
           return;
         }
         if (time && this.name == this.page) {
-          this.getCommits(this.selectedProject.id);
+          this._debounceFilter = Polymer.Debouncer.debounce(this._debounceFilter, Polymer.Async.timeOut.after(500), () => {
+            this.getCommits(this.selectedProject.id);
+          });
         }
       }
 
@@ -194,7 +197,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           new Date(this.till).toISOString()).then((response) => {
             return response.json();
           }).then((resp) => {
-            console.log("resp", resp);
+            console.log("resp: ", resp);
             this.commits = resp;
           });
       }
