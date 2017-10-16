@@ -10,13 +10,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="shared-styles.html">
-<link rel="import" href="../bower_components/google-map/google-map.html">
-<link rel="import" href="../bower_components/google-apis/google-maps-api.html">
-<link rel="import" href="../bower_components/paper-button/paper-button.html">
+
 <link rel="import" href="my-view1.html">
 <link rel="import" href="custom-timeline.html">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/OverlappingMarkerSpiderfier/1.0.3/oms.min.js"></script>
-<script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
+
 
 <dom-module id="my-collaboration">
   <template>
@@ -26,10 +23,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
     <div class="layout horizontal">
-        <my-view1 selected-project="[[selectedProject]]" commits="{{commits}}" id="view1"></my-view1>
-
-        <my-view1 selected-project="[[selectedProject]]" page="[[page]]" id="viewCompare"></my-view1>
-
+      <my-view1 selected-project="[[selectedProject]]" commits="{{commits}}" id="view1"></my-view1>
+      <my-view1 selected-project="[[selectedProject]]" page="[[page]]" id="viewCompare"></my-view1>
     </div>
 
 
@@ -46,7 +41,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           commits: {
             type: Object,
             value: [],
-            // observer: 'commitsChanged',
             notify: true
           },
           name: {
@@ -58,7 +52,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           selectedProject: {
             type: String,
             notify: true
-            // observer: '_selectedProjectChanged'
           },
         };
       }
@@ -69,12 +62,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       ready() {
         super.ready();
-        document.addEventListener('api-load', (e) => {
-          this.$.view1.initMap();
-          this.$.viewCompare.initMap();
-        }, {
-            once: true
-          });
+        
       }
 
     }
