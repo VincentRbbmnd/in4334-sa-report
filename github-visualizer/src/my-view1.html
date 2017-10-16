@@ -10,18 +10,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="shared-styles.html">
+<link rel="import" href="custom-timeline.html">
 <link rel="import" href="../bower_components/google-map/google-map.html">
 <link rel="import" href="../bower_components/google-apis/google-maps-api.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
-<link rel="import" href="custom-timeline.html">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/OverlappingMarkerSpiderfier/1.0.3/oms.min.js"></script>
 <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
-
 <dom-module id="my-view1">
   <template>
     <style include="shared-styles">
       :host {
         display: block;
+        width: 100%;
         height: calc(100vh - 64px);
         background-color: white;
       }
@@ -50,7 +50,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
     <div class="layout vertical">
       <div id="timeline">
-        <custom-timeline till-date="{{till}}" from-date="{{from}}"></custom-timeline>
+        <custom-timeline id="timeLine" till-date="{{till}}" from-date="{{from}}"></custom-timeline>
       </div>
       <div id="wrapper">
         <google-map disable-default-ui id="map" map="{{map}}" latitude="0" longitude="0" zoom="2" api-key="AIzaSyBFRdnjO9WVvl3Voqj84bLvVMVIjDfBjlk">
@@ -126,17 +126,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             notify: true,
             value: false
           },
-          name: {
-            type: String
-          },
-          page: {
-            type: String
-          },
           selectedProject: {
             type: String,
             notify: true,
             observer: '_selectedProjectChanged'
-          },
+          }
         };
       }
 
@@ -147,54 +141,72 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       ready() {
         super.ready();
         document.addEventListener('api-load', (e) => {
-          this._setMapElement();
-
-          this.oms = new OverlappingMarkerSpiderfier(this.map, {
-            markersWontMove: true,
-            markersWontHide: true,
-            basicFormatEvents: true
-          });
-
-          this.commitPath = new google.maps.Polyline({
-            path: this.collaborationCoordinates,
-            geodesic: true,
-            strokeColor: '#3423A6',
-            strokeOpacity: 1.0,
-            strokeWeight: 2
-          });
-
-          this.markerCluster = new MarkerClusterer(this.map, [], {
-            imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'
-          });
-          this.markerCluster.setMaxZoom(14);
-          this.apiLoaded = true;
-          this.commitsChanged();
+          this.initMap();
         }, {
             once: true
           });
       }
 
-      _setMapElement() {
-        console.log(this.$.timeline.offsetHeight)
-        console.log(this.offsetHeight);
-        this.$.wrapper.style.height = this.offsetHeight - this.$.timeline.offsetHeight + "px";
+      resizeTimeLine(){
+        this.$.timeLine.resize();
+      }
 
+      tryToReInitMap(){
+        // if(this.apiLoaded){
+          this.initMap();
+        // }
+      }
+
+      initMap() {
+        let mapOptions = {
+          center: new google.maps.LatLng(0, 0),
+          zoom: 1,
+          mapTypeId: 'roadmap',
+          disableDefaultUI: true
+        };
+        this.map = new google.maps.Map(this.$.map, mapOptions);
+        this._setMapElement();
+        console.log(this.map);
+        this.oms = new OverlappingMarkerSpiderfier(this.map, {
+          markersWontMove: true,
+          markersWontHide: true,
+          basicFormatEvents: true
+        });
+
+        this.commitPath = new google.maps.Polyline({
+          path: this.collaborationCoordinates,
+          geodesic: true,
+          strokeColor: '#3423A6',
+          strokeOpacity: 1.0,
+          strokeWeight: 2
+        });
+
+        this.markerCluster = new MarkerClusterer(this.map, [], {
+          imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'
+        });
+        this.markerCluster.setMaxZoom(14);
+        this.apiLoaded = true;
+        this.commitsChanged();
+        this.$.map.resize();
+      }
+
+      _setMapElement() {
+        console.log("set height: ", this.offsetHeight);
+        this.$.wrapper.style.height = this.offsetHeight - this.$.timeline.offsetHeight + "px";
       }
 
       _selectedProjectChanged() {
         if (this.selectedProject === null) {
           return;
         }
-        console.log(this.selectedProject);
         this.getCommits(this.selectedProject.id);
       }
 
       _timeChanged(time) {
-        console.log("time: ", time);
         if (this.selectedProject === undefined) {
           return;
         }
-        if (time && this.name == this.page) {
+        if (time) {
           this._debounceFilter = Polymer.Debouncer.debounce(this._debounceFilter, Polymer.Async.timeOut.after(500), () => {
             this.getCommits(this.selectedProject.id);
           });

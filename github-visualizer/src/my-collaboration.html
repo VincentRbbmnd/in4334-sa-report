@@ -1,0 +1,98 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+
+<link rel="import" href="my-view1.html">
+<link rel="import" href="custom-timeline.html">
+
+
+<dom-module id="my-collaboration">
+  <template>
+    <style include="shared-styles iron-flex iron-flex-alignment">
+      :host {
+        display: block;
+      }
+
+      #compareButton {
+        z-index: 10;
+        position: absolute;
+        top: 70px;
+        right: 20px;
+        background-color: #4285f4;
+        color: white;
+      }
+    </style>
+    <paper-button raised id="compareButton" on-click="_showCompare">Compare</paper-button>
+    <div class="layout horizontal">
+      <my-view1 selected-project="[[selectedProject]]" commits="{{commits}}" id="view1"></my-view1>
+      <template is="dom-if" if="{{showCompare}}">
+        <my-view1 selected-project="[[selectedProject]]" page="[[page]]" id="viewCompare"></my-view1>
+      </template>
+    </div>
+
+
+  </template>
+
+  <script>
+    class MyCollaboration extends Polymer.Element {
+      static get is() {
+        return 'my-collaboration';
+      }
+
+      static get properties() {
+        return {
+          commits: {
+            type: Object,
+            value: [],
+            notify: true
+          },
+          name: {
+            type: String
+          },
+          page: {
+            type: String
+          },
+          selectedProject: {
+            type: String,
+            notify: true
+          },
+          showCompare: {
+            type: Boolean,
+            notify: true,
+            value: false
+          }
+        };
+      }
+
+      constructor() {
+        super();
+      }
+
+      ready() {
+        super.ready();
+      }
+
+      _showCompare() {
+        this.showCompare = !this.showCompare;
+        setTimeout(() => {
+          let viewCompare =  this.shadowRoot.querySelector("#viewCompare");
+          viewCompare.tryToReInitMap();
+          viewCompare.resizeTimeLine();
+          this.$.view1.tryToReInitMap();
+          this.$.view1.resizeTimeLine();
+        }, 10);
+      }
+    }
+
+    window.customElements.define(MyCollaboration.is, MyCollaboration);
+  </script>
+</dom-module>
