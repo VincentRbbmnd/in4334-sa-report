@@ -86,7 +86,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </div>
           </template>
         </div>
-        <paper-range-slider slider-width="{{sliderWidth}}" id="rangeSlider" value-max="{{selectedMax}}" value-min={{selectedMin}} step="1" snaps min="[[min]]" max="[[max]]"></paper-range-slider>
+        <paper-range-slider value-diff-min="[[valueDiffMin]]" value-diff-max="[[valueDiffMax]]" slider-width="{{sliderWidth}}" id="rangeSlider" value-max="{{selectedMax}}" value-min={{selectedMin}} step="1" snaps min="[[min]]" max="[[max]]"></paper-range-slider>
       </div>
     </div>
 
@@ -139,6 +139,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           sliderWidth: {
             type: String,
             observer: '_sliderWidthChanged'
+          },
+          valueDiffMin:{
+            type: Number,
+            notify: true
+          },
+          valueDiffMax:{
+            type: Number,
+            notify: true
           }
         };
       }

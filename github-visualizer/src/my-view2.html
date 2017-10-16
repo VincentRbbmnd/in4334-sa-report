@@ -22,29 +22,48 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template>
     <style include="shared-styles iron-flex iron-flex-alignment">
        :host {
-          display: block;
-          width: 100%;
+        display: block;
+        width: 100%;
         height: calc(100vh - 64px);
-        }
+      }
 
-        #sliderContainer {
-          text-align: center;
-          position: relative;
-          top: 800px;
-        }
+      #sliderContainer {
+        text-align: center;
+        position: relative;
+        top: 800px;
+      }
 
-        #svg {
-          z-index: 1;
-          position: absolute;
-          top: 170px;
-          left: 0;
-          right: 0;
-          bottom: 0;
-        }
+      #svg {
+        z-index: 1;
+        position: absolute;
+        top: 225px;
+        left: -243px;
+        right: 0;
+        bottom: 0;
+      }
+
+      #timeslide {
+        z-index: 10;
+        width: 300px;
+      }
+
+      #range{
+        text-align: center;
+      }
     </style>
     <div class="layout vertical">
-        <custom-timeline id="timeLine" till-date="{{till}}" from-date="{{from}}"></custom-timeline>
-    <svg id="svg" width="1200" height="850"></svg>
+      <custom-timeline value-diff-min="365" value-diff-max="365" id="timeLine" till-date="{{till}}" from-date="{{from}}"></custom-timeline>
+      <div class="layout vertical">
+        <div class="layout horizontal center-justified">
+            <input id="timeslide" type="range" min="0" max="11" value="0" step="1" /><br>
+            
+        </div>
+            <span id="range">January</span>
+        
+      </div>
+
+      <svg id="svg" width="1200" height="850"></svg>
+
     </div>
   </template>
 
@@ -102,15 +121,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.drawMap();
       }
 
-      initialDate(d,i){
-        const month = ["January","February","March","April","May","June","July","August","September","October","November","December"]
+      initialDate(d, i) {
+        const month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
         var d = new Date(d.timestamp);
         var m = month[d.getMonth()];
         if (m == "January") {
-            this.parentElement.appendChild(this);
-            return "red";
+          this.parentElement.appendChild(this);
+          return "red";
         } else {
-            return "#999";
+          return "#999";
         };
       }
 
@@ -144,31 +163,31 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       commitsChanged() {
-        console.log( "commits changed" )
-        if( this.svg ){
+        console.log("commits changed")
+        if (this.svg) {
           let commitNodes = this.svg.selectAll("circle")
-                                    .data(this.commits)
+            .data(this.commits)
 
           var that = this
 
           commitNodes.enter()
-              .append("circle")
-              .attr( "class", "commit")
-              .attr("cx", function (d) {
-                  let lat = d.author.location.lat;
-                  let lon = d.author.location.lng
-                  return that.projection([lon, lat])[0];
-              })
-              .attr("cy", function (d) {
-                let lat = d.author.location.lat;
-                let lon = d.author.location.lng
-                  return that.projection([lon, lat])[1];
-              })
-              .attr("r", "2px")
-              .attr("fill", this.initialDate)
+            .append("circle")
+            .attr("class", "commit")
+            .attr("cx", function (d) {
+              let lat = d.author.location.lat;
+              let lon = d.author.location.lng
+              return that.projection([lon, lat])[0];
+            })
+            .attr("cy", function (d) {
+              let lat = d.author.location.lat;
+              let lon = d.author.location.lng
+              return that.projection([lon, lat])[1];
+            })
+            .attr("r", "4px")
+            .attr("fill", this.initialDate)
 
           commitNodes.exit()
-                      .remove()
+            .remove()
         }
 
       }
@@ -176,94 +195,94 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       drawMap() {
         console.log("Starting to make requests...")
 
-        const margin = {top: 20, right: 20, bottom: 30, left: 40}
+        const margin = { top: 20, right: 20, bottom: 30, left: 40 }
         const padding = 30
         const width = 1500 - margin.left - margin.right
         const height = 750 - margin.top - margin.bottom
 
         this.svg = d3.select(this.$.svg)
-                    .attr( 'width', 1500 )
-                    .attr( 'height', 750 )
+          .attr('width', 1500)
+          .attr('height', 750)
 
         this.projection = d3.geoMercator()
-                            .scale(150)
-                            .translate( [width / 2, height / 1.5]);
+          .scale(150)
+          .translate([width / 2, height / 1.5]);
 
         this.path = d3.geoPath().projection(this.projection);
 
         let d3Ready = (error, world) => {
-            if (error) throw error;
-    
-            // const commits = commitsResponse
-            // console.log(commitsResponse);
-            // console.log("commits: ", commits)
-    
-            var inputValue = null;
-            const month = ["January","February","March","April","May","June","July","August","September","October","November","December"]
-    
-            // when the input range changes update the value
-            d3.select(this.$.timeslide).on("input", function() {
-                update(+this.value);
-            });
-    
-            // update the fill of each SVG of class "commit" with value
-            let update = (value) => {
-              this.$.range.innerHTML=month[value];
-              inputValue = month[value];
-              d3.selectAll(this.shadowRoot.querySelectorAll('.commit'))
-                  .attr("fill", dateMatch);
-            }
-    
-            function dateMatch(data, value) {
-              var d = new Date(data.timestamp);
-              var m = month[d.getMonth()];
-              if (inputValue == m) {
-                  this.parentElement.appendChild(this);
-                  return "red";
-              } else {
-                  return "#999";
-              };
-            }
-    
-            this.svg.append("g")
-                .attr("class", "countries")
-                .selectAll("path")
-                .data(topojson.feature(world, world.objects.countries).features)
-                .enter().append("path")
-                .attr("d", this.path)
-                .style("fill", "white")
-                .style("stroke", "black")
+          if (error) throw error;
 
-            console.log("this.commits: ", this.commits)
+          // const commits = commitsResponse
+          // console.log(commitsResponse);
+          // console.log("commits: ", commits)
 
-            let commitNodes = this.svg.selectAll("circle")
-                                  .data(this.commits)
-    
-            var that = this
+          var inputValue = null;
+          const month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
-            commitNodes.enter()
-                .append("circle")
-                .attr( "class", "commit")
-                .attr("cx", function (d) {
-                    let lat = d.author.location.lat
-                    let lon = d.author.location.lng
-                    return that.projection([lon, lat])[0]
-                })
-                .attr("cy", function (d) {
-                  let lat = d.author.location.lat
-                  let lon = d.author.location.lng
-                  return that.projection([lon, lat])[1]
-                })
-                .attr("r", "2px")
-                .attr("fill", this.initialDate)
+          // when the input range changes update the value
+          d3.select(this.$.timeslide).on("input", function () {
+            update(+this.value);
+          });
 
-            commitNodes.exit()
-                        .remove()
+          // update the fill of each SVG of class "commit" with value
+          let update = (value) => {
+            this.$.range.innerHTML = month[value];
+            inputValue = month[value];
+            d3.selectAll(this.shadowRoot.querySelectorAll('.commit'))
+              .attr("fill", dateMatch);
+          }
+
+          function dateMatch(data, value) {
+            var d = new Date(data.timestamp);
+            var m = month[d.getMonth()];
+            if (inputValue == m) {
+              this.parentElement.appendChild(this);
+              return "red";
+            } else {
+              return "#999";
+            };
+          }
+
+          this.svg.append("g")
+            .attr("class", "countries")
+            .selectAll("path")
+            .data(topojson.feature(world, world.objects.countries).features)
+            .enter().append("path")
+            .attr("d", this.path)
+            .style("fill", "white")
+            .style("stroke", "black")
+
+          console.log("this.commits: ", this.commits)
+
+          let commitNodes = this.svg.selectAll("circle")
+            .data(this.commits)
+
+          var that = this
+
+          commitNodes.enter()
+            .append("circle")
+            .attr("class", "commit")
+            .attr("cx", function (d) {
+              let lat = d.author.location.lat
+              let lon = d.author.location.lng
+              return that.projection([lon, lat])[0]
+            })
+            .attr("cy", function (d) {
+              let lat = d.author.location.lat
+              let lon = d.author.location.lng
+              return that.projection([lon, lat])[1]
+            })
+            .attr("r", "2px")
+            .attr("fill", this.initialDate)
+
+          commitNodes.exit()
+            .remove()
         }
 
         d3.queue()
-          .defer( d3.json, "world-50m.json" )
-          .await( d3Ready )
+          .defer(d3.json, "world-50m.json")
+          .await(d3Ready)
 
       }
     }
