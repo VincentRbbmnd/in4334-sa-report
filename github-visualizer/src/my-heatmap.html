@@ -255,7 +255,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             _commitsChanged(commits) {
                 let locations = [];
-                if (this.map && commits.length > 0) {
+                if (this.map && this.commits && commits.length > 0) {
                     for (let el of commits) {
                         locations.push([this.randomize(el.author.location.lat), this.randomize(el.author.location
                             .lng)]);
