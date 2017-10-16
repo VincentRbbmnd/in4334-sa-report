@@ -175,8 +175,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (this.possibleValues[0] === undefined) {
           return;
         }
-        this.fromDate = new Date(this.possibleValues[this.selectedMin].date);
-        this.tillDate = new Date(this.possibleValues[this.selectedMax - 1].date);
+        this.fromDate = new Date(this.possibleValues[Math.round(this.selectedMin)].date);
+        this.tillDate = new Date(this.possibleValues[Math.round(this.selectedMax - 1)].date);
       }
 
       _formatDate(date) {

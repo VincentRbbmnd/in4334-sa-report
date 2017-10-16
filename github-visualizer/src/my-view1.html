@@ -12,6 +12,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="../bower_components/google-map/google-map.html">
 <link rel="import" href="../bower_components/google-apis/google-maps-api.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="custom-timeline.html">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/OverlappingMarkerSpiderfier/1.0.3/oms.min.js"></script>
 <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
@@ -27,7 +28,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       #wrapper {
         position: relative;
-        height: 600px;
       }
 
       #map {
@@ -38,14 +38,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         right: 0;
         bottom: 0;
       }
+
+      #button {
+        z-index: 10;
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        background-color: #4285f4;
+        color: white;
+      }
     </style>
     <div class="layout vertical">
       <div id="timeline">
-        <custom-timeline></custom-timeline>
+        <custom-timeline till-date="{{till}}" from-date="{{from}}"></custom-timeline>
       </div>
       <div id="wrapper">
         <google-map disable-default-ui id="map" map="{{map}}" latitude="0" longitude="0" zoom="2" api-key="AIzaSyBFRdnjO9WVvl3Voqj84bLvVMVIjDfBjlk">
         </google-map>
+        <paper-button raised on-click="_downloadCSV" id="button">Download CSV</paper-button>
       </div>
 
     </div>
@@ -172,7 +182,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _selectedProjectChanged() {
-        if(this.selectedProject === null){
+        if (this.selectedProject === null) {
           return;
         }
         console.log(this.selectedProject);
@@ -180,11 +190,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _timeChanged(time) {
+        console.log("time: ", time);
         if (this.selectedProject === undefined) {
           return;
         }
         if (time && this.name == this.page) {
-          this.getCommits(this.selectedProject.id);
+          this._debounceFilter = Polymer.Debouncer.debounce(this._debounceFilter, Polymer.Async.timeOut.after(500), () => {
+            this.getCommits(this.selectedProject.id);
+          });
         }
       }
 
@@ -194,7 +207,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           new Date(this.till).toISOString()).then((response) => {
             return response.json();
           }).then((resp) => {
-            console.log("resp", resp);
+            console.log("resp: ", resp);
             this.commits = resp;
           });
       }
@@ -271,6 +284,42 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         });
 
         this.commitPath.setMap(this.map);
+      }
+
+      pivot(arr) {
+        var mp = new Map();
+
+        function setValue(a, path, val) {
+          if (Object(val) !== val) { // primitive value
+            var pathStr = path.join('.');
+            var i = (mp.has(pathStr) ? mp : mp.set(pathStr, mp.size)).get(pathStr);
+            a[i] = val;
+          } else {
+            for (var key in val) {
+              setValue(a, key == '0' ? path : path.concat(key), val[key]);
+            }
+          }
+          return a;
+        }
+        var result = arr.map(obj => setValue([], [], obj));
+        return [[...mp.keys()], ...result];
+      }
+
+      toCsv(arr) {
+        return arr.map(row =>
+          row.map(val => isNaN(val) ? JSON.stringify(val) : +val).join(';')
+        ).join('\n');
+      }
+
+      _downloadCSV() {
+        let csv = this.toCsv(this.pivot(this.commits));
+        var element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(csv));
+        element.setAttribute('download', 'commitData.csv');
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
       }
     }
 
