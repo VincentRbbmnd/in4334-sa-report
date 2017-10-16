@@ -65,12 +65,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
     <div class="layout vertical">
-        <div class="textDisplay">
-            Commit range:
-          </div>
-          <div class="textDisplay">
-            {{_formatDate(fromDate)}} - {{_formatDate(tillDate)}}
-          </div>
+      <div class="textDisplay">
+        Commit range:
+      </div>
+      <div class="textDisplay">
+        {{_formatDate(fromDate)}} - {{_formatDate(tillDate)}}
+      </div>
       <div id="sliderContainer" class="layout horizontal">
         <div id="yearIndicators">
           <template is="dom-repeat" items="{{years}}" as="year">
@@ -80,7 +80,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   <div class="line"></div>
                 </div>
                 <div class="yearText">
-                  {{year}}
+                  {{year.value}}
                 </div>
               </div>
             </div>
@@ -148,7 +148,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         while (begin < end) {
           if (begin.getFullYear() != realYear) {
             realYear = begin.getFullYear();
-            this.years.push(begin.getFullYear());
+            this.years.push({ "id": this.max, "value": begin.getFullYear() });
             yearCounter++;
           }
           this.possibleValues.push({ "id": this.max, "date": begin.toString() })
@@ -157,13 +157,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
         this.selectedMax = this.max;
         this.selectedMin = this.max - 30;
-
-        console.log(this.shadowRoot.querySelector("#sliderContainer"));
         setTimeout(() => {
           let numberOfYears = this.shadowRoot.querySelector("#yearIndicators").children;
-          let offsetWidth = this.offsetWidth ;
+          let offsetWidth = this.offsetWidth;
           for (var i = 0; i < numberOfYears.length; i++) {
-              numberOfYears[i].style.left = (i * (this.offsetWidth / (numberOfYears.length - 1)))+ "px";
+            numberOfYears[i].style.left = Math.round((this.offsetWidth - 30) * (this.years[i].id / this.max)) + "px";
           }
         }, 10);
 
