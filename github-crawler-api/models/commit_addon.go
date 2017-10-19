@@ -35,7 +35,7 @@ type ParentCommit struct {
 func (m *CommitDB) ListCommitWithUsersWithLocationForRepo(ctx context.Context, repoID int, from *time.Time, till *time.Time, limit *int) app.CommitCollection {
 	defer goa.MeasureSince([]string{"goa", "db", "commit", "listcommit"}, time.Now())
 	var objs []*app.Commit
-	l := 2000
+	l := 10000
 
 	// We want to filter on time to not crash the system
 	if from == nil || till == nil {
