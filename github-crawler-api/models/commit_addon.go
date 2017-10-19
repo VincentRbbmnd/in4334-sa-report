@@ -3,7 +3,7 @@ package models
 import (
 	"context"
 
-	"github-crawler-api/app"
+	"github.com/VincentRbbmnd/in4334-sa-report/github-crawler-api/app"
 
 	"time"
 
@@ -53,7 +53,7 @@ func (m *CommitDB) ListCommitWithUsersWithLocationForRepo(ctx context.Context, r
 		Joins(`LEFT JOIN locations on locations.id = location_id`).
 		Where("repositories.id = ? AND commit_date > ? AND commit_date < ? AND ST_Y(point) != 0 ", repoID, from, till).
 		Order("commit_date desc").
-		Limit(limit).
+		Limit(*limit).
 		Find(&native).Error
 
 	if err != nil {

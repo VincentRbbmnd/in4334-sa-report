@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github-crawler-api/app"
+	"github.com/VincentRbbmnd/in4334-sa-report/github-crawler-api/app"
 
 	"github.com/goadesign/goa"
 )

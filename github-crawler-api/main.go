@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"os"
 
-	"github-crawler-api/models"
+	"github.com/VincentRbbmnd/in4334-sa-report/github-crawler-api/models"
 
-	"github-crawler-api/app"
+	"github.com/VincentRbbmnd/in4334-sa-report/github-crawler-api/app"
 
 	"github.com/goadesign/goa"
 	"github.com/goadesign/goa/middleware"

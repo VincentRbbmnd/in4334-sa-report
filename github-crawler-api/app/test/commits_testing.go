@@ -14,7 +14,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github-crawler-api/app"
+	"github.com/VincentRbbmnd/in4334-sa-report/github-crawler-api/app"
 	"github.com/goadesign/goa"
 	"github.com/goadesign/goa/goatest"
 	"io"

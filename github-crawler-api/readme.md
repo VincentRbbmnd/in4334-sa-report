@@ -1,9 +1,8 @@
 # Build instructions
 
-- Make sure you installed golang
-- Put the github-crawler-api folder into your $GOPATH/src
-- Install dep (dependency manager for golang) `go get -u github.com/golang/dep/cmd/dep` 
-- Run `dep ensure` in your $GOPATH/src/github-crawler-api folder
+- Make sure you installed golang and project is cloned in your `go workspace` in src/github.com/VincentRbbmnd/in4334-sa-report.
+- Install dep (dependency manager for golang) `go get -u github.com/golang/dep/cmd/dep` (only once)
+- Run `dep ensure` in the github-crawler-api folder
 - Run `go build -o 'OUTPUT_FILE_NAME'`
 - You now have a binary that can be run to host the API
 
