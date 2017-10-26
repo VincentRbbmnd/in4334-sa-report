@@ -65,11 +65,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         width: 200px;
       }
 
-      #button2 {
+      #button {
         z-index: 10;
         position: absolute;
         bottom: 20px;
         right: 20px;
+        background-color: #4285f4;
+        color: white;
+      }
+
+      #button2 {
+        z-index: 10;
+        position: absolute;
+        bottom: 20px;
+        right: 170px;
         background-color: #4285f4;
         color: white;
       }
@@ -103,6 +112,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <svg id="svg" width="1200" height="850"></svg>
 
     </div>
+    <paper-button raised on-click="_downloadCSV" id="button">Download CSV</paper-button>
+
     <paper-button raised on-click="_showDetails" id="button2">Details</paper-button>
 
     <paper-dialog id="dialog">
@@ -181,6 +192,42 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
       _showDetails() {
         this.$.dialog.open();
+      }
+
+      pivot(arr) {
+        var mp = new Map();
+
+        function setValue(a, path, val) {
+          if (Object(val) !== val) { // primitive value
+            var pathStr = path.join('.');
+            var i = (mp.has(pathStr) ? mp : mp.set(pathStr, mp.size)).get(pathStr);
+            a[i] = val;
+          } else {
+            for (var key in val) {
+              setValue(a, key == '0' ? path : path.concat(key), val[key]);
+            }
+          }
+          return a;
+        }
+        var result = arr.map(obj => setValue([], [], obj));
+        return [[...mp.keys()], ...result];
+      }
+
+      toCsv(arr) {
+        return arr.map(row =>
+          row.map(val => isNaN(val) ? JSON.stringify(val) : +val).join(';')
+        ).join('\n');
+      }
+
+      _downloadCSV() {
+        let csv = this.toCsv(this.pivot(this.commits));
+        var element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(csv));
+        element.setAttribute('download', 'commitData.csv');
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
       }
 
       _selectedYearChanged() {
