@@ -13,6 +13,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="custom-timeline.html">
 
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../bower_components/paper-slider/paper-slider.html">
 <script src="..\node_modules\d3\build\d3.min.js"></script>
 <script src="..\node_modules\d3-queue\build\d3-queue.min.js"></script>
 <script src="..\node_modules\d3-request\build\d3-request.min.js"></script>
@@ -21,7 +22,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <dom-module id="my-view2">
   <template>
     <style include="shared-styles iron-flex iron-flex-alignment">
-       :host {
+      :host {
+        padding-top: 20px;
         display: block;
         width: 100%;
         height: calc(100vh - 64px);
@@ -47,19 +49,41 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         width: 300px;
       }
 
-      #range{
+      #range {
         text-align: center;
+      }
+
+      #placeHolder {
+        padding-right: 5px;
+      }
+
+      #comboBoxWrapper {
+        width: 200px;
       }
     </style>
     <div class="layout vertical">
-      <custom-timeline value-diff-min="365" value-diff-max="365" id="timeLine" till-date="{{till}}" from-date="{{from}}"></custom-timeline>
+      <div class="layout horizontal center-justified">
+        <div id="comboBoxWrapper">
+          <vaadin-combo-box selected-item="{{selectedYear}}" item-label-path="full_name" label="Selected year" items="[[availableYears]]">
+            <template>
+              [[item]]
+            </template>
+          </vaadin-combo-box>
+        </div>
+      </div>
+
+
+      <!-- <custom-timeline value-diff-min="365" value-diff-max="365" id="timeLine" till-date="{{till}}" from-date="{{from}}"></custom-timeline> -->
       <div class="layout vertical">
         <div class="layout horizontal center-justified">
-            <input id="timeslide" type="range" min="0" max="11" value="0" step="1" /><br>
-            
+          <paper-slider id="ratings" snaps max="10" max-markers="10" step="1" value="{{monthSliderValue}}"></paper-slider>
         </div>
-            <span id="range">January</span>
-        
+        <div class="layout horizontal center-justified">
+          <span id="placeHolder">Selected month:</span>
+          <span id="range">January</span>
+
+        </div>
+
       </div>
 
       <svg id="svg" width="1200" height="850"></svg>
@@ -77,6 +101,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Object,
             value: [],
             observer: 'commitsChanged'
+          },
+          monthSliderValue: {
+            type: Number,
+            value: 0,
+            observer: '_monthSliderChanged',
+            notify: true
           },
           apiLoaded: {
             type: Boolean,
@@ -112,13 +142,34 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: String,
             notify: true,
             observer: '_selectedProjectChanged'
+          },
+          months: {
+            type: Array,
+            notify: true,
+            value: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+          },
+          availableYears: {
+            type: Object,
+            notify: true,
+            value: ["2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017"]
+          },
+          selectedYear: {
+            type: String,
+            notify: true,
+            observer: "_selectedYearChanged"
           }
         };
       }
 
+      _selectedYearChanged() {
+        this.from = new Date(this.selectedYear);
+        this.till = new Date((parseInt(this.selectedYear) + 1).toString());
+      }
       ready() {
         super.ready();
         this.drawMap();
+        this.selectedYear = this.availableYears[7];
+        this.$.ratings.style.width = this.offsetWidth + "px";
       }
 
       initialDate(d, i) {
@@ -157,13 +208,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           new Date(this.till).toISOString()).then((response) => {
             return response.json();
           }).then((resp) => {
-            console.log("resp: ", resp);
             this.commits = resp;
           });
       }
 
       commitsChanged() {
-        console.log("commits changed")
         if (this.svg) {
           let commitNodes = this.svg.selectAll("circle")
             .data(this.commits)
@@ -189,11 +238,34 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           commitNodes.exit()
             .remove()
         }
-
       }
 
+      _monthSliderChanged() {
+        this.updateRedCommits(this.monthSliderValue);
+      }
+
+      updateRedCommits(value) {
+        this.$.range.innerHTML = this.months[value];
+        let inputValue = this.months[value];
+        d3.selectAll(this.shadowRoot.querySelectorAll('.commit'))
+          .attr("fill", dateMatch);
+        function dateMatch(data, value) {
+          const month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+          var d = new Date(data.timestamp);
+          var m = month[d.getMonth()];
+          if (inputValue == m) {
+            this.parentElement.appendChild(this);
+            return "red";
+          } else {
+            return "#999";
+          };
+        }
+        return inputValue;
+      }
+
+
+
       drawMap() {
-        console.log("Starting to make requests...")
 
         const margin = { top: 20, right: 20, bottom: 30, left: 40 }
         const padding = 30
@@ -213,36 +285,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         let d3Ready = (error, world) => {
           if (error) throw error;
 
-          // const commits = commitsResponse
-          // console.log(commitsResponse);
-          // console.log("commits: ", commits)
-
-          var inputValue = null;
-          const month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
-
           // when the input range changes update the value
-          d3.select(this.$.timeslide).on("input", function () {
-            update(+this.value);
+          d3.select(this.$.timeslide).on("input", () => {
+            inputValue = this.updateRedCommits(this.monthSliderValue);
           });
-
-          // update the fill of each SVG of class "commit" with value
-          let update = (value) => {
-            this.$.range.innerHTML = month[value];
-            inputValue = month[value];
-            d3.selectAll(this.shadowRoot.querySelectorAll('.commit'))
-              .attr("fill", dateMatch);
-          }
-
-          function dateMatch(data, value) {
-            var d = new Date(data.timestamp);
-            var m = month[d.getMonth()];
-            if (inputValue == m) {
-              this.parentElement.appendChild(this);
-              return "red";
-            } else {
-              return "#999";
-            };
-          }
 
           this.svg.append("g")
             .attr("class", "countries")
@@ -252,8 +298,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             .attr("d", this.path)
             .style("fill", "white")
             .style("stroke", "black")
-
-          console.log("this.commits: ", this.commits)
 
           let commitNodes = this.svg.selectAll("circle")
             .data(this.commits)
