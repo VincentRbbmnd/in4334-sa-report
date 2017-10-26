@@ -12,8 +12,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="custom-timeline.html">
 <link rel="import" href="../bower_components/google-map/google-map.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/google-apis/google-maps-api.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="my-view3.html">
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/OverlappingMarkerSpiderfier/1.0.3/oms.min.js"></script>
 <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
 <dom-module id="my-view1">
@@ -47,6 +50,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         background-color: #4285f4;
         color: white;
       }
+
+      #button2 {
+        z-index: 10;
+        position: absolute;
+        bottom: 20px;
+        right: 170px;
+        background-color: #4285f4;
+        color: white;
+      }
     </style>
     <div class="layout vertical">
       <div id="timeline">
@@ -56,9 +68,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <google-map disable-default-ui id="map" map="{{map}}" latitude="0" longitude="0" zoom="2" api-key="AIzaSyBFRdnjO9WVvl3Voqj84bLvVMVIjDfBjlk">
         </google-map>
         <paper-button raised on-click="_downloadCSV" id="button">Download CSV</paper-button>
+        <paper-button raised on-click="_showDetails" id="button2">Details</paper-button>
       </div>
 
     </div>
+    <paper-dialog id="dialog">
+      <my-view3 commits="[[commits]]" name="view3"></my-view3>
+    </paper-dialog>
 
 
   </template>
@@ -147,20 +163,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           });
       }
 
-      resizeTimeLine(){
+      resizeTimeLine() {
         this.$.timeLine.resize();
       }
 
-      tryToReInitMap(){
+      tryToReInitMap() {
         // if(this.apiLoaded){
-          this.initMap();
+        this.initMap();
         // }
+      }
+
+      _showDetails() {
+        this.$.dialog.open();
       }
 
       initMap() {
         let mapOptions = {
           center: new google.maps.LatLng(0, 0),
-          zoom: 1,
+          zoom: 2,
+          minZoom: 2,
           mapTypeId: 'roadmap',
           disableDefaultUI: true
         };

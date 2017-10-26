@@ -21,7 +21,9 @@
     "vaadin-combo-box": "vaadin/vaadin-combo-box#^3.0.0",
     "paper-range-slider": "IftachSadeh/paper-range-slider#^1.0.1",
     "vaadin-grid": "vaadin/vaadin-grid#^3.0.2",
-    "webgl-heatmap": "*"
+    "webgl-heatmap": "*",
+    "paper-dialog": "PolymerElements/paper-dialog#^2.0.0",
+    "paper-slider": "PolymerElements/paper-slider#^2.0.2"
   },
   "resolutions": {
     "polymer": "^2.0.0",
