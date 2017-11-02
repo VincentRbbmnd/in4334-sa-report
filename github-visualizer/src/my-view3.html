@@ -114,11 +114,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         let map = {};
         if (commits.length > 0) {
           for (let commit of commits) {
-            if (map[commit.author.location.location_string]) {
-              map[commit.author.location.location_string]++;
+            if (commit.author === undefined) {
+              if (map[commit.location.location_string]) {
+                map[commit.location.location_string]++;
+              } else {
+                map[commit.location.location_string] = 1;
+              }
             } else {
-              map[commit.author.location.location_string] = 1;
+              if (map[commit.author.location.location_string]) {
+                map[commit.author.location.location_string]++;
+              } else {
+                map[commit.author.location.location_string] = 1;
+              }
             }
+
           }
         }
         for (let el in map) {

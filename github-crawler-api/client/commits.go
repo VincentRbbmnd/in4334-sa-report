@@ -4,8 +4,8 @@
 //
 // Command:
 // $ goagen
-// --design=github-crawler-api/design
-// --out=$(GOPATH)\src\github-crawler-api
+// --design=github.com\VincentRbbmnd\in4334-sa-report\github-crawler-api\design
+// --out=$(GOPATH)\src\github.com\VincentRbbmnd\in4334-sa-report\github-crawler-api
 // --version=v1.2.0-dirty
 
 package client
@@ -44,16 +44,16 @@ func (c *Client) NewListCommitsRequest(ctx context.Context, path string, from *t
 	u := url.URL{Host: c.Host, Scheme: scheme, Path: path}
 	values := u.Query()
 	if from != nil {
-		tmp7 := from.Format(time.RFC3339)
-		values.Set("from", tmp7)
+		tmp10 := from.Format(time.RFC3339)
+		values.Set("from", tmp10)
 	}
 	if limit != nil {
-		tmp8 := strconv.Itoa(*limit)
-		values.Set("limit", tmp8)
+		tmp11 := strconv.Itoa(*limit)
+		values.Set("limit", tmp11)
 	}
 	if until != nil {
-		tmp9 := until.Format(time.RFC3339)
-		values.Set("until", tmp9)
+		tmp12 := until.Format(time.RFC3339)
+		values.Set("until", tmp12)
 	}
 	u.RawQuery = values.Encode()
 	req, err := http.NewRequest("GET", u.String(), nil)

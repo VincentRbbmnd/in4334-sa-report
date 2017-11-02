@@ -79,6 +79,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       ready() {
         super.ready();
+        console.log("colly ready:");
+        this.$.view1.tryToReInitMap();
+          this.$.view1.resizeTimeLine();
       }
 
       _showCompare() {

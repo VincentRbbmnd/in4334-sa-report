@@ -41,6 +41,29 @@ var _ = Resource("commits", func() {
 	})
 })
 
+var _ = Resource("developers", func() {
+	DefaultMedia(GHUserMedia)
+	Parent("repositories")
+	BasePath("/developers")
+	Action("list", func() {
+		Routing(
+			GET("/list"),
+		)
+		Params(func() {
+			Param("from", DateTime, "From date", func() {
+			})
+			Param("until", DateTime, "Till ID", func() {
+			})
+			Param("limit", Integer, "Limit the results")
+		})
+		Description("Retrieve developers between timespan with users")
+		Response(OK, CollectionOf(GHUserMedia))
+		Response(NoContent)
+		Response(NotFound)
+		Response(BadRequest, ErrorMedia)
+	})
+})
+
 var _ = Resource("repositories", func() {
 	DefaultMedia(RepositoryMedia)
 	BasePath("/repositories")

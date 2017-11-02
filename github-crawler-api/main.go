@@ -38,6 +38,9 @@ func main() {
 	c := NewCommitsController(service)
 	app.MountCommitsController(service, c)
 
+	c2 := NewDevelopersController(service)
+	app.MountDevelopersController(service, c2)
+
 	c1 := NewRepositoriesController(service)
 	app.MountRepositoriesController(service, c1)
 	// Start service

@@ -101,6 +101,22 @@ definitions:
     - type
     title: 'Mediatype identifier: application/vnd.ghuser+json; view=default'
     type: object
+  GhuserCollection:
+    description: GhuserCollection is the media type for an array of Ghuser (default
+      view)
+    example:
+    - id: 5.4301856e+18
+      locationForUser:
+        id: 1.1409709e+18
+        lat: 0.5667709
+        lng: 0.45074025
+        location_string: Sit et esse maiores sit.
+      login: Consequatur eos atque similique.
+      type: Consectetur sunt asperiores dolor necessitatibus quasi suscipit.
+    items:
+      $ref: '#/definitions/Ghuser'
+    title: 'Mediatype identifier: application/vnd.ghuser+json; type=collection; view=default'
+    type: array
   Location:
     description: Location as geocoordinates (default view)
     example:
@@ -151,21 +167,21 @@ definitions:
         message: Soluta natus doloribus.
         sha: Sint cupiditate ratione.
         timestamp: 1978-06-20T04:46:16+02:00
-      full_name: Magnam laudantium.
-      id: 1.4347941e+18
+      full_name: Possimus distinctio quas harum quaerat enim.
+      id: 1.9539887e+18
       org: true
-      owner: Quas harum quaerat enim sed magni eveniet.
-      project_id: 0.038566206
+      owner: Harum quibusdam omnis non quis repudiandae.
+      project_id: 0.8593949
     properties:
       first_commit:
         $ref: '#/definitions/Commit'
       full_name:
         description: Full name of the repo
-        example: Magnam laudantium.
+        example: Possimus distinctio quas harum quaerat enim.
         type: string
       id:
         description: ID of the commit in the database
-        example: 1.4347941e+18
+        example: 1.9539887e+18
         format: int64
         type: integer
       org:
@@ -174,11 +190,11 @@ definitions:
         type: boolean
       owner:
         description: Name of the owner of the repository
-        example: Quas harum quaerat enim sed magni eveniet.
+        example: Harum quibusdam omnis non quis repudiandae.
         type: string
       project_id:
         description: Time the commit happened
-        example: 0.038566206
+        example: 0.8593949
         format: double
         type: number
     required:
@@ -206,30 +222,11 @@ definitions:
         message: Soluta natus doloribus.
         sha: Sint cupiditate ratione.
         timestamp: 1978-06-20T04:46:16+02:00
-      full_name: Magnam laudantium.
-      id: 1.4347941e+18
+      full_name: Possimus distinctio quas harum quaerat enim.
+      id: 1.9539887e+18
       org: true
-      owner: Quas harum quaerat enim sed magni eveniet.
-      project_id: 0.038566206
-    - first_commit:
-        authorOfCommit:
-          id: 5.4301856e+18
-          locationForUser:
-            id: 1.1409709e+18
-            lat: 0.5667709
-            lng: 0.45074025
-            location_string: Sit et esse maiores sit.
-          login: Consequatur eos atque similique.
-          type: Consectetur sunt asperiores dolor necessitatibus quasi suscipit.
-        id: 8.348355e+18
-        message: Soluta natus doloribus.
-        sha: Sint cupiditate ratione.
-        timestamp: 1978-06-20T04:46:16+02:00
-      full_name: Magnam laudantium.
-      id: 1.4347941e+18
-      org: true
-      owner: Quas harum quaerat enim sed magni eveniet.
-      project_id: 0.038566206
+      owner: Harum quibusdam omnis non quis repudiandae.
+      project_id: 0.8593949
     items:
       $ref: '#/definitions/Repository'
     title: 'Mediatype identifier: application/vnd.repository+json; type=collection;
@@ -374,8 +371,8 @@ paths:
         required: false
         type: string
       produces:
-      - application/vnd.goa.error
       - application/vnd.commit+json; type=collection
+      - application/vnd.goa.error
       responses:
         "200":
           description: OK
@@ -394,6 +391,53 @@ paths:
       summary: list commits
       tags:
       - commits
+  /repositories/{repoID}/developers/list:
+    get:
+      description: Retrieve developers between timespan with users
+      operationId: developers#list
+      parameters:
+      - description: From date
+        in: query
+        name: from
+        required: false
+        type: string
+      - description: Limit the results
+        in: query
+        name: limit
+        required: false
+        type: integer
+      - description: Repository ID
+        in: path
+        minimum: 1
+        name: repoID
+        required: true
+        type: integer
+      - description: Till ID
+        in: query
+        name: until
+        required: false
+        type: string
+      produces:
+      - application/vnd.goa.error
+      - application/vnd.ghuser+json; type=collection
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/GhuserCollection'
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/error'
+        "404":
+          description: Not Found
+      schemes:
+      - http
+      summary: list developers
+      tags:
+      - developers
   /repositories/list:
     get:
       description: Retrieve all repositories in DB
