@@ -29,6 +29,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="lazy-import" href="my-collaboration.html">
 <link rel="lazy-import" href="my-view2.html">
+<link rel="lazy-import" href="my-devs-per-country.html">
 <link rel="lazy-import" href="my-view404.html">
 
 <dom-module id="my-app">
@@ -94,6 +95,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </div>
         <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
           <a name="collaboration" href="[[rootPath]]collaboration">Collaboration</a>
+          <a name="devs-per-country" href="[[rootPath]]devs-per-country">Developers per country</a>
           <a name="view2" href="[[rootPath]]view2">Commits per month</a>
           <a name="heatmap" href="[[rootPath]]heatmap">Heatmap</a>
         </iron-selector>
@@ -113,6 +115,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <!-- <my-view1 selected-project="[[selectedProject]]" commits="{{commits}}" page="[[page]]" id="view1" name="view1"></my-view1> -->
           <my-collaboration selected-project="[[selectedProject]]" commits="{{commits}}" page="[[page]]" id="collaboration" name="collaboration"></my-collaboration>
           <my-view2 page="[[page]]" selected-project="[[selectedProject]]" commits="[[commits]]" name="view2"></my-view2>
+          <my-devs-per-country page="[[page]]" selected-project="[[selectedProject]]" commits="[[commits]]" name="devs-per-country"></my-devs-per-country>
           <my-heatmap selected-project="[[selectedProject]]" name="heatmap" page="[[page]]"></my-heatmap>
           <my-view404 name="view404"></my-view404>
         </iron-pages>

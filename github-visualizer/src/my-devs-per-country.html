@@ -1,0 +1,361 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="custom-timeline.html">
+<link rel="import" href="../bower_components/google-map/google-map.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+
+<link rel="import" href="../bower_components/google-apis/google-maps-api.html">
+<link rel="import" href="my-view3.html">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/OverlappingMarkerSpiderfier/1.0.3/oms.min.js"></script>
+<script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
+<dom-module id="my-devs-per-country">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        width: 100%;
+        height: calc(100vh - 64px);
+        background-color: white;
+      }
+
+      #wrapper {
+        position: relative;
+      }
+
+      #map {
+        z-index: 1;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+      }
+
+      #button {
+        z-index: 10;
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        background-color: #4285f4;
+        color: white;
+      }
+
+      #button2 {
+        z-index: 10;
+        position: absolute;
+        bottom: 20px;
+        right: 170px;
+        background-color: #4285f4;
+        color: white;
+      }
+    </style>
+    <div class="layout vertical">
+      <div id="timeline">
+        <custom-timeline id="timeLine" till-date="{{till}}" from-date="{{from}}"></custom-timeline>
+      </div>
+      <div id="wrapper">
+        <google-map disable-default-ui id="map" map="{{map}}" latitude="0" longitude="0" zoom="2" api-key="AIzaSyBFRdnjO9WVvl3Voqj84bLvVMVIjDfBjlk">
+        </google-map>
+        <paper-button raised on-click="_downloadCSV" id="button">Download CSV</paper-button>
+        <paper-button raised on-click="_showDetails" id="button2">Details</paper-button>
+      </div>
+
+    </div>
+    <paper-dialog id="dialog">
+      <my-view3 commits="[[commits]]" name="view3"></my-view3>
+    </paper-dialog>
+
+
+  </template>
+
+  <script>
+    class MyDevsPerCountry extends Polymer.Element {
+      static get is() {
+        return 'my-devs-per-country';
+      }
+
+      static get properties() {
+        return {
+          commits: {
+            type: Object,
+            value: [],
+            observer: 'commitsChanged',
+            notify: true
+          },
+          map: {
+            type: Object,
+            notify: true
+          },
+          apiLoaded: {
+            type: Boolean,
+            notify: true,
+            value: false
+          },
+          from: {
+            type: String,
+            notify: true,
+            observer: '_timeChanged'
+          },
+          till: {
+            type: String,
+            notify: true,
+            observer: '_timeChanged'
+          },
+          markers: {
+            type: Object,
+            notify: true,
+            value: []
+          },
+          oms: {
+            type: Object,
+            notify: true,
+            value: {}
+          },
+          markerCluster: {
+            type: Object,
+            notify: true,
+            value: {}
+          },
+          commitPath: {
+            type: Object,
+            notify: true,
+            value: {}
+          },
+          collaborationCoordinates: {
+            type: Object,
+            notify: true,
+            value: []
+          },
+          markerClusterDone: {
+            type: Boolean,
+            notify: true,
+            value: false
+          },
+          selectedProject: {
+            type: String,
+            notify: true,
+            observer: '_selectedProjectChanged'
+          }
+        };
+      }
+
+      constructor() {
+        super();
+      }
+
+      ready() {
+        super.ready();
+        document.addEventListener('api-load', (e) => {
+          this.initMap();
+        }, {
+            once: true
+          });
+      }
+
+      resizeTimeLine() {
+        this.$.timeLine.resize();
+      }
+
+      tryToReInitMap() {
+        this.initMap();
+      }
+
+      _showDetails() {
+        this.$.dialog.open();
+      }
+
+      initMap() {
+        let mapOptions = {
+          center: new google.maps.LatLng(0, 0),
+          zoom: 2,
+          minZoom: 2,
+          mapTypeId: 'roadmap',
+          disableDefaultUI: true
+        };
+        this.map = new google.maps.Map(this.$.map, mapOptions);
+        this._setMapElement();
+        console.log(this.map);
+        this.oms = new OverlappingMarkerSpiderfier(this.map, {
+          markersWontMove: true,
+          markersWontHide: true,
+          basicFormatEvents: true
+        });
+
+        this.commitPath = new google.maps.Polyline({
+          path: this.collaborationCoordinates,
+          geodesic: true,
+          strokeColor: '#3423A6',
+          strokeOpacity: 1.0,
+          strokeWeight: 2
+        });
+
+        this.markerCluster = new MarkerClusterer(this.map, [], {
+          imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'
+        });
+        this.markerCluster.setMaxZoom(14);
+        this.apiLoaded = true;
+        this.commitsChanged();
+        this.$.map.resize();
+      }
+
+      _setMapElement() {
+        console.log("set height: ", this.offsetHeight);
+        this.$.wrapper.style.height = this.offsetHeight - this.$.timeline.offsetHeight + "px";
+      }
+
+      _selectedProjectChanged() {
+        if (this.selectedProject === null) {
+          return;
+        }
+        this.getCommits(this.selectedProject.id);
+      }
+
+      _timeChanged(time) {
+        if (this.selectedProject === undefined) {
+          return;
+        }
+        if (time) {
+          this._debounceFilter = Polymer.Debouncer.debounce(this._debounceFilter, Polymer.Async.timeOut.after(500), () => {
+            this.getCommits(this.selectedProject.id);
+          });
+        }
+      }
+
+      //TODO REPLACE WITH GET AUTHORS.
+      getCommits(projectID) {
+        fetch('http://localhost:8081/v1/repositories/' + this.selectedProject.id + '/commits/list?from=' + new Date(this.from).toISOString() +
+          '&until=' +
+          new Date(this.till).toISOString()).then((response) => {
+            return response.json();
+          }).then((resp) => {
+            console.log("resp: ", resp);
+            this.commits = resp;
+          });
+      }
+
+      commitsChanged() {
+        if (!this.apiLoaded) {
+          return;
+        }
+        this.addMarkers();
+        // this.addLines();
+      }
+
+      addMarkers() {
+        for (var i = 0; i < this.markers.length; i++) {
+          this.oms.removeMarker(this.markers[i]);
+        }
+        this.markers = [];
+        if (!this.commits) {
+          return;
+        }
+        for (var i = 0; i < this.commits.length; i++) {
+          let myLatlng = new google.maps.LatLng(this.commits[i].author.location.lat, this.commits[i].author.location
+            .lng);
+          var image = {
+            url: '../images/icons/git-commit.png',
+            // This marker is 20 pixels wide by 32 pixels high.
+            scaledSize: new google.maps.Size(20, 20),
+            // // The origin for this image is (0, 0).
+            origin: new google.maps.Point(0, 0),
+            // // The anchor for this image is the base of the flagpole at (0, 32).
+            anchor: new google.maps.Point(10, 10)
+          };
+          let marker = new google.maps.Marker({
+            position: myLatlng,
+            pixel: this.commits[i],
+            title: this.commits[i].author.login,
+            icon: image
+          });
+          this.markers.push(marker);
+          let markerContent = this.commits[i];
+          google.maps.event.addListener(marker, 'spider_click', function test(e) { // 'spider_click', not plain 'click'
+            let iw = new google.maps.InfoWindow();
+            let content = "Author: " + markerContent.author.login + "<br/>";
+            content += "Sha: " + markerContent.sha + "<br/>";
+            content += "Message: " + markerContent.message;
+            iw.setContent(content);
+            iw.open(this.map, marker);
+          });
+
+          this.oms.addMarker(marker)
+        }
+        this.markerCluster.clearMarkers();
+        this.markerCluster.addMarkers(this.markers);
+      }
+
+      addLines() {
+        this.commitPath.setMap(null);
+        this.collaborationCoordinates = [];
+        if (!this.commits) {
+          return;
+        }
+        for (var i = 0; i < this.commits.length; i++) {
+          this.collaborationCoordinates.push({
+            lat: this.commits[i].author.location.lat,
+            lng: this.commits[i].author.location.lng
+          })
+        }
+        this.commitPath = new google.maps.Polyline({
+          path: this.collaborationCoordinates,
+          geodesic: true,
+          strokeColor: '#3423A6',
+          strokeOpacity: 1.0,
+          strokeWeight: 2
+        });
+
+        this.commitPath.setMap(this.map);
+      }
+
+      pivot(arr) {
+        var mp = new Map();
+
+        function setValue(a, path, val) {
+          if (Object(val) !== val) { // primitive value
+            var pathStr = path.join('.');
+            var i = (mp.has(pathStr) ? mp : mp.set(pathStr, mp.size)).get(pathStr);
+            a[i] = val;
+          } else {
+            for (var key in val) {
+              setValue(a, key == '0' ? path : path.concat(key), val[key]);
+            }
+          }
+          return a;
+        }
+        var result = arr.map(obj => setValue([], [], obj));
+        return [[...mp.keys()], ...result];
+      }
+
+      toCsv(arr) {
+        return arr.map(row =>
+          row.map(val => isNaN(val) ? JSON.stringify(val) : +val).join(';')
+        ).join('\n');
+      }
+
+      _downloadCSV() {
+        let csv = this.toCsv(this.pivot(this.commits));
+        var element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(csv));
+        element.setAttribute('download', 'commitData.csv');
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+      }
+    }
+
+    window.customElements.define(MyDevsPerCountry.is, MyDevsPerCountry);
+  </script>
+</dom-module>
