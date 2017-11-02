@@ -4,8 +4,8 @@
 //
 // Command:
 // $ goagen
-// --design=github-crawler-api/design
-// --out=$(GOPATH)\src\github-crawler-api
+// --design=github.com\VincentRbbmnd\in4334-sa-report\github-crawler-api\design
+// --out=$(GOPATH)\src\github.com\VincentRbbmnd\in4334-sa-report\github-crawler-api
 // --version=v1.2.0-dirty
 
 package app
@@ -88,6 +88,23 @@ func (mt *Ghuser) Validate() (err error) {
 	}
 	if mt.Type == "" {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "type"))
+	}
+	return
+}
+
+// GhuserCollection is the media type for an array of Ghuser (default view)
+//
+// Identifier: application/vnd.ghuser+json; type=collection; view=default
+type GhuserCollection []*Ghuser
+
+// Validate validates the GhuserCollection media type instance.
+func (mt GhuserCollection) Validate() (err error) {
+	for _, e := range mt {
+		if e != nil {
+			if err2 := e.Validate(); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
 	}
 	return
 }

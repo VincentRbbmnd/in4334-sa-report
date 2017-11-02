@@ -4,8 +4,8 @@
 //
 // Command:
 // $ goagen
-// --design=github-crawler-api/design
-// --out=$(GOPATH)\src\github-crawler-api
+// --design=github.com\VincentRbbmnd\in4334-sa-report\github-crawler-api\design
+// --out=$(GOPATH)\src\github.com\VincentRbbmnd\in4334-sa-report\github-crawler-api
 // --version=v1.2.0-dirty
 
 package client
@@ -112,6 +112,30 @@ func (c *Client) DecodeGhuser(resp *http.Response) (*Ghuser, error) {
 	var decoded Ghuser
 	err := c.Decoder.Decode(&decoded, resp.Body, resp.Header.Get("Content-Type"))
 	return &decoded, err
+}
+
+// GhuserCollection is the media type for an array of Ghuser (default view)
+//
+// Identifier: application/vnd.ghuser+json; type=collection; view=default
+type GhuserCollection []*Ghuser
+
+// Validate validates the GhuserCollection media type instance.
+func (mt GhuserCollection) Validate() (err error) {
+	for _, e := range mt {
+		if e != nil {
+			if err2 := e.Validate(); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
+// DecodeGhuserCollection decodes the GhuserCollection instance encoded in resp body.
+func (c *Client) DecodeGhuserCollection(resp *http.Response) (GhuserCollection, error) {
+	var decoded GhuserCollection
+	err := c.Decoder.Decode(&decoded, resp.Body, resp.Header.Get("Content-Type"))
+	return decoded, err
 }
 
 // DecodeErrorResponse decodes the ErrorResponse instance encoded in resp body.

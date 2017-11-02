@@ -4,8 +4,8 @@
 //
 // Command:
 // $ goagen
-// --design=github-crawler-api/design
-// --out=$(GOPATH)\src\github-crawler-api
+// --design=github.com\VincentRbbmnd\in4334-sa-report\github-crawler-api\design
+// --out=$(GOPATH)\src\github.com\VincentRbbmnd\in4334-sa-report\github-crawler-api
 // --version=v1.2.0-dirty
 
 package cli
@@ -14,7 +14,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github-crawler-api/client"
+	"github.com/VincentRbbmnd/in4334-sa-report/github-crawler-api/client"
 	"github.com/goadesign/goa"
 	goaclient "github.com/goadesign/goa/client"
 	uuid "github.com/goadesign/goa/uuid"
@@ -50,6 +50,19 @@ type (
 		PrettyPrint bool
 	}
 
+	// ListDevelopersCommand is the command line data structure for the list action of developers
+	ListDevelopersCommand struct {
+		// Repository ID
+		RepoID int
+		// From date
+		From string
+		// Limit the results
+		Limit int
+		// Till ID
+		Until       string
+		PrettyPrint bool
+	}
+
 	// ListRepositoriesCommand is the command line data structure for the list action of repositories
 	ListRepositoriesCommand struct {
 		PrettyPrint bool
@@ -79,37 +92,46 @@ func RegisterCommands(app *cobra.Command, c *client.Client) {
 	tmp1.RegisterFlags(sub, c)
 	sub.PersistentFlags().BoolVar(&tmp1.PrettyPrint, "pp", false, "Pretty print response body")
 	command.AddCommand(sub)
-	tmp2 := new(ListRepositoriesCommand)
+	tmp2 := new(ListDevelopersCommand)
 	sub = &cobra.Command{
-		Use:   `repositories ["/v1/repositories/list"]`,
+		Use:   `developers ["/v1/repositories/REPOID/developers/list"]`,
 		Short: ``,
 		RunE:  func(cmd *cobra.Command, args []string) error { return tmp2.Run(c, args) },
 	}
 	tmp2.RegisterFlags(sub, c)
 	sub.PersistentFlags().BoolVar(&tmp2.PrettyPrint, "pp", false, "Pretty print response body")
 	command.AddCommand(sub)
-	app.AddCommand(command)
-	command = &cobra.Command{
-		Use:   "show",
-		Short: `show action`,
-	}
-	tmp3 := new(ShowCommitsCommand)
+	tmp3 := new(ListRepositoriesCommand)
 	sub = &cobra.Command{
-		Use:   `commits ["/v1/repositories/REPOID/commits/SHA"]`,
+		Use:   `repositories ["/v1/repositories/list"]`,
 		Short: ``,
 		RunE:  func(cmd *cobra.Command, args []string) error { return tmp3.Run(c, args) },
 	}
 	tmp3.RegisterFlags(sub, c)
 	sub.PersistentFlags().BoolVar(&tmp3.PrettyPrint, "pp", false, "Pretty print response body")
 	command.AddCommand(sub)
-	tmp4 := new(ShowRepositoriesCommand)
+	app.AddCommand(command)
+	command = &cobra.Command{
+		Use:   "show",
+		Short: `show action`,
+	}
+	tmp4 := new(ShowCommitsCommand)
 	sub = &cobra.Command{
-		Use:   `repositories ["/v1/repositories/REPOID"]`,
+		Use:   `commits ["/v1/repositories/REPOID/commits/SHA"]`,
 		Short: ``,
 		RunE:  func(cmd *cobra.Command, args []string) error { return tmp4.Run(c, args) },
 	}
 	tmp4.RegisterFlags(sub, c)
 	sub.PersistentFlags().BoolVar(&tmp4.PrettyPrint, "pp", false, "Pretty print response body")
+	command.AddCommand(sub)
+	tmp5 := new(ShowRepositoriesCommand)
+	sub = &cobra.Command{
+		Use:   `repositories ["/v1/repositories/REPOID"]`,
+		Short: ``,
+		RunE:  func(cmd *cobra.Command, args []string) error { return tmp5.Run(c, args) },
+	}
+	tmp5.RegisterFlags(sub, c)
+	sub.PersistentFlags().BoolVar(&tmp5.PrettyPrint, "pp", false, "Pretty print response body")
 	command.AddCommand(sub)
 	app.AddCommand(command)
 }
@@ -277,25 +299,25 @@ func (cmd *ListCommitsCommand) Run(c *client.Client, args []string) error {
 	}
 	logger := goa.NewLogger(log.New(os.Stderr, "", log.LstdFlags))
 	ctx := goa.WithLogger(context.Background(), logger)
-	var tmp5 *time.Time
+	var tmp6 *time.Time
 	if cmd.From != "" {
 		var err error
-		tmp5, err = timeVal(cmd.From)
+		tmp6, err = timeVal(cmd.From)
 		if err != nil {
 			goa.LogError(ctx, "failed to parse flag into *time.Time value", "flag", "--from", "err", err)
 			return err
 		}
 	}
-	var tmp6 *time.Time
+	var tmp7 *time.Time
 	if cmd.Until != "" {
 		var err error
-		tmp6, err = timeVal(cmd.Until)
+		tmp7, err = timeVal(cmd.Until)
 		if err != nil {
 			goa.LogError(ctx, "failed to parse flag into *time.Time value", "flag", "--until", "err", err)
 			return err
 		}
 	}
-	resp, err := c.ListCommits(ctx, path, tmp5, intFlagVal("limit", cmd.Limit), tmp6)
+	resp, err := c.ListCommits(ctx, path, tmp6, intFlagVal("limit", cmd.Limit), tmp7)
 	if err != nil {
 		goa.LogError(ctx, "failed", "err", err)
 		return err
@@ -343,6 +365,56 @@ func (cmd *ShowCommitsCommand) RegisterFlags(cc *cobra.Command, c *client.Client
 	cc.Flags().IntVar(&cmd.RepoID, "repoID", repoID, `Repository ID`)
 	var sha string
 	cc.Flags().StringVar(&cmd.Sha, "sha", sha, `SHA of the commit`)
+}
+
+// Run makes the HTTP request corresponding to the ListDevelopersCommand command.
+func (cmd *ListDevelopersCommand) Run(c *client.Client, args []string) error {
+	var path string
+	if len(args) > 0 {
+		path = args[0]
+	} else {
+		path = fmt.Sprintf("/v1/repositories/%v/developers/list", cmd.RepoID)
+	}
+	logger := goa.NewLogger(log.New(os.Stderr, "", log.LstdFlags))
+	ctx := goa.WithLogger(context.Background(), logger)
+	var tmp8 *time.Time
+	if cmd.From != "" {
+		var err error
+		tmp8, err = timeVal(cmd.From)
+		if err != nil {
+			goa.LogError(ctx, "failed to parse flag into *time.Time value", "flag", "--from", "err", err)
+			return err
+		}
+	}
+	var tmp9 *time.Time
+	if cmd.Until != "" {
+		var err error
+		tmp9, err = timeVal(cmd.Until)
+		if err != nil {
+			goa.LogError(ctx, "failed to parse flag into *time.Time value", "flag", "--until", "err", err)
+			return err
+		}
+	}
+	resp, err := c.ListDevelopers(ctx, path, tmp8, intFlagVal("limit", cmd.Limit), tmp9)
+	if err != nil {
+		goa.LogError(ctx, "failed", "err", err)
+		return err
+	}
+
+	goaclient.HandleResponse(c.Client, resp, cmd.PrettyPrint)
+	return nil
+}
+
+// RegisterFlags registers the command flags with the command line.
+func (cmd *ListDevelopersCommand) RegisterFlags(cc *cobra.Command, c *client.Client) {
+	var repoID int
+	cc.Flags().IntVar(&cmd.RepoID, "repoID", repoID, `Repository ID`)
+	var from string
+	cc.Flags().StringVar(&cmd.From, "from", from, `From date`)
+	var limit int
+	cc.Flags().IntVar(&cmd.Limit, "limit", limit, `Limit the results`)
+	var until string
+	cc.Flags().StringVar(&cmd.Until, "until", until, `Till ID`)
 }
 
 // Run makes the HTTP request corresponding to the ListRepositoriesCommand command.

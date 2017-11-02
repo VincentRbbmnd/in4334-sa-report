@@ -4,8 +4,8 @@
 //
 // Command:
 // $ goagen
-// --design=github-crawler-api/design
-// --out=$(GOPATH)\src\github-crawler-api
+// --design=github.com\VincentRbbmnd\in4334-sa-report\github-crawler-api\design
+// --out=$(GOPATH)\src\github.com\VincentRbbmnd\in4334-sa-report\github-crawler-api
 // --version=v1.2.0-dirty
 
 package client

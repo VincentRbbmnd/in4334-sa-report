@@ -75,6 +75,52 @@ func (m *CommitDB) ListCommitWithUsersWithLocationForRepo(ctx context.Context, r
 	return list
 }
 
+// ListDevelopers returns an array of view: default.
+func (m *CommitDB) ListDevelopers(ctx context.Context, repoID int, from *time.Time, till *time.Time, limit *int) app.GhuserCollection {
+	defer goa.MeasureSince([]string{"goa", "db", "commit", "listcommit"}, time.Now())
+	var objs []*app.Ghuser
+	l := 10000
+
+	// We want to filter on time to not crash the system
+	if from == nil || till == nil {
+		return objs
+	}
+	if limit == nil {
+		limit = &l
+	}
+
+	var native []*CommitWithEverything
+	err := m.Db.Scopes().Table("repositories").
+		Select(`users.login,users.type, location_id, message, commit_date, sha, location_string, ST_X(point) as lat, ST_Y(point) as lng`).
+		Joins(`LEFT JOIN "Commits" on repository_id = repositories.project_id`).
+		Joins(`LEFT JOIN users on github_user_id = author_id`).
+		Joins(`LEFT JOIN locations on locations.id = location_id`).
+		Where("repositories.id = ? AND commit_date > ? AND commit_date < ? AND ST_Y(point) != 0 ", repoID, from, till).
+		Order("commit_date desc").
+		Limit(*limit).
+		Find(&native).Error
+
+	if err != nil {
+		goa.LogError(ctx, "error listing Commit", "error", err.Error())
+		return objs
+	}
+
+	list := app.GhuserCollection{}
+	users := make(map[string]*app.Ghuser)
+
+	for _, t := range native {
+		user := t.User.UserToGhuser()
+		users[user.Login] = user
+		loc := &app.Location{Lat: t.Lat, Lng: t.Lng, LocationString: &t.LocationString}
+		user.Location = loc
+	}
+	for _, u := range users {
+		list = append(list, u)
+	}
+
+	return list
+}
+
 // GetFirstCommitForRepository gets first commit for repository (TODO: FIND FASTER WAY TO QUERY)
 func (m *CommitDB) GetFirstCommitForRepository(ctx context.Context, repoID int) (*app.Commit, error) {
 	defer goa.MeasureSince([]string{"goa", "db", "commit", "onecommit"}, time.Now())
