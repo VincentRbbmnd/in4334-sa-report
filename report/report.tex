@@ -34,20 +34,20 @@
 
 \author{Rick Proost}
 \affiliation{%
- \institution{Delft University of Technology}
- \country{The Netherlands}}
+\institution{Delft University of Technology}
+\country{The Netherlands}}
 \email{rpjproost@gmail.com}
 
 \author{Vincent Robbemond}
 \affiliation{%
- \institution{Delft University of Technology}
- \country{The Netherlands}}
+\institution{Delft University of Technology}
+\country{The Netherlands}}
 \email{vincentrobbemond@gmail.com}
 
 \author{Wim Spaargaren}
 \affiliation{%
- \institution{Delft University of Technology}
- \country{The Netherlands}}
+\institution{Delft University of Technology}
+\country{The Netherlands}}
 \email{wim_spaargaren@live.nl}
 
 \begin{abstract}
@@ -137,26 +137,30 @@ The first step in answering the research questions, is the retrieval of data fro
 This data is gathered by using the GitHub REST API\cite{GHAPI}.
 The repositories retrieved are limited to the top 1000 starred repositories on GitHub, for two reasons:
 First, according to Octoverse \cite{GHOctoverse} in 2016 there were nearly 20 million software repositories, storage of this amount of data goes beyond the scope of this research paper.
-The second reason to choose the most starred repositories, is that stars give an indication to the popularity of a repository and therefore have higher chances on relatively more activity than less popular repositories. 
+The second reason to choose the most starred repositories, is that stars give an indication to the popularity of a repository and therefore have higher chances on relatively more activity than less popular repositories.
 The top 1000 starred repositories were listed and specified at \cite{gitstar} on september 2017.
-Data for these projects was retrieved by a custom data scraper, the database dump can be found at  \cite{githubvisualizerovertime}. 
+Data for these projects was retrieved by a custom data scraper, the database dump can be found at  \cite{githubvisualizerovertime}.
 The scraper first retrieved the repository data using the projects resource\cite{GHAPI}, afterwards all the commits with it’s user and at last location was translated into geocoordinates.
 The GitHub platform allows a user to specify a location on their profile, which is stored as plain text.
 This means not all users have a location and some locations may not be as specific as others.
 Commit data contains a message which is mostly used to describe the change and a timestamp denoting commit time.
 Commit author and committer data is also available, therefore it is possible to make a distinction if necessary.
 Finally, another custom scraper retrieved all star events for each repository using the repository stargazer resource\cite{GHAPI}.
-A stargazer is a user who starred a certain repository, so Developer A stars Repository B, therefore A is now in the list of stargazers of B. 
+A stargazer is a user who starred a certain repository, so Developer A stars Repository B, therefore A is now in the list of stargazers of B.
 The star events depict another way of activity in open source software development and can be of value when visualizing activity data.
 
 TODO: Front-end features
 
+
+\section{Evaluation}
+TODO: Top 1000 starred projects are not updated
+
 \section{Results}
-The self developed data scraper can be found at \cite{githubvisualizerovertime} together with a database dump for the top 1000 starred repositories on September 2017.
+The self developed data scraper can be found at \cite{githubvisualizerovertime} together with a database dump for the top 1000 starred repositories of September 2017.
 This Golang scripts provide functionality to gather both commits and stars for projects.
-Projects which data needs to be retrieved for can be specified in two ways, namely by providing a json file with project names, or by reading repository names from a self provided database. 
-For each project, all commits and stars from the current date until the last known commit in the database will be retrieved and stored in the specified database. 
-Detailed build instructions are provided in the README.
+Projects which data needs to be retrieved for, can be specified in two ways, by providing a json file with project names, or by reading repository names from a self provided database.
+For each project, commits and stars from the current date until the last stored commit in the database will be retrieved and stored in the specified database.
+Detailed build instructions are provided in the README file.
 \begin{figure}
 \includegraphics[scale=0.18]{images/vscode-compare.PNG}
 \caption{Example visualization of developer collaboration comparison for VSCode}
@@ -164,37 +168,69 @@ Detailed build instructions are provided in the README.
 \end{figure}
 
 Figure ~\ref{fig:collaboration} shows a visualization example for the repository Visual Studio Code.
-Markers depict commits, with a location where the author of the commit is located.
+Markers depict commits, with a location of where the author of the commit is located.
 Lines depict collaboration between developers.
-This collaboration is defined as successive commits done by collaborators working on the project.
+This collaboration is defined as successive commits done by collaborators working on the same project.
 When at a lower zoom level, nodes get un-grouped and lines between individual developers will be shown.
-In the top of the page a timeline is shown. 
-Here a timespan can be selected for which commits need to be shown. 
+In the top of the page a timeline is shown.
+In the timeline a timespan can be selected.
+After selecting a timespan, commits within this timespan are shown on the map.
 A download CSV button is added to download the shown commit data as CSV file.
-This way users of the platform can further analyze the data.
-By pressing the compare button, two visualizations can be shown next to each other. 
+This way users of the platform can further analyze the data shown.
+By pressing the compare button, two visualizations can be shown next to each other.
 In figure  ~\ref{fig:collaboration} commits from the first half of 2016 are compared to commits of the second half of 2016.
+\begin{figure}
+\includegraphics[scale=0.18]{images/details-popup-ebook-foundation.PNG}
+\caption{Example details popup}
+\label{fig:details}
+\end{figure}
+
+A second button is provided to show details about the commits currently shown on the map. 
+By pressing the details button, a dialog is created with information about the number of commits per location, as shown in ~\ref{fig: details}.
+In this example commits of the second half of 2016 are shown. 
+In the dialog a sort on count button is added to sort the commit details in ascending or descending order.
 
 \begin{figure}
-\includegraphics[scale=0.4]{images/d3-example-rails.PNG}
+\includegraphics[scale=0.25]{images/d3-example-rails.PNG}
 \caption{Example visualization of commits per month}
 \label{fig:commits-period}
 \end{figure}
 
 Figure ~\ref{fig:commits-period} shows an example of a map built with the D3 library.
-Every dot represents a commit belonging to a repository in a year span, which can be selected by adjusting the slider in the top of the page,
+Every dot represents a commit belonging to a repository in a year span, which can be selected by selecting a year in the dropdown menu.
 Red dots represent commits made during the month selected in the second slider.
+Beneath this slider the selected month is stated.
 By adjusting the month slider, it is possible to visualize how commits change per month for a project.
+As well as the first visualization the details button as well as the download csv button are provided.
+
+\begin{figure}
+\includegraphics[scale=0.2]{images/rails-heatmap-2016-2017.PNG}
+\caption{Example visualization of heatmap for rails from 2016 till 2017}
+\label{fig:commits-heatmap}
+\end{figure}
+
+The third visualization in the application is a heatmap and is shown in figure ~\ref{fig:commits-heatmap}. 
+As well as the visualization for commits per month, this visualization is created with the D3 library.
+The heatmap visualization uses the same slider as the collaboration visualization.
+The visualization creates a heatmap for the commits belonging to the selected timespan.
+The heatmap visualizes commits by color ranging from green to red. 
+Here red spots mean locations with a lot of commits, and green spots are locations with fewer commits.
+
 
 Preliminary results contain 1000 repositories with over 5 million commits belonging to 160.000 users.
 Not all of the user gave information on their whereabouts, but about 84.000 did.
 This means that it was possible to retrieve locations for just over 50\% of the gathered users.
 
+\section{Discussion}
+Visualizing repository data is an interesting way of looking at the data from a different perspective. 
+This leads to points of interest that otherwise wouldn't arise when looking at the raw data. 
+By introducing location data to these visualizations one gets a good overview of  the geographic distribution of developers.
 
-\section{Evaluation}
-TODO: Top 1000 starred projects are not updated
-
+In the future, more types of visualizations can be added, as well as more interaction through the use of the D3 library.
+In addition it would be of high value for stakeholders of a repository not listed in the used dataset to be able to import their repository in the web application itself, without having to resort to setup the project locally themselves.
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{bibliography}
 
 \end{document}
+
+
