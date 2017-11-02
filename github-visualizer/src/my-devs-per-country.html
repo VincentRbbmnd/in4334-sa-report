@@ -162,6 +162,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }, {
             once: true
           });
+          this.tryToReInitMap();
+          this.resizeTimeLine();
       }
 
       resizeTimeLine() {
@@ -283,9 +285,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           let markerContent = this.commits[i];
           google.maps.event.addListener(marker, 'spider_click', function test(e) { // 'spider_click', not plain 'click'
             let iw = new google.maps.InfoWindow();
-            let content = "Author: " + markerContent.author.login + "<br/>";
-            content += "Sha: " + markerContent.sha + "<br/>";
-            content += "Message: " + markerContent.message;
+            let content = "Developer: " + markerContent.login + "<br/>";
             iw.setContent(content);
             iw.open(this.map, marker);
           });
