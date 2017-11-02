@@ -235,7 +235,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       //TODO REPLACE WITH GET AUTHORS.
       getCommits(projectID) {
-        fetch('http://localhost:8081/v1/repositories/' + this.selectedProject.id + '/commits/list?from=' + new Date(this.from).toISOString() +
+        fetch('http://localhost:8081/v1/repositories/' + this.selectedProject.id + '/developers/list?from=' + new Date(this.from).toISOString() +
           '&until=' +
           new Date(this.till).toISOString()).then((response) => {
             return response.json();
@@ -262,7 +262,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           return;
         }
         for (var i = 0; i < this.commits.length; i++) {
-          let myLatlng = new google.maps.LatLng(this.commits[i].author.location.lat, this.commits[i].author.location
+          let myLatlng = new google.maps.LatLng(this.commits[i].location.lat, this.commits[i].location
             .lng);
           var image = {
             url: '../images/icons/git-commit.png',
@@ -276,7 +276,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           let marker = new google.maps.Marker({
             position: myLatlng,
             pixel: this.commits[i],
-            title: this.commits[i].author.login,
+            title: this.commits[i].login,
             icon: image
           });
           this.markers.push(marker);
