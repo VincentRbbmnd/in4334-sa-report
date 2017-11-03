@@ -314,16 +314,21 @@ This makes the evolution of number of commits fairly stable for a certain countr
 \section{Discussion}
 Visualizing repository data is an interesting way of looking at the data from a different perspective.
 This leads to points of interest that otherwise wouldn't arise when looking at the raw data.
-By introducing location data to these visualizations one gets a good overview of  the geographic distribution of developers.
+Introducing location data to the visualization adds a new dimension to analyze and form new hypotheses based this data.
 
 \subsection{Limitations and threats to validity}
-As stated earlier in the paper, user location on GitHub is done on an opt-in basis, without any form of validation form the side of GitHub.
+As stated, user location on GitHub is done on an opt-in basis, without any form of validation from the side of GitHub.
 GitHub users are themselves responsible for entering valid locations in the field, and while it is possible to filter invalid locations it will always be a risk when used for research purposes.
 
 \subsection{Future work}
 In the future, more types of visualizations can be added, as well as more interaction through the use of the D3 library.
 It is also interesting to include more detailed information about collaborating developers and the number of commits made.
 In addition it would be of high value for stakeholders of a repository not listed in the used dataset to be able to import their repository in the web application itself, without having to resort to setup the project locally themselves.
+
+\section{Acknowledgements}
+We wish to thank the developer teams of all technologies used to build this application. 
+The Go language and community made it possible to build a robust and fast data gatherer and accompanying API while Polymer enabled us to rapidly develop a web applications for everybody to use.
+Also a big thank you to GitHub for providing open access to all data, and to D3 and Google for making it possible to build intuitive visualizations.
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{bibliography}
